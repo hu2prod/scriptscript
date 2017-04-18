@@ -239,10 +239,13 @@ class @Tokenizer
 #    specific
 # ###################################################################################################
 # API should be async by default in case we make some optimizations in future
+tokenizer = new module.Tokenizer
+tokenizer.parser_list.push (new module.Token_parser 'id', /^[_a-z][_a-z0-9]*/i)
+tokenizer.parser_list.push (new module.Token_parser 'numeric_constant', /^(0|[1-9][0-9]*)/)
+tokenizer.parser_list.push (new module.Token_parser 'numeric_constant_octal', /^0[0-7]+/)
+tokenizer.parser_list.push (new module.Token_parser 'numeric_constant_hex', /^0x[0-9a-f]+/i)
 @_tokenize = (str, opt)->
-  ret = []
-  
-  ret
+  tokenizer.go str
 
 @tokenize = (str, opt, on_end)->
   try
