@@ -254,11 +254,11 @@ tokenizer.parser_list.push (new module.Token_parser 'unary_operator', /// ^
   delete
   ///)
 tokenizer.parser_list.push (new module.Token_parser 'binary_operator', /// ^ (
+  \.\.\.?|
+  \??(::|\.)|
   (\*\*?|//?|%%?|<<|>>>?|&&?|\|\|?|\^\^?|[-+?]|and|or|xor)=?|
   instanceof|
-  \??(::|\.)|
-  [<>!=]=|<|>|
-  \.\.\.?
+  [<>!=]=|<|>
 ) ///)
 tokenizer.parser_list.push (new module.Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]*/i)
 

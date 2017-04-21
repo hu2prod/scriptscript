@@ -109,7 +109,7 @@ describe 'tokenizer section', ()->
           assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
   
   describe "binary operators", ()->
-    for v in "* / % ** // %% << >> >>> & | ^ && || ^^ and or xor instanceof".split " "
+    for v in "* / % ** // %% << >> >>> & | ^ && || ^^ and or xor instanceof ? . ?. :: ?:: .. ...".split " "
       do (v)->
         it "should tokenize '#{v}' as binary_operator", ()->
           v = g._tokenize v
@@ -117,7 +117,7 @@ describe 'tokenizer section', ()->
           assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
     
   describe "binary operators assign", ()->
-    for v in "+ - * / % ** // %% << >> >>> & | ^ && || ^^ and or xor".split " "
+    for v in "+ - * / % ** // %% << >> >>> & | ^ && || ^^ and or xor ?".split " "
       v += "="
       do (v)->
         it "should tokenize '#{v}' as binary_operator", ()->
