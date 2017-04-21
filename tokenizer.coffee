@@ -249,10 +249,13 @@ tokenizer.parser_list.push (new module.Token_parser 'unary_operator', /// ^
   (--?|\+\+?)|
   [-+~!]|
   not|
-  typeof
+  typeof|
+  new|
+  delete
   ///)
 tokenizer.parser_list.push (new module.Token_parser 'binary_operator', /// ^ (
-  (\*\*?|//?|%%?|<<|>>>?|&&?|\|\|?|\^\^?|[-+?]|and|or|xor|instanceof)=?|
+  (\*\*?|//?|%%?|<<|>>>?|&&?|\|\|?|\^\^?|[-+?]|and|or|xor)=?|
+  instanceof|
   \??(::|\.)|
   [<>!=]=|<|>|
   \.\.\.?

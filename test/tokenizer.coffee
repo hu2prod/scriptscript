@@ -91,191 +91,46 @@ describe 'tokenizer section', ()->
       assert.equal v.length, 1
       assert.equal v[0][0].mx_hash.hash_key, "binary_literal"
   
-  describe "unary operators", ()->
-    it "should tokenize '+' as unary_operator", ()->
-      v = g._tokenize "+"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
-    
-    it "should tokenize '-' as unary_operator", ()->
-      v = g._tokenize "-"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
-    
-    it "should tokenize '~' as unary_operator", ()->
-      v = g._tokenize "~"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
-    
-    it "should tokenize '!' as unary_operator", ()->
-      v = g._tokenize "!"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
-    
-    it "should tokenize '++' as unary_operator", ()->
-      v = g._tokenize "++"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
-    
-    it "should tokenize '--' as unary_operator", ()->
-      v = g._tokenize "--"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
-    
-    it "should tokenize 'not' as unary_operator", ()->
-      v = g._tokenize "not"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
-    
-    it "should tokenize 'typeof' as unary_operator", ()->
-      v = g._tokenize "typeof"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+  describe "mixed operators", ()->
+    for v in "+ -".split " "
+      do (v)->
+        it "should tokenize '#{v}' as unary_operator and binary_operator", ()->
+          v = g._tokenize v
+          assert.equal v.length, 1
+          assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+          assert.equal v[0][1].mx_hash.hash_key, "binary_operator"
   
+  describe "unary operators", ()->
+    for v in "~ ! ++ -- not typeof new delete".split " "
+      do (v)->
+        it "should tokenize '#{v}' as unary_operator", ()->
+          v = g._tokenize v
+          assert.equal v.length, 1
+          assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
   
   describe "binary operators", ()->
-    it "should tokenize '+' as binary_operator", ()->
-      v = g._tokenize "+"
-      assert.equal v.length, 1
-      assert.equal v[0][1].mx_hash.hash_key, "binary_operator"
+    for v in "* / % ** // %% << >> >>> & | ^ && || ^^ and or xor instanceof".split " "
+      do (v)->
+        it "should tokenize '#{v}' as binary_operator", ()->
+          v = g._tokenize v
+          assert.equal v.length, 1
+          assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
     
-    it "should tokenize '-' as binary_operator", ()->
-      v = g._tokenize "-"
-      assert.equal v.length, 1
-      assert.equal v[0][1].mx_hash.hash_key, "binary_operator"
+  describe "binary operators assign", ()->
+    for v in "+ - * / % ** // %% << >> >>> & | ^ && || ^^ and or xor".split " "
+      v += "="
+      do (v)->
+        it "should tokenize '#{v}' as binary_operator", ()->
+          v = g._tokenize v
+          assert.equal v.length, 1
+          assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+  
+  describe "binary operators compare", ()->
+    # !== === 
+    for v in "< > <= >= == !=".split " "
+      do (v)->
+        it "should tokenize '#{v}' as binary_operator", ()->
+          v = g._tokenize v
+          assert.equal v.length, 1
+          assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
     
-    it "should tokenize '*' as binary_operator", ()->
-      v = g._tokenize "*"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '/' as binary_operator", ()->
-      v = g._tokenize "/"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '%' as binary_operator", ()->
-      v = g._tokenize "%"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '**' as binary_operator", ()->
-      v = g._tokenize "**"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '//' as binary_operator", ()->
-      v = g._tokenize "/"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '%%' as binary_operator", ()->
-      v = g._tokenize "%%"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '>' as binary_operator", ()->
-      v = g._tokenize ">"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '<' as binary_operator", ()->
-      v = g._tokenize "<"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '>=' as binary_operator", ()->
-      v = g._tokenize ">="
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '<=' as binary_operator", ()->
-      v = g._tokenize "<="
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '==' as binary_operator", ()->
-      v = g._tokenize "=="
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '!=' as binary_operator", ()->
-      v = g._tokenize "!="
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    # it "should tokenize '===' as binary_operator", ()->
-    #   v = g._tokenize "==="
-    #   assert.equal v.length, 1
-    #   assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    # it "should tokenize '!==' as binary_operator", ()->
-    #   v = g._tokenize "!=="
-    #   assert.equal v.length, 1
-    #   assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '<<' as binary_operator", ()->
-      v = g._tokenize "<<"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '>>' as binary_operator", ()->
-      v = g._tokenize ">>"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '>>>' as binary_operator", ()->
-      v = g._tokenize ">>>"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '&' as binary_operator", ()->
-      v = g._tokenize "&"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '|' as binary_operator", ()->
-      v = g._tokenize "|"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '^' as binary_operator", ()->
-      v = g._tokenize "^"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '&&' as binary_operator", ()->
-      v = g._tokenize "&&"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '||' as binary_operator", ()->
-      v = g._tokenize "||"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize '^^' as binary_operator", ()->
-      v = g._tokenize "^^"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize 'and' as binary_operator", ()->
-      v = g._tokenize "and"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize 'or' as binary_operator", ()->
-      v = g._tokenize "or"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize 'xor' as binary_operator", ()->
-      v = g._tokenize "xor"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-    
-    it "should tokenize 'instanceof' as binary_operator", ()->
-      v = g._tokenize "instanceof"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
-
