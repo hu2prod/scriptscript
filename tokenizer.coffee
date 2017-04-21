@@ -239,11 +239,27 @@ class @Tokenizer
 #    specific
 # ###################################################################################################
 # API should be async by default in case we make some optimizations in future
+
 tokenizer = new module.Tokenizer
-tokenizer.parser_list.push (new module.Token_parser 'id', /^[_a-z][_a-z0-9]*/i)
-tokenizer.parser_list.push (new module.Token_parser 'numeric_constant', /^(0|[1-9][0-9]*)/)
-tokenizer.parser_list.push (new module.Token_parser 'numeric_constant_octal', /^0[0-7]+/)
-tokenizer.parser_list.push (new module.Token_parser 'numeric_constant_hex', /^0x[0-9a-f]+/i)
+tokenizer.parser_list.push (new module.Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]*/i)
+tokenizer.parser_list.push (new module.Token_parser 'decimal_literal', /^(0|[1-9][0-9]*)/)
+tokenizer.parser_list.push (new module.Token_parser 'octal_literal', /^0o?[0-7]+/i)
+tokenizer.parser_list.push (new module.Token_parser 'hexadecimal_literal', /^0x[0-9a-f]+/i)
+tokenizer.parser_list.push (new module.Token_parser 'binary_literal', /^0b[01]+/i)
+tokenizer.parser_list.push (new module.Token_parser 'unary_operator', /// ^
+  ([-+])\1         # doubles
+  | [-+~!]         # singles
+  ///)
+tokenizer.parser_list.push (new module.Token_parser 'binary_operator', /// ^ (
+  ?: #[-=]> |            # function
+     >>>=?               # zero-fill right shift
+   | ([:*/%&<>|])\1      # doubles
+   | [-+*/%<>&|^!?=]=?   # one-char operators / compound assign / compare
+   # | ([&|<>*/%])\2=?   # logic / shift / power / floor division / modulo
+   # | \?(\.|::)         # soak access
+   # | \.{2,3}           # range or splat
+) ///)
+
 @_tokenize = (str, opt)->
   tokenizer.go str
 

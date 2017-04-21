@@ -4,33 +4,235 @@ util = require './util'
 g = require '../tokenizer.coffee'
 
 describe 'tokenizer section', ()->
-  it "a", ()->
-    v = g._tokenize "a"
-    assert.equal v.length, 1
+  describe "identifier", ()->
+    it "should tokenize 'qwerty' as identifier", ()->
+      v = g._tokenize "qwerty"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "identifier"
 
-  it "1", ()->
-    v = g._tokenize "1"
-    assert.equal v.length, 1
-    assert.equal v[0][0].mx_hash.hash_key, "numeric_constant"
+    it "should tokenize 'myvar123' as identifier", ()->
+      v = g._tokenize "myvar123"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "identifier"
 
-  it "0777", ()->
-    v = g._tokenize "0777"
-    assert.equal v.length, 1
-    assert.equal v[0][0].mx_hash.hash_key, "numeric_constant_octal"
+    it "should tokenize 'someCamelCase' as identifier", ()->
+      v = g._tokenize "someCamelCase"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "identifier"
 
-  it "0xabcd8", ()->
-    v = g._tokenize "0xabcd8"
-    assert.equal v.length, 1
-    assert.equal v[0][0].mx_hash.hash_key, "numeric_constant_hex"
+    it "should tokenize 'some_snake_case' as identifier", ()->
+      v = g._tokenize "some_snake_case"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "identifier"
 
-  it "0XABCD8", ()->
-    v = g._tokenize "0XABCD8"
-    assert.equal v.length, 1
-    assert.equal v[0][0].mx_hash.hash_key, "numeric_constant_hex"
+    it "should tokenize 'CAPSLOCK' as identifier", ()->
+      v = g._tokenize "CAPSLOCK"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "identifier"
 
-  it "0xAbCd8", ()->
-    v = g._tokenize "0xAbCd8"
-    assert.equal v.length, 1
-    assert.equal v[0][0].mx_hash.hash_key, "numeric_constant_hex"
+    it "should tokenize '$' as identifier", ()->
+      v = g._tokenize "$"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "identifier"
 
+    it "should tokenize '$scope' as identifier", ()->
+      v = g._tokenize "$scope"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "identifier"
+
+
+  describe "integer literals", ()->
+    it "should tokenize '142857' as decimal_literal", ()->
+      v = g._tokenize "142857"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "decimal_literal"
+
+    it "should tokenize '0' as decimal_literal", ()->
+      v = g._tokenize "0"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "decimal_literal"
+
+    it "should tokenize '0777' as octal_literal", ()->
+      v = g._tokenize "0777"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "octal_literal"
+
+    it "should tokenize '0o777' as octal_literal", ()->
+      v = g._tokenize "0o777"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "octal_literal"
+
+    it "should tokenize '0O777' as octal_literal", ()->
+      v = g._tokenize "0O777"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "octal_literal"
+
+    it "should tokenize '0xabcd8' as hexadecimal_literal", ()->
+      v = g._tokenize "0xabcd8"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "hexadecimal_literal"
+
+    it "should tokenize '0XABCD8' as hexadecimal_literal", ()->
+      v = g._tokenize "0XABCD8"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "hexadecimal_literal"
+
+    it "should tokenize '0xAbCd8' as hexadecimal_literal", ()->
+      v = g._tokenize "0xAbCd8"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "hexadecimal_literal"
+
+    it "should tokenize '0b10101' as binary_literal", ()->
+      v = g._tokenize "0b10101"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_literal"
+
+    it "should tokenize '0B10101' as binary_literal", ()->
+      v = g._tokenize "0B10101"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_literal"
+
+
+  describe "unary operators", ()->
+    it "should tokenize '+' as unary_operator", ()->
+      v = g._tokenize "+"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+
+    it "should tokenize '-' as unary_operator", ()->
+      v = g._tokenize "-"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+
+    it "should tokenize '~' as unary_operator", ()->
+      v = g._tokenize "~"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+
+    it "should tokenize '!' as unary_operator", ()->
+      v = g._tokenize "!"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+
+    it "should tokenize '++' as unary_operator", ()->
+      v = g._tokenize "++"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+
+    it "should tokenize '--' as unary_operator", ()->
+      v = g._tokenize "--"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
+
+
+  describe "binary operators", ()->
+    it "should tokenize '+' as binary_operator", ()->
+      v = g._tokenize "+"
+      assert.equal v.length, 1
+      assert.equal v[0][1].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '-' as binary_operator", ()->
+      v = g._tokenize "-"
+      assert.equal v.length, 1
+      assert.equal v[0][1].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '*' as binary_operator", ()->
+      v = g._tokenize "*"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '/' as binary_operator", ()->
+      v = g._tokenize "/"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '%' as binary_operator", ()->
+      v = g._tokenize "%"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '**' as binary_operator", ()->
+      v = g._tokenize "**"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '>' as binary_operator", ()->
+      v = g._tokenize ">"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '<' as binary_operator", ()->
+      v = g._tokenize "<"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '>=' as binary_operator", ()->
+      v = g._tokenize ">="
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '<=' as binary_operator", ()->
+      v = g._tokenize "<="
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '==' as binary_operator", ()->
+      v = g._tokenize "=="
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '!=' as binary_operator", ()->
+      v = g._tokenize "!="
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    # it "should tokenize '===' as binary_operator", ()->
+    #   v = g._tokenize "==="
+    #   assert.equal v.length, 1
+    #   assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    # it "should tokenize '!==' as binary_operator", ()->
+    #   v = g._tokenize "!=="
+    #   assert.equal v.length, 1
+    #   assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '<<' as binary_operator", ()->
+      v = g._tokenize "<<"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '>>' as binary_operator", ()->
+      v = g._tokenize ">>"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '>>>' as binary_operator", ()->
+      v = g._tokenize ">>>"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '&' as binary_operator", ()->
+      v = g._tokenize "&"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '|' as binary_operator", ()->
+      v = g._tokenize "|"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '^' as binary_operator", ()->
+      v = g._tokenize "^"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '&&' as binary_operator", ()->
+      v = g._tokenize "&&"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+
+    it "should tokenize '||' as binary_operator", ()->
+      v = g._tokenize "||"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
 
