@@ -1,7 +1,8 @@
 assert = require 'assert'
-util = require './util'
+util = require 'fy/test_util'
 
 g = require '../tokenizer.coffee'
+pub = require '../index.coffee'
 
 describe 'tokenizer section', ()->
   describe "identifier", ()->
@@ -133,4 +134,13 @@ describe 'tokenizer section', ()->
           v = g._tokenize v
           assert.equal v.length, 1
           assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
+  
+  it "public endpoint should works", (done)->
+    await pub.tokenize "id", {}, defer(err, v)
+    assert.equal v.length, 1
+    assert.equal v[0][0].mx_hash.hash_key, "identifier"
     
+    await pub.tokenize "wtf кирилица", {}, defer(err, v)
+    assert err?
+    
+    done()
