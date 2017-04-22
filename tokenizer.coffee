@@ -8,18 +8,20 @@ module = @
 # API should be async by default in case we make some optimizations in future
 
 tokenizer = new Tokenizer
+tokenizer.parser_list.push (new Token_parser 'bracket', /^[\[\]\(\)\{\}]/)
+
 tokenizer.parser_list.push (new Token_parser 'decimal_literal', /^(0|[1-9][0-9]*)/)
 tokenizer.parser_list.push (new Token_parser 'octal_literal', /^0o?[0-7]+/i)
 tokenizer.parser_list.push (new Token_parser 'hexadecimal_literal', /^0x[0-9a-f]+/i)
 tokenizer.parser_list.push (new Token_parser 'binary_literal', /^0b[01]+/i)
-tokenizer.parser_list.push (new Token_parser 'unary_operator', /// ^
+tokenizer.parser_list.push (new Token_parser 'unary_operator', /// ^ (
   (--?|\+\+?)|
-  [-+~!]|
+  [~!]|
   not|
   typeof|
   new|
   delete
-  ///)
+)  ///)
 tokenizer.parser_list.push (new Token_parser 'binary_operator', /// ^ (
   \.\.\.?|
   \??(::|\.)|
