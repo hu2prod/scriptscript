@@ -135,6 +135,26 @@ describe 'tokenizer section', ()->
           assert.equal v.length, 1
           assert.equal v[0][0].mx_hash.hash_key, "binary_operator"
   
+  describe "function", ()->
+    for v in "-> =>".split " "
+      do (v)->
+        it "should tokenize '#{v}' as arrow_function", ()->
+          v = g._tokenize v
+          assert.equal v.length, 1
+          assert.equal v[0][0].mx_hash.hash_key, "arrow_function"
+  
+  describe "this", ()->
+    it "should tokenize '@' as this", ()->
+      v = g._tokenize "@"
+      assert.equal v.length, 1
+      assert.equal v[0][0].mx_hash.hash_key, "this"
+  
+    it "should tokenize '@a' as this and identifier", ()->
+      v = g._tokenize "@a"
+      assert.equal v.length, 2
+      assert.equal v[0][0].mx_hash.hash_key, "this"
+      assert.equal v[1][0].mx_hash.hash_key, "identifier"
+  
   it "public endpoint should works", (done)->
     await pub.tokenize "id", {}, defer(err, v)
     assert.equal v.length, 1
