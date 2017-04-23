@@ -110,7 +110,7 @@ describe 'tokenizer section', ()->
           assert.equal v[0][0].mx_hash.hash_key, "unary_operator"
   
   describe "binary operators", ()->
-    for v in "* / % ** // %% << >> >>> & | ^ && || ^^ and or xor instanceof ? . ?. :: ?:: .. ...".split " "
+    for v in "* / % ** // %% << >> >>> & | ^ && || ^^ and or xor instanceof in of is isnt ? . ?. :: ?:: .. ...".split " "
       do (v)->
         it "should tokenize '#{v}' as binary_operator", ()->
           v = g._tokenize v
