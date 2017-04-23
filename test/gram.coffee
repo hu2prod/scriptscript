@@ -28,7 +28,6 @@ describe 'gram section', ()->
   
   it 'public endpoint should work', (done)->
     await go '1', {}, defer(err, res)
-    pp err
     assert !(err?)
     await go '1 КИРИЛИЦА', {}, defer(err, res)
     assert err?
@@ -36,3 +35,6 @@ describe 'gram section', ()->
     assert err?
     done()
   
+describe "Gram TODO", ()->
+  it "all exapmles from coffeescript documentation (oneliners only) should be tokenizable and parsabpe"
+  # check only if it doesn't throw

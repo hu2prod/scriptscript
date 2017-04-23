@@ -94,6 +94,7 @@ describe 'tokenizer section', ()->
   
   describe "mixed operators", ()->
     for v in "+ -".split " "
+    # for v in "+ - ?".split " "
       do (v)->
         it "should tokenize '#{v}' as unary_operator and binary_operator", ()->
           v = g._tokenize v
@@ -164,3 +165,32 @@ describe 'tokenizer section', ()->
     assert err?
     
     done()
+  
+  describe "TODO", ()->
+    it "should parse '?' as unary_operator and binary_operator"
+    it "should parse '(' as bracket"
+    it "should parse ')' as bracket"
+    it "should parse '[' as bracket"
+    it "should parse ']' as bracket"
+    it "should parse '{' as bracket"
+    it "should parse '}' as bracket"
+    it "should parse '(a)->a' as 5 tokens"
+    # it "should parse 'true' as bool_const"
+    # it "should parse 'false' as bool_const"
+    it "should parse '.1' as float_literal"
+    it "should parse '1.' as float_literal"
+    it "should parse '1.e10' as float_literal"
+    it "should parse '1.e+10' as float_literal"
+    it "should parse '1.e-10' as float_literal"
+    it "should parse '-1' as 2 tokens"
+    it "should parse '# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \n' as comment"
+    it "should parse 'a + b' as 3 tokens"
+    it "should parse 'a + b' as 'a ', '+ ', 'b'"
+    it "should parse whitespace: all except for \\n, \\r "
+    it "should parse whitespace: all except for \\n, \\r "
+    it "should parse 'a / b / c' as 5 tokens (not regexp!)"
+    it "should parse 'a/b/c' as 3 tokens with regexp in the middle"
+    it "should parse 'a/b' as 3 tokens without regexp"
+    it "should parse 'a//b' as 3 tokens without regexp"
+    # regexp must contain at least one symbol excluding whitespace
+    # escape policy for string constant should apply for regex
