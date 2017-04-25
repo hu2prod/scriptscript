@@ -21,6 +21,11 @@ describe 'gram section', ()->
     do (sample)->
       it sample, ()->
         full sample
+  it 'loop\\n  b'#,  ()->
+    # full """
+    # loop
+    #   b
+    # """
   
   it '1a1 throw', ()->
     util.throws ()->
