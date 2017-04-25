@@ -1,5 +1,5 @@
 require 'fy'
-{Token_parser, Tokenizer} = require 'gram'
+{Token_parser, Tokenizer, Node} = require 'gram'
 module = @
 
 # ###################################################################################################
@@ -7,7 +7,31 @@ module = @
 # ###################################################################################################
 # API should be async by default in case we make some optimizations in future
 
+last_space = 0
 tokenizer = new Tokenizer
+tokenizer.parser_list.push (new Token_parser 'Xdent', /^\n/, (_this, ret_value, q)->
+  _this.text = _this.text.substr 1 # \n
+  tail_space_len = /^[ \t]*/.exec(_this.text)[0].length
+  _this.text = _this.text.substr tail_space_len
+  if tail_space_len != last_space
+    while last_space < tail_space_len
+      node = new Node
+      node.mx_hash.hash_key = 'indent'
+      ret_value.push [node]
+      last_space += 2
+    
+    while last_space > tail_space_len
+      node = new Node
+      node.mx_hash.hash_key = 'dedent'
+      ret_value.push [node]
+      last_space -= 2
+    
+  last_space = tail_space_len
+  
+  
+  
+)
+
 tokenizer.parser_list.push (new Token_parser 'bracket', /^[\[\]\(\)\{\}]/)
 
 tokenizer.parser_list.push (new Token_parser 'decimal_literal', /^(0|[1-9][0-9]*)/)
@@ -44,6 +68,12 @@ tokenizer.parser_list.push (new Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]
 tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>/)
 
 @_tokenize = (str, opt)->
+  # reset
+  last_space = 0
+  
+  # TODO later better replace policy/heur
+  str = str.replace /\t/, '  '
+  str += "\n" # dedent fix
   tokenizer.go str
 
 @tokenize = (str, opt, on_end)->
