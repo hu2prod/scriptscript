@@ -224,6 +224,16 @@ describe 'tokenizer section', ()->
       assert.equal tl[0][0].mx_hash.hash_key, "decimal_literal"
       assert.equal tl[1][0].mx_hash.hash_key, "identifier"
   
+  describe "Multiline", ()->
+    it "should parse '\\n  b' as indent b dedent", # ()->
+      # tl = g._tokenize """
+      # 
+      #   b
+      # """
+      # assert.equal tl.length, 3
+      # assert.equal tl[0][0].mx_hash.hash_key, "indent"
+      # assert.equal tl[1][0].mx_hash.hash_key, "identifier"
+      # assert.equal tl[2][0].mx_hash.hash_key, "dedent"
   
   describe "TODO", ()->
     # it "should parse 'true' as bool_const"
