@@ -236,10 +236,39 @@ describe 'tokenizer section', ()->
       assert.equal tl[2][0].mx_hash.hash_key, "identifier"
       assert.equal tl[3][0].mx_hash.hash_key, "dedent"
   
+  describe "Comments", ()->
+    it "should parse '# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \\n' as comment", ()->
+      tl = g._tokenize "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \n"
+      assert.equal tl.length, 1
+      assert.equal tl[0][0].mx_hash.hash_key, "comment"
+      assert.equal tl[0][0].value, "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \n"
+    
+    it "should parse '2+2#=4\\n4+4#=8\\n' as 8 tokens including comments", ()->
+      tl = g._tokenize "2+2#=4\n4+4#=8\n"
+      assert.equal tl.length, 8
+      assert.equal tl[0][0].mx_hash.hash_key, "decimal_literal"
+      assert.equal tl[1][0].mx_hash.hash_key, "unary_operator"
+      assert.equal tl[2][0].mx_hash.hash_key, "decimal_literal"
+      assert.equal tl[3][0].mx_hash.hash_key, "comment"
+      assert.equal tl[4][0].mx_hash.hash_key, "decimal_literal"
+      assert.equal tl[5][0].mx_hash.hash_key, "unary_operator"
+      assert.equal tl[6][0].mx_hash.hash_key, "decimal_literal"
+      assert.equal tl[7][0].mx_hash.hash_key, "comment"
+    
+    it "should parse '### 2 + 2 = 4\\n4 + 4 = 8\\n###' as comment", ()->
+      tl = g._tokenize "### 2 + 2 = 4\n4 + 4 = 8\n###"
+      assert.equal tl.length, 1
+      assert.equal tl[0][0].mx_hash.hash_key, "comment"
+    
+    it "should parse '####################### COMMENT\\n' as comment", ()->
+      tl = g._tokenize "####################### COMMENT\n"
+      assert.equal tl.length, 1
+      assert.equal tl[0][0].mx_hash.hash_key, "comment"
+      assert.equal tl[0][0].value, "####################### COMMENT\n"
+  
   describe "TODO", ()->
     # it "should parse 'true' as bool_const"
     # it "should parse 'false' as bool_const"
-    it "should parse '# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \\n' as comment"
     it "should parse 'a + b' as 3 tokens"
     it "should parse 'a + b' as 'a ', '+ ', 'b'"
     it "should parse whitespace: all except for \\n, \\r "
