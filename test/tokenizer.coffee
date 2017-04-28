@@ -266,14 +266,24 @@ describe 'tokenizer section', ()->
       assert.equal tl[0][0].mx_hash.hash_key, "comment"
       assert.equal tl[0][0].value, "####################### COMMENT\n"
   
+  describe "Whitespace", ()->
+    it "should parse 'a + b' as 'a ', '+ ', 'b'", ()->
+      tl = g._tokenize "a + b"
+      assert.equal tl.length, 3
+      assert.equal tl[0][0].value, "a "
+      assert.equal tl[1][0].value, "+ "
+      assert.equal tl[2][0].value, "b"
+    
+    it "should parse 'a / b / c' as 5 tokens (not regexp!)", ()->
+      tl = g._tokenize "a / b / c"
+      assert.equal tl.length, 5
+      assert.equal tl[0][0].mx_hash.hash_key, "identifier"
+      assert.equal tl[1][0].mx_hash.hash_key, "binary_operator"
+      assert.equal tl[2][0].mx_hash.hash_key, "identifier"
+      assert.equal tl[3][0].mx_hash.hash_key, "binary_operator"
+      assert.equal tl[4][0].mx_hash.hash_key, "identifier"
+  
   describe "TODO", ()->
-    # it "should parse 'true' as bool_const"
-    # it "should parse 'false' as bool_const"
-    it "should parse 'a + b' as 3 tokens"
-    it "should parse 'a + b' as 'a ', '+ ', 'b'"
-    it "should parse whitespace: all except for \\n, \\r "
-    it "should parse whitespace: all except for \\n, \\r "
-    it "should parse 'a / b / c' as 5 tokens (not regexp!)"
     it "should parse 'a/b/c' as 3 tokens with regexp in the middle"
     it "should parse 'a/b' as 3 tokens without regexp"
     it "should parse 'a//b' as 3 tokens without regexp"
