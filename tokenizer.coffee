@@ -27,6 +27,7 @@ tokenizer.parser_list.push (new Token_parser 'Xdent', /^\n/, (_this, ret_value, 
       ret_value.push [node]
       last_space -= 2
   else
+    return if _this.ret_access.last()?[0].mx_hash.hash_key == 'eol' # do not duplicate
     node = new Node
     node.mx_hash.hash_key = 'eol'
     ret_value.push [node]
@@ -49,6 +50,7 @@ tokenizer.parser_list.push (new Token_parser 'float_literal', ///
     )
   ///i)
 tokenizer.parser_list.push (new Token_parser 'this', /^@/)
+tokenizer.parser_list.push (new Token_parser 'comma', /^,/)
 tokenizer.parser_list.push (new Token_parser 'unary_operator', /// ^ (
   (--?|\+\+?)|
   [~!]|
@@ -77,7 +79,7 @@ tokenizer.parser_list.push (new Token_parser 'comment', /^(###[^#][^]*###|#.*\n)
   str = str.replace /\t/, '  '
   str += "\n" # dedent fix
   res = tokenizer.go str
-  while res.last()[0].mx_hash.hash_key == 'eol'
+  while res.length && res.last()[0].mx_hash.hash_key == 'eol'
     res.pop()
   res
 

@@ -55,7 +55,7 @@ describe 'gram section', ()->
   for sample in sample_list
     continue if !sample
     do (sample)->
-      it sample, ()->
+      it JSON.stringify(sample), ()->
         full sample
   
   sample_list = """
@@ -99,6 +99,57 @@ describe 'gram section', ()->
     util.throws ()->
       full '1a1'
   
+  describe 'array section', ()->
+    sample_list = """
+      []
+      ---
+      [ ]
+      ---
+      [a]
+      ---
+      [a,b]
+      ---
+      [a,b,c]
+      ---
+      [
+      ]
+      ---
+      [
+      
+      ]
+      ---
+      [
+      
+      
+      ]
+      ---
+      [
+      a
+      ]
+      ---
+      [
+        a
+      ]
+      ---
+    """.split /\n?---\n?/g
+    for sample in sample_list
+      continue if !sample
+      do (sample)->
+        it JSON.stringify(sample), ()->
+          full sample
+    # sample_list = """
+    #   [a
+    #   ]
+    #   ---
+    #   [
+    #   a]
+    # """.split /\n?---\n?/g
+    # for sample in sample_list
+    #   continue if !sample
+    #   do (sample)->
+    #     it "#{JSON.stringify(sample)} bad codestyle not parsed", ()-> # или говнокодеры должны страдать
+    #       util.throws ()->
+    #         full sample
   describe 'pipe section', ()->
     sample_list = """
       a | | b
@@ -126,8 +177,7 @@ describe 'gram section', ()->
     for sample in sample_list
       continue if !sample
       do (sample)->
-        it sample, ()->
-          pp _tokenize sample
+        it JSON.stringify(sample), ()->
           full sample
   
   it 'public endpoint should work', (done)->

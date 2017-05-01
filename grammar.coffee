@@ -65,6 +65,14 @@ q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent') .mx("priorit
 
 q('rvalue',  '#pre_op #rvalue')               .mx('priority=#pre_op.priority')       .strict('#rvalue[1].priority<=#pre_op.priority')
 q('rvalue',  '#rvalue #post_op')              .mx('priority=#post_op.priority')      .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
+# array
+q('comma_rvalue',  '#rvalue')
+q('comma_rvalue',  '#eol #comma_rvalue')
+q('comma_rvalue',  '#comma_rvalue , #rvalue')
+q('array',  '[ #comma_rvalue? #eol? ]')                   .mx("priority=#{base_priority}")
+q('array',  '[ #indent #comma_rvalue? #dedent ]')   .mx("priority=#{base_priority}")
+q('rvalue',  '#array')
+# NOTE lvalue array come later
 
 q('stmt',  '#rvalue')
 

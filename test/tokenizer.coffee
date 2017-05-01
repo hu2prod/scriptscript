@@ -267,6 +267,22 @@ describe 'tokenizer section', ()->
       assert.equal tl[0][0].value, "####################### COMMENT\n"
   
   describe "Whitespace", ()->
+    it "should parse \\n as 0 tokens", ()->
+      tl = g._tokenize "\n"
+      assert.equal tl.length, 0
+    
+    it "should parse \\n1 as 2 tokens", ()->
+      tl = g._tokenize "\n1"
+      assert.equal tl.length, 2
+    
+    it "should parse \\n\\n1 as 2 tokens", ()->
+      tl = g._tokenize "\n\n1"
+      assert.equal tl.length, 2
+    
+    it "should parse \\n\\n\\n1 as 2 tokens", ()->
+      tl = g._tokenize "\n\n\n1"
+      assert.equal tl.length, 2
+    
     it "should parse 'a + b' as 'a', '+', 'b' with tail_space 1 1 0", ()->
       tl = g._tokenize "a + b"
       assert.equal tl.length, 3
