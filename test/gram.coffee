@@ -184,6 +184,72 @@ describe 'gram section', ()->
     #     it "#{JSON.stringify(sample)} bad codestyle not parsed", ()-> # или говнокодеры должны страдать
     #       util.throws ()->
     #         full sample
+  ###
+  string not defined yet
+      ---
+      {\"a\":b}
+      ---
+      {'a':b}
+  ###
+  describe 'hash section', ()->
+    sample_list = """
+      {}
+      ---
+      { }
+      ---
+      {a}
+      ---
+      {a:b}
+      ---
+      {1:b}
+      ---
+      {a,b}
+      ---
+      {a:1,b:2}
+      ---
+      {a:1,b}
+      ---
+      {a,b,c}
+      ---
+      {
+      }
+      ---
+      {
+      
+      }
+      ---
+      {
+      
+      
+      }
+      ---
+      {
+      a
+      }
+      ---
+      {
+        a
+      }
+      ---
+    """.split /\n?---\n?/g
+    for sample in sample_list
+      continue if !sample
+      do (sample)->
+        it JSON.stringify(sample), ()->
+          full sample
+    # sample_list = """
+    #   [a
+    #   ]
+    #   ---
+    #   [
+    #   a]
+    # """.split /\n?---\n?/g
+    # for sample in sample_list
+    #   continue if !sample
+    #   do (sample)->
+    #     it "#{JSON.stringify(sample)} bad codestyle not parsed", ()-> # или говнокодеры должны страдать
+    #       util.throws ()->
+    #         full sample
   describe 'pipe section', ()->
     sample_list = """
       a | | b

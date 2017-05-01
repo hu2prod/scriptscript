@@ -51,6 +51,7 @@ tokenizer.parser_list.push (new Token_parser 'float_literal', ///
   ///i)
 tokenizer.parser_list.push (new Token_parser 'this', /^@/)
 tokenizer.parser_list.push (new Token_parser 'comma', /^,/)
+tokenizer.parser_list.push (new Token_parser 'pair_separator', /^:/)
 tokenizer.parser_list.push (new Token_parser 'unary_operator', /// ^ (
   (--?|\+\+?)|
   [~!]|

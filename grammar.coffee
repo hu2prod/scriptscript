@@ -76,12 +76,29 @@ q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.pr
 q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority')      .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
 # array
 q('comma_rvalue',  '#rvalue')
-q('comma_rvalue',  '#eol #comma_rvalue')
+q('comma_rvalue',  '#eol #comma_rvalue') # NOTE eol in back will not work. Gram bug
 q('comma_rvalue',  '#comma_rvalue , #rvalue')
 q('array',  '[ #comma_rvalue? #eol? ]')                 .mx("priority=#{base_priority}")
 q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_priority}")
 q('rvalue',  '#array')
 # NOTE lvalue array come later
+
+# hash with brackets
+q('pair',  '#identifier : #rvalue')
+q('pair',  '#const : #rvalue')
+q('pair',  '#identifier')
+q('pair_comma_rvalue',  '#pair')
+q('pair_comma_rvalue',  '#eol #pair')
+q('pair_comma_rvalue',  '#pair_comma_rvalue , #pair')
+q('hash',  '{ #pair_comma_rvalue? #eol? }')                   .mx("priority=#{base_priority}")
+q('hash',  '{ #indent #pair_comma_rvalue? #dedent }')   .mx("priority=#{base_priority}")
+q('rvalue',  '#hash')
+# LATER bracket-less hash
+# fuckup sample
+# a a:b,c:d
+#   a({a:b,c:d})
+#   a({a:b},{c:d})
+
 
 q('stmt',  '#rvalue')
 
