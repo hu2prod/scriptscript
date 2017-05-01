@@ -10,7 +10,7 @@ module = @
 g = new Gram
 q = (a, b)->g.rule a,b
 base_priority = -9000
-q('lvalue', '#identifier')
+q('lvalue', '#identifier')                              .mx("priority=#{base_priority}")
 q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority}")
 
 q('const', '#decimal_literal')
@@ -31,8 +31,9 @@ q('pre_op',  'new')                                     .mx('priority=15')
 q('pre_op',  'delete')                                  .mx('priority=15')
 # ++ -- pre_op is banned.
 
-q('post_op', '++').mx('priority=1')
-q('post_op', '--').mx('priority=1')
+q('post_op', '++')                                      .mx('priority=1')
+q('post_op', '--')                                      .mx('priority=1')
+q('post_op', '[QUESTION]')                              .mx('priority=1')
 
 # https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 # TODO all ops
@@ -46,6 +47,8 @@ q('bin_op',  '<<|>>|>>>')                               .mx('priority=7  right_a
 q('bin_op',  'instanceof')                              .mx('priority=8  right_assoc=1')
 q('bin_op',  '<|<=|>|>=|!=|==')                         .mx('priority=9  right_assoc=1') # NOTE == <= has same priority
 q('bin_op',  '&&|and|or|[PIPE][PIPE]')                  .mx('priority=10 right_assoc=1')
+
+q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx('priority=3')
 
 
 q('bin_op',  '#multipipe')                              .mx("priority=#{pipe_priority} right_assoc=1") # возможно стоит это сделать отдельной конструкцией языка дабы проверять всё более тсчательно
@@ -65,6 +68,8 @@ q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.pr
 q('pre_pipe_rvalue',  '#multipipe #rvalue')                                                    #.strict("#rvalue.priority<#{pipe_priority}")
 q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                              #.strict("#rvalue.priority<#{pipe_priority}")
 q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}").strict("#rvalue[1].priority<=#{pipe_priority}")
+# assign
+q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
 
 
 q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority')       .strict('#rvalue[1].priority<=#pre_op.priority')

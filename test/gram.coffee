@@ -7,6 +7,10 @@ full = (t)->_parse _tokenize t
 {go} = require '../index.coffee'
 
 describe 'gram section', ()->
+  # fuckups
+  ###
+  a /= b / c
+  ###
   sample_list = """
     a
     +a
@@ -53,6 +57,20 @@ describe 'gram section', ()->
     a+ b
     a +b
     a + b
+    a?
+    a = b
+    a += b
+    a -= b
+    a *= b
+    a /= b
+    a %= b
+    a **= b
+    a //= b
+    a %%= b
+    a <<= b
+    a >>= b
+    a >>>= b
+    a ?= b
   """.split /\n/g
   # NOTE a +b is NOT bin_op. It's function call
   for sample in sample_list

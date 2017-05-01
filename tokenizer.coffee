@@ -64,7 +64,8 @@ tokenizer.parser_list.push (new Token_parser 'binary_operator', /// ^ (
   \??(::|\.)|
   (\*\*?|//?|%%?|<<|>>>?|&&?|\|\|?|\^\^?|[-+?]|and|or|xor)=?|
   instanceof|in|of|isnt|is|
-  [<>!=]=|<|>
+  [<>!=]=|<|>|
+  =
 ) ///)
 tokenizer.parser_list.push (new Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]*/i)
 tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>/)
