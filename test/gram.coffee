@@ -95,7 +95,7 @@ describe 'gram section', ()->
     rvalue = ret[0].value_array
     assert.equal rvalue[0].value_array[1].value, "+"
   
-  it ' void a+a priority',  ()->
+  it 'void a+a priority',  ()->
     ret = full 'void a+a'
     rvalue = ret[0].value_array
     assert.equal rvalue[0].value_array[0].value, "void"
