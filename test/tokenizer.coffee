@@ -286,6 +286,11 @@ describe 'tokenizer section', ()->
       assert.equal tl[3][0].mx_hash.hash_key, "binary_operator"
       assert.equal tl[4][0].mx_hash.hash_key, "identifier"
   
+  describe "Pipes", ()->
+    it "should parse 'a | b | c' as 5 tokens", ()->
+      tl = g._tokenize "a | b | c"
+      assert.equal tl.length, 5
+  
   describe "TODO", ()->
     it "should parse 'a/b/c' as 3 tokens with regexp in the middle"
     it "should parse 'a/b' as 3 tokens without regexp"

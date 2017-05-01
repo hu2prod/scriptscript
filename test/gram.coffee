@@ -16,11 +16,48 @@ describe 'gram section', ()->
     a+a+a
     (a)
     a+a*a
+    a|b
+    a|b|c
+    -a+b
+    ~a
+    !a
+    typeof a
+    not a
+    void a
+    a and b
+    a && b
+    a or b
+    a || b
+    a < b
+    a <= b
+    a == b
+    a > b
+    a >= b
+    a != b
+    a << b
+    a >> b
+    a >>> b
   """.split /\n/g
   for sample in sample_list
     do (sample)->
       it sample, ()->
         full sample
+  
+  it 'a+a*a priority',  ()->
+    ret = full 'a+a*a'
+    rvalue = ret[0].value_array
+    assert.equal rvalue[0].value_array[1].value, "+"
+  
+  it 'a*a+a priority',  ()->
+    ret = full 'a*a+a'
+    rvalue = ret[0].value_array
+    assert.equal rvalue[0].value_array[1].value, "+"
+  
+  it '-a+b priority',  ()->
+    ret = full '-a+b'
+    rvalue = ret[0].value_array
+    assert.equal rvalue[0].value_array[1].value, "+"
+  
   it 'loop\\n  b'#,  ()->
     # full """
     # loop
