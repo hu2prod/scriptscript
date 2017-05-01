@@ -24,6 +24,16 @@ describe 'gram section', ()->
     typeof a
     not a
     void a
+    new a
+    delete a
+    a + b
+    a - b
+    a * b
+    a / b
+    a % b
+    a ** b
+    a // b
+    a %% b
     a and b
     a && b
     a or b
@@ -84,6 +94,11 @@ describe 'gram section', ()->
     ret = full 'a*a+a'
     rvalue = ret[0].value_array
     assert.equal rvalue[0].value_array[1].value, "+"
+  
+  it ' void a+a priority',  ()->
+    ret = full 'void a+a'
+    rvalue = ret[0].value_array
+    assert.equal rvalue[0].value_array[0].value, "void"
   
   it '-a+b priority',  ()->
     ret = full '-a+b'
