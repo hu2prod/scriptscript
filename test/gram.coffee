@@ -37,6 +37,7 @@ describe 'gram section', ()->
     a << b
     a >> b
     a >>> b
+    a instanceof b
     a++
     a--
     a+ b
