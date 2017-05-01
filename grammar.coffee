@@ -25,7 +25,10 @@ q('pre_op',  '~')                                       .mx('priority=1')
 q('pre_op',  '-')                                       .mx('priority=1')
 q('pre_op',  '+')                                       .mx('priority=1')
 q('pre_op',  'typeof')                                  .mx('priority=1')
-q('pre_op',  'void')                                    .mx('priority=1')
+
+q('pre_op',  'void')                                    .mx('priority=15')
+q('pre_op',  'new')                                     .mx('priority=15')
+q('pre_op',  'delete')                                  .mx('priority=15')
 # ++ -- pre_op is banned.
 
 q('post_op', '++').mx('priority=1')
@@ -35,7 +38,8 @@ q('post_op', '--').mx('priority=1')
 # TODO all ops
 pipe_priority = 100
 
-q('bin_op',  '**')                                      .mx('priority=4  left_assoc=1')
+q('bin_op',  '//|%%')                                   .mx('priority=4  right_assoc=1')
+q('bin_op',  '**')                                      .mx('priority=4  left_assoc=1') # because JS
 q('bin_op',  '*|/|%')                                   .mx('priority=5  right_assoc=1')
 q('bin_op',  '+|-')                                     .mx('priority=6  right_assoc=1')
 q('bin_op',  '<<|>>|>>>')                               .mx('priority=7  right_assoc=1')
