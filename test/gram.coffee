@@ -37,11 +37,29 @@ describe 'gram section', ()->
     a << b
     a >> b
     a >>> b
+    a++
+    a--
   """.split /\n/g
   for sample in sample_list
     do (sample)->
       it sample, ()->
         full sample
+  
+  sample_list = """
+    a++++
+    a++ ++
+    a+
+    кирилица
+    a === b
+    a !== b
+    ++a
+    --a
+  """.split /\n/g
+  for sample in sample_list
+    do (sample)->
+      it "#{sample} should not parse", ()->
+        util.throws ()->
+          full sample
   
   it 'a+a*a priority',  ()->
     ret = full 'a+a*a'
@@ -68,6 +86,15 @@ describe 'gram section', ()->
     util.throws ()->
       full '1a1'
   
+  describe 'pipe section', ()->
+    sample_list = """
+      a | | b
+    """.split /\n/g
+    for sample in sample_list
+      do (sample)->
+        it sample, ()->
+          full sample
+  
   it 'public endpoint should work', (done)->
     await go '1', {}, defer(err, res)
     assert !(err?)
@@ -78,5 +105,5 @@ describe 'gram section', ()->
     done()
   
 describe "Gram TODO", ()->
-  it "all exapmles from coffeescript documentation (oneliners only) should be tokenizable and parsabpe"
+  it "all exapmles from coffeescript documentation (oneliners only) should be tokenizable and parsable"
   # check only if it doesn't throw

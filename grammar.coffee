@@ -26,6 +26,10 @@ q('pre_op',  '-').mx('priority=1')
 q('pre_op',  '+').mx('priority=1')
 q('pre_op',  'typeof').mx('priority=1')
 q('pre_op',  'void').mx('priority=1')
+# ++ -- pre_op is banned.
+
+q('post_op', '++').mx('priority=1')
+q('post_op', '--').mx('priority=1')
 
 # https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 # TODO all ops
@@ -36,7 +40,10 @@ q('bin_op',  '<<|>>|>>>')                     .mx('priority=8   right_assoc=1')
 q('bin_op',  '<|<=|>|>=|!=|==')               .mx('priority=9   right_assoc=1') # NOTE == <= has same priority
 q('bin_op',  '&&|and|or|[PIPE][PIPE]')        .mx('priority=10  right_assoc=1')
 q('bin_op',  'instanceof')                    .mx('priority=100 right_assoc=1')
-q('bin_op',  '[PIPE]')                        .mx('priority=100 right_assoc=1') # возможно стоит это сделать отдельной конструкцией языка дабы проверять всё более тсчательно
+
+
+q('bin_op',  '#multipipe')                    .mx('priority=100 right_assoc=1') # возможно стоит это сделать отдельной конструкцией языка дабы проверять всё более тсчательно
+q('multipipe',  '[PIPE] #multipipe?')
 
 # NOTE need ~same rule for lvalue
 q('rvalue',  '( #rvalue )')                   .mx("priority=#{base_priority}")
@@ -45,6 +52,7 @@ q('rvalue',  '#rvalue #bin_op #rvalue')       .mx('priority=#bin_op.priority')  
 q('rvalue',  '#rvalue #bin_op #rvalue')       .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
 q('rvalue',  '#rvalue #bin_op #rvalue')       .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
 q('rvalue',  '#pre_op #rvalue')               .mx('priority=#pre_op.priority')       .strict('#rvalue[1].priority<=#pre_op.priority')
+q('rvalue',  '#rvalue #post_op')              .mx('priority=#post_op.priority')      .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
 
 q('stmt',  '#rvalue')
 
