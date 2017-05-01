@@ -21,15 +21,17 @@ tokenizer.parser_list.push (new Token_parser 'Xdent', /^\n/, (_this, ret_value, 
       last_space += 2
     
     while last_space > tail_space_len
+      indent_change_present = true
       node = new Node
       node.mx_hash.hash_key = 'dedent'
       ret_value.push [node]
       last_space -= 2
+  else
+    node = new Node
+    node.mx_hash.hash_key = 'eol'
+    ret_value.push [node]
     
   last_space = tail_space_len
-  
-  
-  
 )
 
 tokenizer.parser_list.push (new Token_parser 'bracket', /^[\[\]\(\)\{\}]/)
@@ -74,7 +76,10 @@ tokenizer.parser_list.push (new Token_parser 'comment', /^(###[^#][^]*###|#.*\n)
   # TODO later better replace policy/heur
   str = str.replace /\t/, '  '
   str += "\n" # dedent fix
-  tokenizer.go str
+  res = tokenizer.go str
+  while res.last()[0].mx_hash.hash_key == 'eol'
+    res.pop()
+  res
 
 @tokenize = (str, opt, on_end)->
   try

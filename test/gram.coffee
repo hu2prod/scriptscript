@@ -39,8 +39,21 @@ describe 'gram section', ()->
     a >>> b
     a++
     a--
+    a+ b
+    a +b
+    a + b
   """.split /\n/g
+  # NOTE a +b is NOT bin_op. It's function call
   for sample in sample_list
+    do (sample)->
+      it sample, ()->
+        full sample
+  sample_list = """
+    a +
+      b
+  """.split /\n?---\n?/g
+  for sample in sample_list
+    continue if !sample
     do (sample)->
       it sample, ()->
         full sample
@@ -89,10 +102,32 @@ describe 'gram section', ()->
   describe 'pipe section', ()->
     sample_list = """
       a | | b
-    """.split /\n/g
+      ---
+      a | b | c
+      ---
+      a |
+        | b
+      ---
+      a |
+        | b | c
+      ---
+      a |
+        | b
+        | c
+      ---
+      a |
+        | b
+        | c | d
+      ---
+      a |
+        | b | c
+        | d | e
+    """.split /\n?---\n?/g
     for sample in sample_list
+      continue if !sample
       do (sample)->
         it sample, ()->
+          pp _tokenize sample
           full sample
   
   it 'public endpoint should work', (done)->
