@@ -32,11 +32,11 @@ tokenizer.parser_list.push (new Token_parser 'Xdent', /^\n/, (_this, ret_value, 
   
 )
 
-tokenizer.parser_list.push (new Token_parser 'bracket', /^[\[\]\(\)\{\}][^\S\n\r]*/)
-tokenizer.parser_list.push (new Token_parser 'decimal_literal', /^(0|[1-9][0-9]*)[^\S\n\r]*/)
-tokenizer.parser_list.push (new Token_parser 'octal_literal', /^0o?[0-7]+[^\S\n\r]*/i)
-tokenizer.parser_list.push (new Token_parser 'hexadecimal_literal', /^0x[0-9a-f]+[^\S\n\r]*/i)
-tokenizer.parser_list.push (new Token_parser 'binary_literal', /^0b[01]+[^\S\n\r]*/i)
+tokenizer.parser_list.push (new Token_parser 'bracket', /^[\[\]\(\)\{\}]/)
+tokenizer.parser_list.push (new Token_parser 'decimal_literal', /^(0|[1-9][0-9]*)/)
+tokenizer.parser_list.push (new Token_parser 'octal_literal', /^0o?[0-7]+/i)
+tokenizer.parser_list.push (new Token_parser 'hexadecimal_literal', /^0x[0-9a-f]+/i)
+tokenizer.parser_list.push (new Token_parser 'binary_literal', /^0b[01]+/i)
 tokenizer.parser_list.push (new Token_parser 'float_literal', ///
   ^ (?:
       (?:
@@ -44,7 +44,7 @@ tokenizer.parser_list.push (new Token_parser 'float_literal', ///
         \.\d+
       )  (?:e[+-]?\d+)? |
       \d+(?:e[+-]?\d+)
-    )[^\S\n\r]*
+    )
   ///i)
 tokenizer.parser_list.push (new Token_parser 'this', /^@/)
 tokenizer.parser_list.push (new Token_parser 'unary_operator', /// ^ (
@@ -54,16 +54,16 @@ tokenizer.parser_list.push (new Token_parser 'unary_operator', /// ^ (
   typeof|
   new|
   delete
-)[^\S\n\r]*  ///)
+)  ///)
 tokenizer.parser_list.push (new Token_parser 'binary_operator', /// ^ (
   \.\.\.?|
   \??(::|\.)|
   (\*\*?|//?|%%?|<<|>>>?|&&?|\|\|?|\^\^?|[-+?]|and|or|xor)=?|
   instanceof|in|of|isnt|is|
   [<>!=]=|<|>
-)[^\S\n\r]* ///)
-tokenizer.parser_list.push (new Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]*[^\S\n\r]*/i)
-tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>[^\S\n\r]*/)
+) ///)
+tokenizer.parser_list.push (new Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]*/i)
+tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>/)
 # Version from the CoffeeScript source code: /^###([^#][\s\S]*?)(?:###[^\n\S]*|###$)|^(?:\s*#(?!##[^#]).*)+/
 tokenizer.parser_list.push (new Token_parser 'comment', /^(###[^#][^]*###|#.*\n)/)
 

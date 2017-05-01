@@ -267,12 +267,15 @@ describe 'tokenizer section', ()->
       assert.equal tl[0][0].value, "####################### COMMENT\n"
   
   describe "Whitespace", ()->
-    it "should parse 'a + b' as 'a ', '+ ', 'b'", ()->
+    it "should parse 'a + b' as 'a', '+', 'b' with tail_space 1 1 0", ()->
       tl = g._tokenize "a + b"
       assert.equal tl.length, 3
-      assert.equal tl[0][0].value, "a "
-      assert.equal tl[1][0].value, "+ "
+      assert.equal tl[0][0].value, "a"
+      assert.equal tl[0][0].mx_hash.tail_space, "1"
+      assert.equal tl[1][0].value, "+"
+      assert.equal tl[1][0].mx_hash.tail_space, "1"
       assert.equal tl[2][0].value, "b"
+      assert.equal tl[2][0].mx_hash.tail_space, "0"
     
     it "should parse 'a / b / c' as 5 tokens (not regexp!)", ()->
       tl = g._tokenize "a / b / c"
