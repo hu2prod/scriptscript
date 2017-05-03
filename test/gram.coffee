@@ -85,6 +85,10 @@ describe 'gram section', ()->
     1e+1
     1e-1
     -1e-1
+    a()
+    a(b)
+    a(b,c)
+    a(b,c=d)
   """.split /\n/g
   # NOTE a +b is NOT bin_op. It's function call
   for sample in sample_list

@@ -129,7 +129,10 @@ q('lvalue', '#lvalue . #decimal_literal')               .mx("priority=#{base_pri
 q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_priority}")
 # hack for a.0123 float_enabled
 # q('lvalue', '#lvalue #float_literal')                   .mx("priority=#{base_priority}")      .strict('#lvalue.tail_space=0 #float_literal[0:0]="."')
-
+# ###################################################################################################
+#    function call
+# ###################################################################################################
+q('rvalue', '#lvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_priority}")
 
 q('stmt',  '#rvalue')
 
