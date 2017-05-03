@@ -3,7 +3,9 @@ util = require 'fy/test_util'
 
 {_tokenize} = require '../tokenizer.coffee'
 {_parse   } = require '../grammar.coffee'
-full = (t)->_parse _tokenize t
+full = (t)->
+  tok = _tokenize(t)
+  _parse(tok, mode_full:true)
 {go} = require '../index.coffee'
 
 describe 'gram section', ()->

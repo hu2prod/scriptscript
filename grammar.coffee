@@ -140,11 +140,14 @@ q('stmt',  '#rvalue')
 q('stmt',  '#comment')
 
 @_parse = (str, opt)->
-  debugger
+  g.mode_full = opt.mode_full || false
   res = g.parse_text_list str,
     expected_token : 'stmt'
   if res.length == 0
     throw new Error "Parsing error. No proper combination found"
+  if res.length != 1
+    ### !pragma coverage-skip-block ###
+    throw new Error "Parsing error. More than one proper combination found #{res.length}"
   res
 
 @parse = (str, opt, on_end)->
