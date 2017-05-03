@@ -40,11 +40,20 @@ tokenizer.parser_list.push (new Token_parser 'decimal_literal', /^(0|[1-9][0-9]*
 tokenizer.parser_list.push (new Token_parser 'octal_literal', /^0o?[0-7]+/i)
 tokenizer.parser_list.push (new Token_parser 'hexadecimal_literal', /^0x[0-9a-f]+/i)
 tokenizer.parser_list.push (new Token_parser 'binary_literal', /^0b[01]+/i)
+# .123 syntax must be enabled by option
+# tokenizer.parser_list.push (new Token_parser 'float_literal', ///
+#   ^ (?:
+#       (?:
+#         \d+\.\d* |
+#         \.\d+
+#       )  (?:e[+-]?\d+)? |
+#       \d+(?:e[+-]?\d+)
+#     )
+#   ///i)
 tokenizer.parser_list.push (new Token_parser 'float_literal', ///
   ^ (?:
       (?:
-        \d+\.\d* |
-        \.\d+
+        \d+\.\d*
       )  (?:e[+-]?\d+)? |
       \d+(?:e[+-]?\d+)
     )

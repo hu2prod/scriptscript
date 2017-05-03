@@ -9,16 +9,24 @@ module = @
 
 g = new Gram
 q = (a, b)->g.rule a,b
+
+# ###################################################################################################
+#    1-position tokens/const
+# ###################################################################################################
 base_priority = -9000
 q('lvalue', '#identifier')                              .mx("priority=#{base_priority}")
 q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority}")
 
-q('const', '#decimal_literal')
-q('const', '#octal_literal')
-q('const', '#hexadecimal_literal')
-q('const', '#binary_literal')
+q('num_const', '#decimal_literal')
+q('num_const', '#octal_literal')
+q('num_const', '#hexadecimal_literal')
+q('num_const', '#binary_literal')
+q('num_const', '#float_literal')
+q('const', '#num_const')
 q('rvalue','#const')                                    .mx("priority=#{base_priority}")
-
+# ###################################################################################################
+#    operators define
+# ###################################################################################################
 q('pre_op',  '!')                                       .mx('priority=1')
 q('pre_op',  'not')                                     .mx('priority=1')
 q('pre_op',  '~')                                       .mx('priority=1')
@@ -51,10 +59,13 @@ q('bin_op',  '&&|and|or|[PIPE][PIPE]')                  .mx('priority=10 right_a
 q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx('priority=3')
 
 
+# ###################################################################################################
+#    operators constructions
+# ###################################################################################################
+# PIPE special
 q('bin_op',  '#multipipe')                              .mx("priority=#{pipe_priority} right_assoc=1") # возможно стоит это сделать отдельной конструкцией языка дабы проверять всё более тсчательно
 q('multipipe',  '[PIPE] #multipipe?')
-
-# NOTE need ~same rule for lvalue
+# NOTE need ~same rule for lvalue ???
 q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority}")
 
 q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
@@ -74,7 +85,9 @@ q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bi
 
 q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority')       .strict('#rvalue[1].priority<=#pre_op.priority')
 q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority')      .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
-# array
+# ###################################################################################################
+#    array
+# ###################################################################################################
 q('comma_rvalue',  '#rvalue')
 q('comma_rvalue',  '#eol #comma_rvalue') # NOTE eol in back will not work. Gram bug
 q('comma_rvalue',  '#comma_rvalue , #rvalue')
@@ -83,6 +96,9 @@ q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_pri
 q('rvalue',  '#array')
 # NOTE lvalue array come later
 
+# ###################################################################################################
+#    hash
+# ###################################################################################################
 # hash with brackets
 q('pair',  '#identifier : #rvalue')
 q('pair',  '#const : #rvalue')
@@ -90,7 +106,7 @@ q('pair',  '#identifier')
 q('pair_comma_rvalue',  '#pair')
 q('pair_comma_rvalue',  '#eol #pair')
 q('pair_comma_rvalue',  '#pair_comma_rvalue , #pair')
-q('hash',  '{ #pair_comma_rvalue? #eol? }')                   .mx("priority=#{base_priority}")
+q('hash',  '{ #pair_comma_rvalue? #eol? }')             .mx("priority=#{base_priority}")
 q('hash',  '{ #indent #pair_comma_rvalue? #dedent }')   .mx("priority=#{base_priority}")
 q('rvalue',  '#hash')
 # LATER bracket-less hash
@@ -98,6 +114,21 @@ q('rvalue',  '#hash')
 # a a:b,c:d
 #   a({a:b,c:d})
 #   a({a:b},{c:d})
+
+# ###################################################################################################
+#    access
+# ###################################################################################################
+# [] access
+q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority}")
+# . access
+q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority}")
+
+# opencl-like access
+# proper
+q('lvalue', '#lvalue . #decimal_literal')               .mx("priority=#{base_priority}")
+q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_priority}")
+# hack for a.0123 float_enabled
+# q('lvalue', '#lvalue #float_literal')                   .mx("priority=#{base_priority}")      .strict('#lvalue.tail_space=0 #float_literal[0:0]="."')
 
 
 q('stmt',  '#rvalue')
