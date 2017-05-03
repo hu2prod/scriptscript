@@ -135,6 +135,7 @@ q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_pri
 q('rvalue', '#lvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_priority}")
 
 q('stmt',  '#rvalue')
+q('stmt',  '#comment')
 
 @_parse = (str, opt)->
   debugger
