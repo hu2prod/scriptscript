@@ -24,6 +24,8 @@ q('num_const', '#binary_literal')
 q('num_const', '#float_literal')
 q('const', '#num_const')
 q('rvalue','#const')                                    .mx("priority=#{base_priority}")
+q('lvalue','@')                                         .mx("priority=#{base_priority}")
+q('lvalue','@ #identifier')                             .mx("priority=#{base_priority}")
 # ###################################################################################################
 #    operators define
 # ###################################################################################################
