@@ -66,6 +66,7 @@ tokenizer.parser_list.push (new Token_parser 'unary_operator', /// ^ (
   [~!]|
   not|
   typeof|
+  void|
   new|
   delete
 )  ///)

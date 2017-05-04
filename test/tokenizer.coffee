@@ -110,7 +110,7 @@ describe 'tokenizer section', ()->
           assert.equal v[0][1].mx_hash.hash_key, "binary_operator"
   
   describe "unary operators", ()->
-    for v in "~ ! ++ -- not typeof new delete".split " "
+    for v in "~ ! ++ -- not typeof void new delete".split " "
       do (v)->
         it "should tokenize '#{v}' as unary_operator", ()->
           v = g._tokenize v
