@@ -305,29 +305,78 @@ describe 'tokenizer section', ()->
       assert.equal tl[4][0].mx_hash.hash_key, "identifier"
   
   describe "Strings", ()->
-    sample_list = [
-      '""',
-      "''",
-      '"abcd"',
-      "'abcd'",
-    ]
-    for sample in sample_list
-      do (sample)->
-        it "should tokenize #{sample} as string_literal", ()->
-          tl = g._tokenize sample
-          assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
+    describe "valid", ()->
+      sample_list = """
+        ""
+        "Some text"
+        ''
+        'Some text'
+        "'"
+        "Alice's Adventures in Wonderland"
+        "''"
+        '"'
+        '""'
+        '"The Silmarillion" by J.R.R. Tolkien'
+        "\\""
+        '\\''
+        "\\\\"
+        "\\0"
+        "\\r"
+        "\\v"
+        "\\t"
+        "\\b"
+        "\\f"
+        "\\a"
+        "\\ "
+        "\\xFF"
+        "\\xFf"
+        "\\xff"
+        "\\u20FF"
+        "\\u20ff"
+        "\\u20fF"
+        "\\u{25}"
+        "\\u{10FFFF}"
+        "\\u{10ffff}"
+        "\\u{10fFFf}"
+        '\\xff'
+        '\\u20fF'
+        '\\u{25}'
+        '\\u{10ffff}'
+        "English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺"
+      """.split /\n/
+      sample_list.push '"\\n"'
+      sample_list.push '"\\\n"'
+      sample_list.push "'\\\n'"
+      for sample in sample_list
+        do (sample)->
+          it "should tokenize #{sample} as string_literal", ()->
+            tl = g._tokenize sample
+            assert.equal tl.length, 1
+            assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
     
-    wrong_string_list = [
-      '"a"a"'
-    ]
-    for sample in wrong_string_list
-      do (sample)->
-        it "should not tokenize #{sample}", ()->
-          assert.throws () -> 
-            g._tokenize sample
-          , /Error: can't tokenize /
-  
+    describe "invalid", ()->
+      wrong_string_list = """
+        "'
+        '"
+        "abcd'
+        'abcd"
+        "a"a"
+        'a'a'
+        "\\u"
+        "\\u1"
+        "\\u{}"
+        "\\u{123456}"
+        "\\u{i}"
+        "\\x"
+        "\\x1"
+      """.split /\n/
+      for sample in wrong_string_list
+        do (sample)->
+          it "should not tokenize #{sample}", ()->
+            assert.throws ()->
+              g._tokenize sample
+            , /Error: can't tokenize /
+
   describe "Pipes", ()->
     it "should parse 'a | b | c' as 5 tokens", ()->
       tl = g._tokenize "a | b | c"

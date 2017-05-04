@@ -81,8 +81,36 @@ tokenizer.parser_list.push (new Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]
 tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>/)
 # Version from the CoffeeScript source code: /^###([^#][\s\S]*?)(?:###[^\n\S]*|###$)|^(?:\s*#(?!##[^#]).*)+/
 tokenizer.parser_list.push (new Token_parser 'comment', /^(###[^#][^]*###|#.*\n)/)
-tokenizer.parser_list.push (new Token_parser 'string_literal', /^"[^"]*"|^'[^']*'/) # don't use, it's not ready yet
-
+tokenizer.parser_list.push (new Token_parser 'string_literal', ///
+  ^"
+  (?:
+    [^"\\] |
+    \\[^xu] |               # x and u is case sensitive while hex letters are not
+    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
+    \\u(?:
+      [0-9a-fA-F]{4} |      # Unicode escape sequence
+      \{(?:
+        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
+        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
+      )\}
+    )
+  )*
+  " |
+  '   # Any changes to the first half of this regex should be reflected in the second half
+  (?:
+    [^'\\] |
+    \\[^xu] |
+    \\x[0-9a-fA-F]{2} |
+    \\u(?:
+      [0-9a-fA-F]{4} |
+      \{(?:
+        [0-9a-fA-F]{1,5} |
+        10[0-9a-fA-F]{4}
+      )\}
+    )
+  )*
+  '
+///)
 @_tokenize = (str, opt)->
   # reset
   last_space = 0
