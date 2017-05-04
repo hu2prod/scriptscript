@@ -386,7 +386,20 @@ describe 'tokenizer section', ()->
     
     # regexp must contain at least one symbol excluding whitespace
     # escape policy for string constant should apply for regex
-  
+
+    sample_list = """
+      /ab+c/
+      /ab+c/i
+      /ab+c/igmy
+      /ab+c/ymgi
+    """.split /\n/
+    for sample in sample_list
+      do (sample)->
+        it "should tokenize #{sample} as regexp_literal", ()->
+          tl = g._tokenize sample
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "regexp_literal"
+
   describe "Pipes", ()->
     it "should tokenize 'a | b | c' as 5 tokens", ()->
       tl = g._tokenize "a | b | c"

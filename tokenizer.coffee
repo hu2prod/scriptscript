@@ -126,7 +126,7 @@ tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///
       )\}
     )
   )+
-  /i?g?m?y?
+  /(?!.*(.).*\1)[imgy]*
 ///)
 
 @_tokenize = (str, opt)->
