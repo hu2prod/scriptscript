@@ -304,6 +304,30 @@ describe 'tokenizer section', ()->
       assert.equal tl[3][0].mx_hash.hash_key, "binary_operator"
       assert.equal tl[4][0].mx_hash.hash_key, "identifier"
   
+  describe "Strings", ()->
+    sample_list = [
+      '""',
+      "''",
+      '"abcd"',
+      "'abcd'",
+    ]
+    for sample in sample_list
+      do (sample)->
+        it "should tokenize #{sample} as string_literal", ()->
+          tl = g._tokenize sample
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
+    
+    wrong_string_list = [
+      '"a"a"'
+    ]
+    for sample in wrong_string_list
+      do (sample)->
+        it "should not tokenize #{sample}", ()->
+          assert.throws () -> 
+            g._tokenize sample
+          , /Error: can't tokenize /
+  
   describe "Pipes", ()->
     it "should parse 'a | b | c' as 5 tokens", ()->
       tl = g._tokenize "a | b | c"

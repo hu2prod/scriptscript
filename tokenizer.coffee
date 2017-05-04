@@ -81,6 +81,7 @@ tokenizer.parser_list.push (new Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]
 tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>/)
 # Version from the CoffeeScript source code: /^###([^#][\s\S]*?)(?:###[^\n\S]*|###$)|^(?:\s*#(?!##[^#]).*)+/
 tokenizer.parser_list.push (new Token_parser 'comment', /^(###[^#][^]*###|#.*\n)/)
+tokenizer.parser_list.push (new Token_parser 'string_literal', /^"[^"]*"|^'[^']*'/) # don't use, it's not ready yet
 
 @_tokenize = (str, opt)->
   # reset
