@@ -83,10 +83,11 @@ tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>/)
 # Version from the CoffeeScript source code: /^###([^#][\s\S]*?)(?:###[^\n\S]*|###$)|^(?:\s*#(?!##[^#]).*)+/
 tokenizer.parser_list.push (new Token_parser 'comment', /^(###[^#][^]*###|#.*\n)/)
 tokenizer.parser_list.push (new Token_parser 'string_literal', ///
-  ^"
+  ^("|'|"""|''')
+  (?![^]*[^\\]\1[^]*\1)     # ensures that all corresponding quotes inside the string are escaped
   (?:
-    [^"\\] |
-    \\[^xu] |               # x and u is case sensitive while hex letters are not
+    [^\\] |
+    \\[^xu] |               # x and u are case sensitive while hex letters are not
     \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
     \\u(?:
       [0-9a-fA-F]{4} |      # Unicode escape sequence
@@ -96,37 +97,23 @@ tokenizer.parser_list.push (new Token_parser 'string_literal', ///
       )\}
     )
   )*
-  " |
-  ^'   # Any changes to the first half of this regex should be reflected in the second half
-  (?:
-    [^'\\] |
-    \\[^xu] |
-    \\x[0-9a-fA-F]{2} |
-    \\u(?:
-      [0-9a-fA-F]{4} |
-      \{(?:
-        [0-9a-fA-F]{1,5} |
-        10[0-9a-fA-F]{4}
-      )\}
-    )
-  )*
-  '
+  \1
 ///)
 tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///
-  ^/(?!\s)
+  ^/(?!\s)                  # no whitespace at the beginning of regexp
   (?:
-    [^/\\] |
-    \\[^xu] |
-    \\x[0-9a-fA-F]{2} |
+    [^/\\] |                # but whitespace in the middle or at the end is allowed
+    \\[^xu] |               # x and u are case sensitive while hex letters are not
+    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
     \\u(?:
-      [0-9a-fA-F]{4} |
+      [0-9a-fA-F]{4} |      # Unicode escape sequence
       \{(?:
-        [0-9a-fA-F]{1,5} |
-        10[0-9a-fA-F]{4}
+        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
+        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
       )\}
     )
   )+
-  /(?!.*(.).*\1)[imgy]*
+  /(?!.*(.).*\1)[imgy]*     # ensures that flag letters don't repeat themselves
 ///)
 
 @_tokenize = (str, opt)->

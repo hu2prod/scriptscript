@@ -338,6 +338,10 @@ describe 'tokenizer section', ()->
       sample_list.push '"\\n"'
       sample_list.push '"\\\n"'
       sample_list.push "'\\\n'"
+      sample_list.push "'''\n            heredoc\n          '''"
+      sample_list.push '"""\n            heredoc\n          """'
+      sample_list.push '"""\n            heredoc with escapes
+        \\n\\r\\t\\b\\f\\0\\\\\\"\\\'\\xFF\\uFFFF\\u{25}\\u{10FFFF}\n          """'
       for sample in sample_list
         do (sample)->
           it "should tokenize #{sample} as string_literal", ()->
