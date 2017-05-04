@@ -377,18 +377,31 @@ describe 'tokenizer section', ()->
               g._tokenize sample
             , /Error: can't tokenize /
 
+  describe "Regexp", ()->
+    it "should parse 'a/b/c' as 3 tokens with regexp in the middle", ()->
+      tl = g._tokenize "a/b/c"
+      assert.equal tl.length, 3
+      assert.equal tl[1][0].mx_hash.hash_key, "regexp_literal"
+    
+    it "should parse 'a/b' as 3 tokens without regexp", ()->
+      tl = g._tokenize "a/b"
+      assert.equal tl.length, 3
+      assert.notEqual tl[1][0].mx_hash.hash_key, "regexp_literal"
+    
+    it "should parse 'a//b' as 3 tokens without regexp", ()->
+      tl = g._tokenize "a//b"
+      assert.equal tl.length, 3
+      assert.notEqual tl[1][0].mx_hash.hash_key, "regexp_literal"
+    
+    # regexp must contain at least one symbol excluding whitespace
+    # escape policy for string constant should apply for regex
+  
   describe "Pipes", ()->
     it "should parse 'a | b | c' as 5 tokens", ()->
       tl = g._tokenize "a | b | c"
       assert.equal tl.length, 5
   
   describe "TODO", ()->
-    it "should parse 'a/b/c' as 3 tokens with regexp in the middle"
-    it "should parse 'a/b' as 3 tokens without regexp"
-    it "should parse 'a//b' as 3 tokens without regexp"
-    # regexp must contain at least one symbol excluding whitespace
-    # escape policy for string constant should apply for regex
-  
   
   it "public endpoint should works", (done)->
     await pub.tokenize "id", {}, defer(err, v)

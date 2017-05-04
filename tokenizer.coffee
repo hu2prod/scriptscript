@@ -96,7 +96,7 @@ tokenizer.parser_list.push (new Token_parser 'string_literal', ///
     )
   )*
   " |
-  '   # Any changes to the first half of this regex should be reflected in the second half
+  ^'   # Any changes to the first half of this regex should be reflected in the second half
   (?:
     [^'\\] |
     \\[^xu] |
@@ -111,6 +111,23 @@ tokenizer.parser_list.push (new Token_parser 'string_literal', ///
   )*
   '
 ///)
+tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///
+  ^/(?!\s)
+  (?:
+    [^/\\] |
+    \\[^xu] |
+    \\x[0-9a-fA-F]{2} |
+    \\u(?:
+      [0-9a-fA-F]{4} |
+      \{(?:
+        [0-9a-fA-F]{1,5} |
+        10[0-9a-fA-F]{4}
+      )\}
+    )
+  )+
+  /i?g?m?y?
+///)
+
 @_tokenize = (str, opt)->
   # reset
   last_space = 0
