@@ -5,41 +5,32 @@ g = require '../tokenizer.coffee'
 pub = require '../index.coffee'
 
 describe 'tokenizer section', ()->
+  it "public endpoint should works", (done)->
+    await pub.tokenize "id", {}, defer(err, v)
+    assert.equal v.length, 1
+    assert.equal v[0][0].mx_hash.hash_key, "identifier"
+    
+    await pub.tokenize "wtf кирилица", {}, defer(err, v)
+    assert err?
+    
+    done()
+
   describe "identifier", ()->
-    it "should tokenize 'qwerty' as identifier", ()->
-      v = g._tokenize "qwerty"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "identifier"
-    
-    it "should tokenize 'myvar123' as identifier", ()->
-      v = g._tokenize "myvar123"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "identifier"
-    
-    it "should tokenize 'someCamelCase' as identifier", ()->
-      v = g._tokenize "someCamelCase"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "identifier"
-    
-    it "should tokenize 'some_snake_case' as identifier", ()->
-      v = g._tokenize "some_snake_case"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "identifier"
-    
-    it "should tokenize 'CAPSLOCK' as identifier", ()->
-      v = g._tokenize "CAPSLOCK"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "identifier"
-    
-    it "should tokenize '$' as identifier", ()->
-      v = g._tokenize "$"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "identifier"
-    
-    it "should tokenize '$scope' as identifier", ()->
-      v = g._tokenize "$scope"
-      assert.equal v.length, 1
-      assert.equal v[0][0].mx_hash.hash_key, "identifier"
+    sample_list = "
+      qwerty
+      myvar123
+      someCamelCase
+      some_snake_case
+      CAPSLOCK
+      $
+      $scope
+    ".split " "
+    for sample in sample_list
+      do (sample)->
+        it "should tokenize '#{sample}' as identifier", ()->
+        v = g._tokenize sample
+        assert.equal v.length, 1
+        assert.equal v[0][0].mx_hash.hash_key, "identifier"
   
   describe "integer literals", ()->
     it "should tokenize '142857' as decimal_literal", ()->
@@ -172,7 +163,7 @@ describe 'tokenizer section', ()->
           assert.equal tl.length, 1
           assert.equal tl[0][0].mx_hash.hash_key, "bracket"
   
-    it "should parse '(a)->a' as 5 tokens", ()->
+    it "should tokenize '(a)->a' as 5 tokens", ()->
       tl = g._tokenize "(a)->a"
       assert.equal tl.length, 5
       assert.equal tl[0][0].mx_hash.hash_key, "bracket"
@@ -199,12 +190,12 @@ describe 'tokenizer section', ()->
     """.split /\n/g
     for v in list
       do (v)->
-        it "should parse '#{v}' as float_literal", ()->
+        it "should tokenize '#{v}' as float_literal", ()->
           tl = g._tokenize v
           assert.equal tl.length, 1
           assert.equal tl[0][0].mx_hash.hash_key, "float_literal"
     
-    it "should parse '1.1+1' as 3 tokens", ()->
+    it "should tokenize '1.1+1' as 3 tokens", ()->
       tl = g._tokenize "1.1+1"
       assert.equal tl.length, 3
       assert.equal tl[0][0].mx_hash.hash_key, "float_literal"
@@ -212,7 +203,7 @@ describe 'tokenizer section', ()->
       assert.equal tl[1][1].mx_hash.hash_key, "binary_operator"
       assert.equal tl[2][0].mx_hash.hash_key, "decimal_literal"
     
-    it "should parse '1e+' as 3 tokens", ()->
+    it "should tokenize '1e+' as 3 tokens", ()->
       tl = g._tokenize "1e+"
       assert.equal tl.length, 3
       assert.equal tl[0][0].mx_hash.hash_key, "decimal_literal"
@@ -220,14 +211,14 @@ describe 'tokenizer section', ()->
       assert.equal tl[2][0].mx_hash.hash_key, "unary_operator"
       assert.equal tl[2][1].mx_hash.hash_key, "binary_operator"
     
-    it "should parse '1e' as 2 tokens", ()->
+    it "should tokenize '1e' as 2 tokens", ()->
       tl = g._tokenize "1e"
       assert.equal tl.length, 2
       assert.equal tl[0][0].mx_hash.hash_key, "decimal_literal"
       assert.equal tl[1][0].mx_hash.hash_key, "identifier"
   
   describe "Multiline", ()->
-    it "should parse 'a\\n  b' as a indent b dedent", ()->
+    it "should tokenize 'a\\n  b' as a indent b dedent", ()->
       tl = g._tokenize """
       a
         b
@@ -239,13 +230,13 @@ describe 'tokenizer section', ()->
       assert.equal tl[3][0].mx_hash.hash_key, "dedent"
   
   describe "Comments", ()->
-    it "should parse '# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \\n' as comment", ()->
+    it "should tokenize '# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \\n' as comment", ()->
       tl = g._tokenize "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \n"
       assert.equal tl.length, 1
       assert.equal tl[0][0].mx_hash.hash_key, "comment"
       assert.equal tl[0][0].value, "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \n"
     
-    it "should parse '2+2#=4\\n4+4#=8\\n' as 8 tokens including comments", ()->
+    it "should tokenize '2+2#=4\\n4+4#=8\\n' as 8 tokens including comments", ()->
       tl = g._tokenize "2+2#=4\n4+4#=8\n"
       assert.equal tl.length, 8
       assert.equal tl[0][0].mx_hash.hash_key, "decimal_literal"
@@ -257,35 +248,35 @@ describe 'tokenizer section', ()->
       assert.equal tl[6][0].mx_hash.hash_key, "decimal_literal"
       assert.equal tl[7][0].mx_hash.hash_key, "comment"
     
-    it "should parse '### 2 + 2 = 4\\n4 + 4 = 8\\n###' as comment", ()->
+    it "should tokenize '### 2 + 2 = 4\\n4 + 4 = 8\\n###' as comment", ()->
       tl = g._tokenize "### 2 + 2 = 4\n4 + 4 = 8\n###"
       assert.equal tl.length, 1
       assert.equal tl[0][0].mx_hash.hash_key, "comment"
     
-    it "should parse '####################### COMMENT\\n' as comment", ()->
+    it "should tokenize '####################### COMMENT\\n' as comment", ()->
       tl = g._tokenize "####################### COMMENT\n"
       assert.equal tl.length, 1
       assert.equal tl[0][0].mx_hash.hash_key, "comment"
       assert.equal tl[0][0].value, "####################### COMMENT\n"
   
   describe "Whitespace", ()->
-    it "should parse \\n as 0 tokens", ()->
+    it "should tokenize \\n as 0 tokens", ()->
       tl = g._tokenize "\n"
       assert.equal tl.length, 0
     
-    it "should parse \\n1 as 2 tokens", ()->
+    it "should tokenize \\n1 as 2 tokens", ()->
       tl = g._tokenize "\n1"
       assert.equal tl.length, 2
     
-    it "should parse \\n\\n1 as 2 tokens", ()->
+    it "should tokenize \\n\\n1 as 2 tokens", ()->
       tl = g._tokenize "\n\n1"
       assert.equal tl.length, 2
     
-    it "should parse \\n\\n\\n1 as 2 tokens", ()->
+    it "should tokenize \\n\\n\\n1 as 2 tokens", ()->
       tl = g._tokenize "\n\n\n1"
       assert.equal tl.length, 2
     
-    it "should parse 'a + b' as 'a', '+', 'b' with tail_space 1 1 0", ()->
+    it "should tokenize 'a + b' as 'a', '+', 'b' with tail_space 1 1 0", ()->
       tl = g._tokenize "a + b"
       assert.equal tl.length, 3
       assert.equal tl[0][0].value, "a"
@@ -295,7 +286,7 @@ describe 'tokenizer section', ()->
       assert.equal tl[2][0].value, "b"
       assert.equal tl[2][0].mx_hash.tail_space, "0"
     
-    it "should parse 'a / b / c' as 5 tokens (not regexp!)", ()->
+    it "should tokenize 'a / b / c' as 5 tokens (not regexp!)", ()->
       tl = g._tokenize "a / b / c"
       assert.equal tl.length, 5
       assert.equal tl[0][0].mx_hash.hash_key, "identifier"
@@ -378,17 +369,17 @@ describe 'tokenizer section', ()->
             , /Error: can't tokenize /
 
   describe "Regexp", ()->
-    it "should parse 'a/b/c' as 3 tokens with regexp in the middle", ()->
+    it "should tokenize 'a/b/c' as 3 tokens with regexp in the middle", ()->
       tl = g._tokenize "a/b/c"
       assert.equal tl.length, 3
       assert.equal tl[1][0].mx_hash.hash_key, "regexp_literal"
     
-    it "should parse 'a/b' as 3 tokens without regexp", ()->
+    it "should tokenize 'a/b' as 3 tokens without regexp", ()->
       tl = g._tokenize "a/b"
       assert.equal tl.length, 3
       assert.notEqual tl[1][0].mx_hash.hash_key, "regexp_literal"
     
-    it "should parse 'a//b' as 3 tokens without regexp", ()->
+    it "should tokenize 'a//b' as 3 tokens without regexp", ()->
       tl = g._tokenize "a//b"
       assert.equal tl.length, 3
       assert.notEqual tl[1][0].mx_hash.hash_key, "regexp_literal"
@@ -397,19 +388,10 @@ describe 'tokenizer section', ()->
     # escape policy for string constant should apply for regex
   
   describe "Pipes", ()->
-    it "should parse 'a | b | c' as 5 tokens", ()->
+    it "should tokenize 'a | b | c' as 5 tokens", ()->
       tl = g._tokenize "a | b | c"
       assert.equal tl.length, 5
   
   describe "TODO", ()->
   
-  it "public endpoint should works", (done)->
-    await pub.tokenize "id", {}, defer(err, v)
-    assert.equal v.length, 1
-    assert.equal v[0][0].mx_hash.hash_key, "identifier"
-    
-    await pub.tokenize "wtf кирилица", {}, defer(err, v)
-    assert err?
-    
-    done()
   
