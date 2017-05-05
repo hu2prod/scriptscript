@@ -295,21 +295,15 @@ describe 'tokenizer section', ()->
       assert.equal tl[3][0].mx_hash.hash_key, "binary_operator"
       assert.equal tl[4][0].mx_hash.hash_key, "identifier"
   
-  describe "Strings", ()->
+  describe "Double quoted strings", ()->
     describe "valid", ()->
       sample_list = """
         ""
         "Some text"
-        ''
-        'Some text'
         "'"
         "Alice's Adventures in Wonderland"
         "''"
-        '"'
-        '""'
-        '"The Silmarillion" by J.R.R. Tolkien'
         "\\""
-        '\\''
         "\\\\"
         "\\0"
         "\\r"
@@ -329,19 +323,90 @@ describe 'tokenizer section', ()->
         "\\u{10FFFF}"
         "\\u{10ffff}"
         "\\u{10fFFf}"
+        "# {a}"
+        "English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺"
+        ""\"English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺""\"
+      """.split /\n/ # "
+      sample_list.push '"\\n"'
+      sample_list.push '"\\\n"'
+      sample_list.push '"""\n            heredoc\n          """'
+      sample_list.push '"""\n            heredoc with escapes
+        \\n\\r\\t\\b\\f\\0\\\\\\"\\\'\\xFF\\uFFFF\\u{25}\\u{10FFFF}\n          """'
+      for sample in sample_list
+        do (sample)->
+          it "should tokenize #{sample} as string_non_interpolated_literal", ()->
+            tl = g._tokenize sample
+            assert.equal tl.length, 1
+            assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+    
+    describe "invalid", ()->
+      wrong_string_list = """
+        "'
+        '"
+        "abcd'
+        'abcd"
+        "a"a"
+        "\\u"
+        "\\u1"
+        "\\u{}"
+        "\\u{123456}"
+        "\\u{i}"
+        "\\x"
+        "\\x1"
+      """.split /\n/ #'
+      for sample in wrong_string_list
+        do (sample)->
+          it "should not tokenize #{sample}", ()->
+            assert.throws ()->
+              g._tokenize sample
+            , /Error: can't tokenize /
+    
+    describe "Interpolated double quoted string", ()->
+      sample_list = '''
+          "#{a}"
+          ---
+          " #{a} "
+          ---
+          " #{a} #{b} "
+          ---
+          " #{a} #{b}
+          "
+          ---
+          """ #{a} """
+          ---
+          """ #{a} #{b} """
+          ---
+          """ #{a} #{b}
+          """
+          '''.split /\n?---\n?/ # "
+      for sample in sample_list
+        do (sample)->
+          it "should tokenize #{sample}", ()->
+            ret = g._tokenize sample
+            for v in ret
+              if ret[0][0].value == '""'
+                throw new Error "\"\" parsed"
+  
+  describe "Single quoted strings", ()->
+    describe "valid", ()->
+      sample_list = """
+        ''
+        'Some text'
+        '"'
+        '""'
+        '"The Silmarillion" by J.R.R. Tolkien'
+        '\\''
         '\\xff'
         '\\u20fF'
         '\\u{25}'
         '\\u{10ffff}'
-        "English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺"
-      """.split /\n/
-      sample_list.push '"\\n"'
-      sample_list.push '"\\\n"'
+        '\#{a}'
+        '\\\#{a}'
+        'English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺'
+        '''English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺'''
+      """.split /\n/ #"
       sample_list.push "'\\\n'"
       sample_list.push "'''\n            heredoc\n          '''"
-      sample_list.push '"""\n            heredoc\n          """'
-      sample_list.push '"""\n            heredoc with escapes
-        \\n\\r\\t\\b\\f\\0\\\\\\"\\\'\\xFF\\uFFFF\\u{25}\\u{10FFFF}\n          """'
       for sample in sample_list
         do (sample)->
           it "should tokenize #{sample} as string_literal", ()->
@@ -364,7 +429,7 @@ describe 'tokenizer section', ()->
         "\\u{i}"
         "\\x"
         "\\x1"
-      """.split /\n/
+      """.split /\n/ #"
       for sample in wrong_string_list
         do (sample)->
           it "should not tokenize #{sample}", ()->
