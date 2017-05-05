@@ -99,9 +99,7 @@ tokenizer.parser_list.push (new Token_parser 'string_literal', ///
   )*?
   \1
 ///)
-tokenizer.parser_list.push (new Token_parser 'string_non_interpolated_literal', ///
-  ^("""|")
-  # (?![^]*[^\\]\1[^]*\1)     # ensures that all corresponding quotes inside the string are escaped
+double_quoted_regexp_craft = ///
   (?:
     [^\\#] |
     \#(?!\{) |
@@ -115,111 +113,14 @@ tokenizer.parser_list.push (new Token_parser 'string_non_interpolated_literal', 
       )\}
     )
   )*?
-  \1
-///)
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_single_literal', ///
-  ^\"
-  (?:
-    [^\\#] |
-    \#(?!\{) |
-    \\[^xu] |               # x and u are case sensitive while hex letters are not
-    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    \\u(?:
-      [0-9a-fA-F]{4} |      # Unicode escape sequence
-      \{(?:
-        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      )\}
-    )
-  )*?
-  \#\{
-///)
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_single_literal', ///
-  ^\}
-  (?:
-    [^\\#] |
-    \#(?!\{) |
-    \\[^xu] |               # x and u are case sensitive while hex letters are not
-    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    \\u(?:
-      [0-9a-fA-F]{4} |      # Unicode escape sequence
-      \{(?:
-        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      )\}
-    )
-  )*?
-  \"
-///)
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_mid_literal', ///
-  ^\}
-  (?:
-    [^\\#] |
-    \#(?!\{) |
-    \\[^xu] |               # x and u are case sensitive while hex letters are not
-    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    \\u(?:
-      [0-9a-fA-F]{4} |      # Unicode escape sequence
-      \{(?:
-        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      )\}
-    )
-  )*?
-  \#\{
-///)
+///.toString().replace(/\//g,'')
+tokenizer.parser_list.push (new Token_parser 'string_non_interpolated_literal',          new RegExp '^("""|")'+double_quoted_regexp_craft+'\\1')
+tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_single_literal', new RegExp '^"'+double_quoted_regexp_craft+'#{')
+tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_single_literal',   new RegExp '^}'+double_quoted_regexp_craft+'"')
+tokenizer.parser_list.push (new Token_parser 'string_interpolated_mid_literal',          new RegExp '^}'+double_quoted_regexp_craft+'#{')
+tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_triple_literal', new RegExp '^"""'+double_quoted_regexp_craft+'#{')
+tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_triple_literal',   new RegExp '^}'+double_quoted_regexp_craft+'"""')
 
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_triple_literal', ///
-  ^\"
-  (?:
-    [^\\#] |
-    \#(?!\{) |
-    \\[^xu] |               # x and u are case sensitive while hex letters are not
-    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    \\u(?:
-      [0-9a-fA-F]{4} |      # Unicode escape sequence
-      \{(?:
-        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      )\}
-    )
-  )*?
-  \#\{
-///)
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_triple_literal', ///
-  ^\}
-  (?:
-    [^\\#] |
-    \#(?!\{) |
-    \\[^xu] |               # x and u are case sensitive while hex letters are not
-    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    \\u(?:
-      [0-9a-fA-F]{4} |      # Unicode escape sequence
-      \{(?:
-        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      )\}
-    )
-  )*?
-  \"
-///)
-# tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_heredoc_literal', ///
-  # \"""
-  # (?:
-    # [^\\#] |
-    # \#(?!\{) |
-    # \\[^xu] |               # x and u are case sensitive while hex letters are not
-    # \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    # \\u(?:
-      # [0-9a-fA-F]{4} |      # Unicode escape sequence
-      # \{(?:
-        # [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        # 10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      # )\}
-    # )
-  # )*
-  # \#\{
-# ///)
 tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///
   ^/(?!\s)                  # no whitespace at the beginning of regexp
   (?:

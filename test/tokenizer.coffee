@@ -384,8 +384,9 @@ describe 'tokenizer section', ()->
           it "should tokenize #{sample}", ()->
             ret = g._tokenize sample
             for v in ret
-              if ret[0][0].value == '""'
-                throw new Error "\"\" parsed"
+              for v2 in ret
+                if v2[0].value == '""'
+                  throw new Error "\"\" parsed"
   
   describe "Single quoted strings", ()->
     describe "valid", ()->
