@@ -462,13 +462,69 @@ describe 'tokenizer section', ()->
       /ab+c/i
       /ab+c/igmy
       /ab+c/ymgi
+      /a/ii
+      /]/
+      /(/
+      /)/
     """.split /\n/
+    # NOTE bad samples
     for sample in sample_list
       do (sample)->
         it "should tokenize #{sample} as regexp_literal", ()->
           tl = g._tokenize sample
           assert.equal tl.length, 1
           assert.equal tl[0][0].mx_hash.hash_key, "regexp_literal"
+    # /[/
+    sample_list = """
+      //
+      /
+      / a/
+    """.split /\n/
+    for sample in sample_list
+      do (sample)->
+        it "should not tokenize #{sample}", ()->
+          assert.throws ()->
+            tl = g._tokenize sample
+            if tl[0][0].mx_hash.hash_key == "binary_operator"
+              assert.equal tl[0][1].mx_hash.hash_key, "regexp_literal"
+            else
+              assert.equal tl[0][0].mx_hash.hash_key, "regexp_literal"
+  describe "Here regexp", ()->
+    sample_list = """
+      ///ab+c///
+      ---
+      ///ab+c///i
+      ---
+      ///ab+c///igmy
+      ---
+      ///ab+c///ymgi
+      ---
+      ///a///ii
+      ---
+      ///]///
+      ---
+      ///(///
+      ---
+      ///)///
+      ---
+      ///
+      ///
+      ---
+      ///
+        a
+      ///
+      ---
+      ///
+        /
+      ///
+    """.split /\n?---\n?/
+    # NOTE bad samples
+    for sample in sample_list
+      do (sample)->
+        it "should tokenize #{sample} as regexp_literal", ()->
+          tl = g._tokenize sample
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "here_regexp_literal"
 
   describe "Pipes", ()->
     it "should tokenize 'a | b | c' as 5 tokens", ()->

@@ -121,21 +121,20 @@ tokenizer.parser_list.push (new Token_parser 'string_interpolated_mid_literal', 
 tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_triple_literal', new RegExp '^"""'+double_quoted_regexp_craft+'#{')
 tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_triple_literal',   new RegExp '^}'+double_quoted_regexp_craft+'"""')
 
+# NOTE don't check flags. Because of reasons
 tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///
-  ^/(?!\s)                  # no whitespace at the beginning of regexp
-  (?:
-    [^/\\] |                # but whitespace in the middle or at the end is allowed
-    \\[^xu] |               # x and u are case sensitive while hex letters are not
-    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    \\u(?:
-      [0-9a-fA-F]{4} |      # Unicode escape sequence
-      \{(?:
-        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      )\}
-    )
-  )+
-  /(?!.*(.).*\1)[imgy]*     # ensures that flag letters don't repeat themselves
+  ^/(?!\s) (?:
+  (?: [^ [ / \n \\ ]  # every other thing
+   | \\[^\n]         # anything but newlines escaped
+   | \[              # character class
+       (?: \\[^\n] | [^ \] \n \\ ] )*
+     \]
+  )+) /[imgy]*
+///)
+tokenizer.parser_list.push (new Token_parser 'here_regexp_literal', ///
+  ^\/\/\/ 
+  (?:(?!\/\/\/)[^])+
+  \/\/\/[imgy]*
 ///)
 
 @_tokenize = (str, opt)->
