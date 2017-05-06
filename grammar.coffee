@@ -135,9 +135,48 @@ q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_pri
 #    function call
 # ###################################################################################################
 q('rvalue', '#lvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_priority}")
+# ###################################################################################################
+#    function decl
+# ###################################################################################################
+q('rvalue', '->|=>')                                    .mx("priority=#{base_priority}")
+# NOTE ->|=> didn't work (
+q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority}")
+q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority}")
+q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority}")
+q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority}")
+
+q('arg_list', '#arg')                                   .mx("priority=#{base_priority}")
+q('arg_list', '#arg_list , #arg')                       .mx("priority=#{base_priority}")
+
+q('arg', '#identifier')                                 .mx("priority=#{base_priority}")
+q('arg', '#identifier : #type')                         .mx("priority=#{base_priority}")
+q('arg', '#identifier = #rvalue')                       .mx("priority=#{base_priority}")
+
+
+q('type', '#identifier')                                .mx("priority=#{base_priority}")
+# LATER array<T> support
+
+q('function_body', '#stmt')                             .mx("priority=#{base_priority}")
+q('function_body', '#block')                            .mx("priority=#{base_priority}")
+# ###################################################################################################
+#    block
+# ###################################################################################################
+
+q('block', '#indent #stmt_plus #dedent')                .mx("priority=#{base_priority}")
+q('stmt_plus', '#stmt')                                 .mx("priority=#{base_priority}")
+q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority}")
+
+# ###################################################################################################
+#    macro-block
+# ###################################################################################################
+q('stmt', '#identifier #rvalue? #block')                .mx("priority=#{base_priority}")
+
+
+# ###################################################################################################
 
 q('stmt',  '#rvalue')
 q('stmt',  '#comment')
+
 
 @_parse = (str, opt)->
   g.mode_full = opt.mode_full || false

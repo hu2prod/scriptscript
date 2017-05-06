@@ -147,11 +147,20 @@ describe 'gram section', ()->
     rvalue = ret[0].value_array
     assert.equal rvalue[0].value_array[1].value, "+"
   
-  it 'loop\\n  b'#,  ()->
-    # full """
-    # loop
-    #   b
-    # """
+  describe 'macro-block section', ()->
+    describe 'array section', ()->
+      sample_list = """
+        loop
+          a
+        ---
+        if a
+          b
+      """.split /\n?---\n?/g
+      for sample in sample_list
+        continue if !sample
+        do (sample)->
+          it JSON.stringify(sample), ()->
+            full sample
   
   it '1a1 throw', ()->
     util.throws ()->
@@ -276,6 +285,8 @@ describe 'gram section', ()->
     #         full sample
   describe 'pipe section', ()->
     sample_list = """
+      a|b
+      ---
       a | | b
       ---
       a | b | c
@@ -297,6 +308,41 @@ describe 'gram section', ()->
       a |
         | b | c
         | d | e
+    """.split /\n?---\n?/g
+    for sample in sample_list
+      continue if !sample
+      do (sample)->
+        it JSON.stringify(sample), ()->
+          full sample
+  
+  describe 'function decl section', ()->
+    sample_list = """
+      ->
+      ---
+      =>
+      ---
+      ()->
+      ---
+      ()->a
+      ---
+      (a)->a
+      ---
+      (a,b)->a
+      ---
+      (a,b=c)->a
+      ---
+      (a:int)->a
+      ---
+      (a:int):int->a
+      ---
+      (a:int):int=>a
+      ---
+      ()->
+        a
+      ---
+      ()->
+        a
+        b
     """.split /\n?---\n?/g
     for sample in sample_list
       continue if !sample
