@@ -104,6 +104,7 @@ q('rvalue',  '#array')
 # hash with brackets
 q('pair',  '#identifier : #rvalue')
 q('pair',  '#const : #rvalue')
+q('pair',  '( #rvalue ) : #rvalue')
 q('pair',  '#identifier')
 q('pair_comma_rvalue',  '#pair')
 q('pair_comma_rvalue',  '#eol #pair')

@@ -265,6 +265,13 @@ describe 'gram section', ()->
         a
       }
       ---
+      {
+        a : b
+      }
+      ---
+      {
+        (a) : b
+      }
     """.split /\n?---\n?/g
     for sample in sample_list
       continue if !sample
