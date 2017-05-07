@@ -55,7 +55,10 @@ q('bin_op',  '*|/|%')                                   .mx('priority=5  right_a
 q('bin_op',  '+|-')                                     .mx('priority=6  right_assoc=1')
 q('bin_op',  '<<|>>|>>>')                               .mx('priority=7  right_assoc=1')
 q('bin_op',  'instanceof')                              .mx('priority=8  right_assoc=1')
-q('bin_op',  '<|<=|>|>=|!=|==')                         .mx('priority=9  right_assoc=1') # NOTE == <= has same priority
+q('bin_op',  '<|<=|>|>=')                               .mx('priority=9')                 # NOTE NOT associative, because chained comparison
+q('bin_op',  '!=|==')                                   .mx('priority=9  right_assoc=1') # NOTE == <= has same priority
+# WARNING a == b < c is bad style. So all fuckups are yours
+
 q('bin_op',  '&&|and|or|[PIPE][PIPE]')                  .mx('priority=10 right_assoc=1')
 
 q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx('priority=3')
