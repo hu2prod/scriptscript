@@ -19,17 +19,40 @@ describe 'translator section', ()->
     0x1
     0777
     (a)
+    +a
+    -a
+    []
+    [1]
+    [1,2]
+    [a]
+    {}
+    {a:1}
   """.split /\n/g
   for sample in sample_list
     do (sample)->
       it sample, ()->
         assert.equal full(sample), sample
   
+  # bracketed
+  sample_list = """
+    typeof a
+    new a
+    delete a
+    a++
+    a--
+    a+b
+    a=b
+  """.split /\n/g
+  for sample in sample_list
+    do (sample)->
+      it sample, ()->
+        assert.equal full(sample), "(#{sample})"
+  
   kv =
-    "+a"      : "+a"
-    "-a"      : "-a"
-    "typeof a": "(typeof a)"
     "not a"   : "!a"
+    "void a"  : "null"
+    "{a}"     : "{a:a}"
+    # "{(a):b}" : "(_t={},_t[a]=b,_t)"
   for k,v of kv
     do (k,v)->
       it k, ()->

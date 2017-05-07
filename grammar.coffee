@@ -32,8 +32,8 @@ q('lvalue','@ #identifier')                             .mx("priority=#{base_pri
 q('pre_op',  '!')                                       .mx('priority=1')
 q('pre_op',  'not')                                     .mx('priority=1')
 q('pre_op',  '~')                                       .mx('priority=1')
-q('pre_op',  '-')                                       .mx('priority=1')                    .strict('!$1.tail_space')
-q('pre_op',  '+')                                       .mx('priority=1')                    .strict('!$1.tail_space')
+q('pre_op',  '-')                                       .mx('priority=1')                             .strict('!$1.tail_space')
+q('pre_op',  '+')                                       .mx('priority=1')                             .strict('!$1.tail_space')
 q('pre_op',  'typeof')                                  .mx('priority=1')
 
 q('pre_op',  'void')                                    .mx('priority=15')
@@ -70,48 +70,48 @@ q('multipipe',  '[PIPE] #multipipe?')
 # NOTE need ~same rule for lvalue ???
 q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority} ult=deep")
 
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op')   .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
 # indent set
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
+q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
+q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
+q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')              .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
 # indent+pipe
-q('pre_pipe_rvalue',  '#multipipe #rvalue')                                                    #.strict("#rvalue.priority<#{pipe_priority}")
-q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                              #.strict("#rvalue.priority<#{pipe_priority}")
-q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}").strict("#rvalue[1].priority<=#{pipe_priority}")
+q('pre_pipe_rvalue',  '#multipipe #rvalue')                                                           #.strict("#rvalue.priority<#{pipe_priority}")
+q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                                     #.strict("#rvalue.priority<#{pipe_priority}")
+q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}")   .strict("#rvalue[1].priority<=#{pipe_priority}")
 # assign
-q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
+q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
 
 
-q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op').strict('#rvalue[1].priority<=#pre_op.priority')
-q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority')      .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
+q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op')   .strict('#rvalue[1].priority<=#pre_op.priority')
+q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority ult=post_op') .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
 # ###################################################################################################
 #    array
 # ###################################################################################################
-q('comma_rvalue',  '#rvalue')
-q('comma_rvalue',  '#eol #comma_rvalue') # NOTE eol in back will not work. Gram bug
-q('comma_rvalue',  '#comma_rvalue , #rvalue')
-q('array',  '[ #comma_rvalue? #eol? ]')                 .mx("priority=#{base_priority}")
-q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_priority}")
-q('rvalue',  '#array')
+q('comma_rvalue',  '#rvalue')                           .mx("ult=deep")
+q('comma_rvalue',  '#eol #comma_rvalue')                .mx("ult=deep") # NOTE eol in back will not work. Gram bug
+q('comma_rvalue',  '#comma_rvalue , #rvalue')           .mx("ult=deep")
+q('array',  '[ #comma_rvalue? #eol? ]')                 .mx("priority=#{base_priority} ult=deep")
+q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_priority} ult=deep")
+q('rvalue',  '#array')                                  .mx("ult=deep")
 # NOTE lvalue array come later
 
 # ###################################################################################################
 #    hash
 # ###################################################################################################
 # hash with brackets
-q('pair',  '#identifier : #rvalue')
-q('pair',  '#const : #rvalue')
-q('pair',  '( #rvalue ) : #rvalue')
-q('pair',  '#identifier')
-q('pair_comma_rvalue',  '#pair')
-q('pair_comma_rvalue',  '#eol #pair')
-q('pair_comma_rvalue',  '#pair_comma_rvalue , #pair')
-q('hash',  '{ #pair_comma_rvalue? #eol? }')             .mx("priority=#{base_priority}")
-q('hash',  '{ #indent #pair_comma_rvalue? #dedent }')   .mx("priority=#{base_priority}")
-q('rvalue',  '#hash')
+q('pair',  '#identifier : #rvalue')                     .mx("ult=hash_pair_simple")
+q('pair',  '#const : #rvalue')                          .mx("ult=deep")
+q('pair',  '( #rvalue ) : #rvalue')                     .mx("ult=hash_pair_eval")
+q('pair',  '#identifier')                               .mx("ult=hash_pair_auto")
+q('pair_comma_rvalue',  '#pair')                        .mx("ult=deep")
+q('pair_comma_rvalue',  '#eol #pair')                   .mx("ult=deep")
+q('pair_comma_rvalue',  '#pair_comma_rvalue , #pair')   .mx("ult=deep")
+q('hash',  '{ #pair_comma_rvalue? #eol? }')             .mx("priority=#{base_priority} ult=deep")
+q('hash',  '{ #indent #pair_comma_rvalue? #dedent }')   .mx("priority=#{base_priority} ult=deep")
+q('rvalue',  '#hash')                                   .mx("ult=deep")
 # LATER bracket-less hash
 # fuckup sample
 # a a:b,c:d
