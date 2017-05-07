@@ -120,6 +120,7 @@ describe 'gram section', ()->
     a !== b
     ++a
     --a
+    + a
   """.split /\n/g
   for sample in sample_list
     do (sample)->

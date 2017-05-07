@@ -137,7 +137,7 @@ tokenizer.parser_list.push (new Token_parser 'here_regexp_literal', ///
   \/\/\/[imgy]*
 ///)
 
-@_tokenize = (str, opt)->
+@_tokenize = (str, opt={})->
   # reset
   last_space = 0
   

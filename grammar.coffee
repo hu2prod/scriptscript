@@ -32,8 +32,8 @@ q('lvalue','@ #identifier')                             .mx("priority=#{base_pri
 q('pre_op',  '!')                                       .mx('priority=1')
 q('pre_op',  'not')                                     .mx('priority=1')
 q('pre_op',  '~')                                       .mx('priority=1')
-q('pre_op',  '-')                                       .mx('priority=1')
-q('pre_op',  '+')                                       .mx('priority=1')
+q('pre_op',  '-')                                       .mx('priority=1')                    .strict('!$1.tail_space')
+q('pre_op',  '+')                                       .mx('priority=1')                    .strict('!$1.tail_space')
 q('pre_op',  'typeof')                                  .mx('priority=1')
 
 q('pre_op',  'void')                                    .mx('priority=15')
@@ -178,7 +178,7 @@ q('stmt',  '#rvalue')
 q('stmt',  '#comment')
 
 
-@_parse = (str, opt)->
+@_parse = (str, opt={})->
   g.mode_full = opt.mode_full || false
   res = g.parse_text_list str,
     expected_token : 'stmt'
