@@ -14,18 +14,18 @@ q = (a, b)->g.rule a,b
 #    1-position tokens/const
 # ###################################################################################################
 base_priority = -9000
-q('lvalue', '#identifier')                              .mx("priority=#{base_priority}")
-q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority}")
+q('lvalue', '#identifier')                              .mx("priority=#{base_priority} ult=value")
+q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority} ult=deep")
 
-q('num_const', '#decimal_literal')
-q('num_const', '#octal_literal')
-q('num_const', '#hexadecimal_literal')
-q('num_const', '#binary_literal')
-q('num_const', '#float_literal')
-q('const', '#num_const')
-q('rvalue','#const')                                    .mx("priority=#{base_priority}")
-q('lvalue','@')                                         .mx("priority=#{base_priority}")
-q('lvalue','@ #identifier')                             .mx("priority=#{base_priority}")
+q('num_const', '#decimal_literal')                      .mx("ult=value")
+q('num_const', '#octal_literal')                        .mx("ult=value")
+q('num_const', '#hexadecimal_literal')                  .mx("ult=value")
+q('num_const', '#binary_literal')                       .mx("ult=value")
+q('num_const', '#float_literal')                        .mx("ult=value")
+q('const', '#num_const')                                .mx("ult=deep")
+q('rvalue','#const')                                    .mx("priority=#{base_priority} ult=deep")
+q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value")
+q('lvalue','@ #identifier')                             .mx("priority=#{base_priority} ult=value")
 # ###################################################################################################
 #    operators define
 # ###################################################################################################
@@ -68,7 +68,7 @@ q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx(
 q('bin_op',  '#multipipe')                              .mx("priority=#{pipe_priority} right_assoc=1") # возможно стоит это сделать отдельной конструкцией языка дабы проверять всё более тсчательно
 q('multipipe',  '[PIPE] #multipipe?')
 # NOTE need ~same rule for lvalue ???
-q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority}")
+q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority} ult=deep")
 
 q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
 q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority')       .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
@@ -85,7 +85,7 @@ q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority
 q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
 
 
-q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority')       .strict('#rvalue[1].priority<=#pre_op.priority')
+q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op').strict('#rvalue[1].priority<=#pre_op.priority')
 q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority')      .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
 # ###################################################################################################
 #    array
@@ -175,8 +175,8 @@ q('stmt', '#identifier #rvalue? #block')                .mx("priority=#{base_pri
 
 # ###################################################################################################
 
-q('stmt',  '#rvalue')
-q('stmt',  '#comment')
+q('stmt',  '#rvalue')                                   .mx("ult=deep")
+q('stmt',  '#comment')                                  .mx("ult=comment")
 
 
 @_parse = (str, opt={})->

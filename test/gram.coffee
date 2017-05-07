@@ -6,7 +6,6 @@ util = require 'fy/test_util'
 full = (t)->
   tok = _tokenize(t)
   _parse(tok, mode_full:true)
-{go} = require '../index.coffee'
 
 describe 'gram section', ()->
   # fuckups
@@ -358,15 +357,6 @@ describe 'gram section', ()->
         it JSON.stringify(sample), ()->
           full sample
   
-  it 'public endpoint should work', (done)->
-    await go '1', {}, defer(err, res)
-    assert !(err?)
-    await go '1 КИРИЛИЦА', {}, defer(err, res)
-    assert err?
-    await go '1a1', {}, defer(err, res)
-    assert err?
-    done()
-  
 describe "Gram TODO: all exapmles from coffeescript documentation (oneliners only) should be tokenizable and parsable", ()->
   # check only if it doesn't throw
   
@@ -505,7 +495,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
       speed ?= 15
       footprints = yeti ? "bear"
       zip = lottery.drawWinner?().address?.zipcode
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample
@@ -519,7 +509,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
       sam.move()
       tom.move()
       String::dasherize = -> this.replace /_/g, "-"
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample
@@ -537,7 +527,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
       [first, ..., last] = text.split " "
       {@name, @age, @height = 'average'} = options
       tim = new Person name: 'Tim', age: 4
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample
@@ -551,7 +541,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
       hi = `function() {return [document.title, "Hello JavaScript"].join(": ");}`
       markdown = `function () {return \\`In Markdown, write code like \\\\\\`this\\\\\\`\\`;}`
       ```function time() {return `The time is ${new Date().toLocaleTimeString()}`;}```
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample
@@ -576,7 +566,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
     sample_list = """
       quote  = "A picture is a fact. -- \#{ author }"
       sentence = "\#{ 22 / 7 } is a decent approximation of π"
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample
