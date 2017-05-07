@@ -52,6 +52,7 @@ describe 'translator section', ()->
     "not a"   : "!a"
     "void a"  : "null"
     "{a}"     : "{a:a}"
+    "[\n]"     : "[]"
     # "{(a):b}" : "(_t={},_t[a]=b,_t)"
   for k,v of kv
     do (k,v)->

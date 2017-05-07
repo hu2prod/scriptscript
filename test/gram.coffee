@@ -113,6 +113,7 @@ describe 'gram section', ()->
   sample_list = """
     a++++
     a++ ++
+    a ++
     a+
     кирилица
     a === b

@@ -14,8 +14,8 @@ q = (a, b)->g.rule a,b
 #    1-position tokens/const
 # ###################################################################################################
 base_priority = -9000
-q('lvalue', '#identifier')                              .mx("priority=#{base_priority} ult=value")
-q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority} ult=deep")
+q('lvalue', '#identifier')                              .mx("priority=#{base_priority} tail_space=$1.tail_space ult=value")
+q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority} tail_space=$1.tail_space ult=deep")
 
 q('num_const', '#decimal_literal')                      .mx("ult=value")
 q('num_const', '#octal_literal')                        .mx("ult=value")
@@ -86,7 +86,7 @@ q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bi
 
 
 q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op')   .strict('#rvalue[1].priority<=#pre_op.priority')
-q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority ult=post_op') .strict('#rvalue[1].priority<#post_op.priority') # a++ ++ is not allowed
+q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority ult=post_op') .strict('#rvalue[1].priority<#post_op.priority !#rvalue.tail_space') # a++ ++ is not allowed
 # ###################################################################################################
 #    array
 # ###################################################################################################
