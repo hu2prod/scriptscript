@@ -94,6 +94,12 @@ describe 'gram section', ()->
     @
     @a
     @.a
+    a:b
+    a:b,c:d
+    (a):b
+    a ? b : c
+    #comment
+    a#comment
   """.split /\n/g
   # NOTE a +b is NOT bin_op. It's function call
   for sample in sample_list
@@ -111,17 +117,30 @@ describe 'gram section', ()->
         full sample
   
   sample_list = """
+    a ?
     a++++
+    a++++ # a
     a++ ++
+    a++ ++ # a
     a ++
+    a ++ # a
     a+
+    a+ # a
     кирилица
     a === b
+    a === b # a
     a !== b
+    a !== b # a
     ++a
+    ++a # a
     --a
+    --a # a
     + a
+    + a # a
+    a ? b:c : d
   """.split /\n/g
+  # KNOWN fuckup a ? b:c : d # comment
+  # b:c can be bracketless hash and c:d can be bracketless hash
   for sample in sample_list
     do (sample)->
       it "#{sample} should not parse", ()->
@@ -196,7 +215,45 @@ describe 'gram section', ()->
       ]
       ---
       [
+      a,b
+      ]
+      ---
+      [
+      a
+      b
+      ]
+      ---
+      [
+      a,
+      b
+      ]
+      ---
+      [
+      a
+      ,b
+      ]
+      ---
+      [
         a
+      ]
+      ---
+      [
+        a,b
+      ]
+      ---
+      [
+        a
+        b
+      ]
+      ---
+      [
+        a,
+        b
+      ]
+      ---
+      [
+        a
+        ,b
       ]
       ---
     """.split /\n?---\n?/g
@@ -262,7 +319,27 @@ describe 'gram section', ()->
       }
       ---
       {
+      a
+      b
+      }
+      ---
+      {
+      a,
+      b
+      }
+      ---
+      {
+      a
+      ,b
+      }
+      ---
+      {
         a
+      }
+      ---
+      {
+        a
+        b
       }
       ---
       {

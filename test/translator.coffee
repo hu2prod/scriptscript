@@ -27,10 +27,11 @@ describe 'translator section', ()->
     [a]
     {}
     {a:1}
+    a ? b : c
   """.split /\n/g
   for sample in sample_list
     do (sample)->
-      it sample, ()->
+      it JSON.stringify(sample), ()->
         assert.equal full(sample), sample
   
   # bracketed
@@ -45,18 +46,23 @@ describe 'translator section', ()->
   """.split /\n/g
   for sample in sample_list
     do (sample)->
-      it sample, ()->
+      it JSON.stringify(sample), ()->
         assert.equal full(sample), "(#{sample})"
   
   kv =
     "not a"   : "!a"
     "void a"  : "null"
     "{a}"     : "{a:a}"
-    "[\n]"     : "[]"
+    "a:1"     : "{a:1}"
+    "[\n]"        : "[]"
+    "[\na\nb]"    : "[a,b]"
+    "{\na:b\nc:d}": "{a:b,c:d}"
+    "#a"  : "//a"
+    "a#a" : "a//a"
     # "{(a):b}" : "(_t={},_t[a]=b,_t)"
   for k,v of kv
     do (k,v)->
-      it k, ()->
+      it JSON.stringify(k), ()->
         assert.equal full(k), v
   
   it 'test translate exception', (done)->
@@ -72,10 +78,9 @@ describe 'translator section', ()->
     await go '1a1', {}, defer(err, res)
     assert err?
     
-    # TEMP
-    await go '#1', {}, defer(err, res)
-    assert err?
     # LATER not translated
     # await go '1+"1"', {}, defer(err, res)
     # assert err?
+    await go '__test_untranslated', {}, defer(err, res)
+    assert err?
     done()

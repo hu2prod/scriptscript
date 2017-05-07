@@ -88,12 +88,19 @@ q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bi
 q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op')   .strict('#rvalue[1].priority<=#pre_op.priority')
 q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority ult=post_op') .strict('#rvalue[1].priority<#post_op.priority !#rvalue.tail_space') # a++ ++ is not allowed
 # ###################################################################################################
+#    ternary
+# ###################################################################################################
+q('rvalue',  '#rvalue [QUESTION] #rvalue : #rvalue')    .mx("priority=#{base_priority} ult=deep delimiter='[SPACE]'")
+# ###################################################################################################
 #    array
 # ###################################################################################################
 q('comma_rvalue',  '#rvalue')                           .mx("ult=deep")
-q('comma_rvalue',  '#eol #comma_rvalue')                .mx("ult=deep") # NOTE eol in back will not work. Gram bug
+# q('comma_rvalue',  '#eol #comma_rvalue')                .mx("ult=deep") # NOTE eol in back will not work. Gram bug
 q('comma_rvalue',  '#comma_rvalue , #rvalue')           .mx("ult=deep")
-q('array',  '[ #comma_rvalue? #eol? ]')                 .mx("priority=#{base_priority} ult=deep")
+q('comma_rvalue',  '#comma_rvalue #eol #rvalue')        .mx("ult=deep delimiter=,")
+q('comma_rvalue',  '#comma_rvalue #eol? , #eol? #rvalue').mx("ult=deep")
+q('array',  '[ #eol? ]')                                .mx("priority=#{base_priority} ult=deep")
+q('array',  '[ #eol? #comma_rvalue #eol? ]')            .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_priority} ult=deep")
 q('rvalue',  '#array')                                  .mx("ult=deep")
 # NOTE lvalue array come later
@@ -105,13 +112,23 @@ q('rvalue',  '#array')                                  .mx("ult=deep")
 q('pair',  '#identifier : #rvalue')                     .mx("ult=hash_pair_simple")
 q('pair',  '#const : #rvalue')                          .mx("ult=deep")
 q('pair',  '( #rvalue ) : #rvalue')                     .mx("ult=hash_pair_eval")
-q('pair',  '#identifier')                               .mx("ult=hash_pair_auto")
+q('pair',  '#identifier')                               .mx("ult=hash_pair_auto auto=1")
 q('pair_comma_rvalue',  '#pair')                        .mx("ult=deep")
-q('pair_comma_rvalue',  '#eol #pair')                   .mx("ult=deep")
-q('pair_comma_rvalue',  '#pair_comma_rvalue , #pair')   .mx("ult=deep")
-q('hash',  '{ #pair_comma_rvalue? #eol? }')             .mx("priority=#{base_priority} ult=deep")
+q('pair_comma_rvalue',  '#pair_comma_rvalue #eol #pair').mx("ult=deep delimiter=,")
+q('pair_comma_rvalue',  '#pair_comma_rvalue #eol? , #eol? #pair').mx("ult=deep")
+q('hash',  '{ #eol? }')                                 .mx("priority=#{base_priority} ult=deep")
+q('hash',  '{ #eol? #pair_comma_rvalue #eol? }')        .mx("priority=#{base_priority} ult=deep")
 q('hash',  '{ #indent #pair_comma_rvalue? #dedent }')   .mx("priority=#{base_priority} ult=deep")
 q('rvalue',  '#hash')                                   .mx("ult=deep")
+
+
+q('BL_pair_comma_rvalue',  '#pair')                        .mx("ult=deep")                           .strict("!#pair.auto")
+q('BL_pair_comma_rvalue',  '#eol #pair')                   .mx("ult=deep")                           .strict("!#pair.auto")
+q('BL_pair_comma_rvalue',  '#BL_pair_comma_rvalue , #pair').mx("ult=deep")                           .strict("!#pair.auto")
+
+q('bracket_less_hash',  '#BL_pair_comma_rvalue')                 .mx("priority=#{base_priority} ult=deep")
+q('bracket_less_hash',  '#indent #BL_pair_comma_rvalue #dedent') .mx("priority=#{base_priority} ult=deep")
+q('rvalue',  '#bracket_less_hash')                      .mx("ult=hash_wrap")
 # LATER bracket-less hash
 # fuckup sample
 # a a:b,c:d
@@ -176,9 +193,44 @@ q('stmt', '#identifier #rvalue? #block')                .mx("priority=#{base_pri
 # ###################################################################################################
 
 q('stmt',  '#rvalue')                                   .mx("ult=deep")
-q('stmt',  '#comment')                                  .mx("ult=comment")
+q('stmt',  '#stmt #comment')                            .mx("ult=deep")
+q('stmt',  '#comment')                                  .mx("ult=deep")
 
+q('stmt',  '__test_untranslated')                       # FOR test purposes only
 
+show_diff = (a,b)->
+  ### !pragma coverage-skip-block ###
+  if a.rule != b.rule
+    perr "RULE mismatch"
+    perr "a="
+    perr a.rule
+    perr "b="
+    perr b.rule
+    return
+  if a.value != b.value
+    perr "a=#{a.value}"
+    perr "b=#{b.value}"
+    return
+  if a.mx_hash.hash_key != b.mx_hash.hash_key
+    perr "a.hash_key = #{a.mx_hash.hash_key}"
+    perr "b.hash_key = #{b.mx_hash.hash_key}"
+    return
+  js_a = JSON.stringify a.mx_hash
+  js_b = JSON.stringify b.mx_hash
+  if js_a != js_b
+    perr "a.mx_hash = #{js_a}"
+    perr "b.mx_hash = #{js_b}"
+    return
+  if a.value_array.length != b.value_array.length
+    perr "list length mismatch #{a.value_array.length} != #{b.value_array.length}"
+    perr "a=#{a.value_array.map((t)->t.value).join ','}"
+    perr "b=#{b.value_array.map((t)->t.value).join ','}"
+    return
+  for i in [0 ... a.value_array.length]
+    show_diff a.value_array[i], b.value_array[i]
+  return
+
+g.fix_overlapping_token = true
 @_parse = (str, opt={})->
   g.mode_full = opt.mode_full || false
   res = g.parse_text_list str,
@@ -186,6 +238,8 @@ q('stmt',  '#comment')                                  .mx("ult=comment")
   if res.length == 0
     throw new Error "Parsing error. No proper combination found"
   if res.length != 1
+    [a,b] = res
+    show_diff a,b
     ### !pragma coverage-skip-block ###
     throw new Error "Parsing error. More than one proper combination found #{res.length}"
   res

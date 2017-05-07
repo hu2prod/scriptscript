@@ -15,7 +15,9 @@ trans.trans_skip =
   dedent : true
   eol    : true
 
-trans.trans_value = {}
+# trans.trans_value = {}
+trans.trans_token =
+  comment : (v)-> "//" + v.substr 1
 deep = (ctx, node)->
   list = []
   # if node.mx_hash.deep?
@@ -31,14 +33,17 @@ deep = (ctx, node)->
       # LATER
       # if node.mx_hash.eol_pass and v.mx_hash.hash_key == 'eol'
         # list.push "\n"
-    # if trans.trans_value[v.mx_hash.hash_key]?
-    #   list.push v.value
+    else if fn = trans.trans_token[v.mx_hash.hash_key]
+      list.push fn v.value
+    # else if trans.trans_value[v.mx_hash.hash_key]?
+      # list.push v.value
     else if /^proxy_/.test v.mx_hash.hash_key
       list.push v.value
     else
       list.push ctx.translate v
-  # if delimiter = node.mx_hash.delimiter
-    # list = [ list.join(delimiter) ]
+  if delimiter = node.mx_hash.delimiter
+    delimiter = ' ' if delimiter == "'[SPACE]'"
+    list = [ list.join(delimiter) ]
   list
 
 trans.translator_hash['value']  = translate:(ctx, node)->node.value
@@ -91,6 +96,9 @@ trans.translator_hash["hash_pair_simple"] = translate:(ctx,node)->
 trans.translator_hash["hash_pair_auto"] = translate:(ctx,node)->
   [_value] = node.value_array
   "#{_value.value}:#{_value.value}"
+trans.translator_hash['hash_wrap']   = translate:(ctx, node)->
+  list = deep ctx, node
+  "{"+list.join('')+"}"
 # ###################################################################################################
 
 @_translate = (ast, opt={})->

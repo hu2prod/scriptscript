@@ -230,34 +230,35 @@ describe 'tokenizer section', ()->
       assert.equal tl[3][0].mx_hash.hash_key, "dedent"
   
   describe "Comments", ()->
-    it "should tokenize '# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \\n' as comment", ()->
-      tl = g._tokenize "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \n"
+    it "should tokenize '# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ ' as comment", ()->
+      tl = g._tokenize "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ "
       assert.equal tl.length, 1
       assert.equal tl[0][0].mx_hash.hash_key, "comment"
-      assert.equal tl[0][0].value, "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ \n"
+      assert.equal tl[0][0].value, "# wpe ri32p q92p 4rpu34iqwr349i+-+-*/*/ "
     
-    it "should tokenize '2+2#=4\\n4+4#=8\\n' as 8 tokens including comments", ()->
-      tl = g._tokenize "2+2#=4\n4+4#=8\n"
-      assert.equal tl.length, 8
+    it "should tokenize '2+2#=4\\n4+4#=8' as 9 tokens including comments", ()->
+      tl = g._tokenize "2+2#=4\n4+4#=8"
+      assert.equal tl.length, 9
       assert.equal tl[0][0].mx_hash.hash_key, "decimal_literal"
       assert.equal tl[1][0].mx_hash.hash_key, "unary_operator"
       assert.equal tl[2][0].mx_hash.hash_key, "decimal_literal"
       assert.equal tl[3][0].mx_hash.hash_key, "comment"
-      assert.equal tl[4][0].mx_hash.hash_key, "decimal_literal"
-      assert.equal tl[5][0].mx_hash.hash_key, "unary_operator"
-      assert.equal tl[6][0].mx_hash.hash_key, "decimal_literal"
-      assert.equal tl[7][0].mx_hash.hash_key, "comment"
+      assert.equal tl[4][0].mx_hash.hash_key, "eol"
+      assert.equal tl[5][0].mx_hash.hash_key, "decimal_literal"
+      assert.equal tl[6][0].mx_hash.hash_key, "unary_operator"
+      assert.equal tl[7][0].mx_hash.hash_key, "decimal_literal"
+      assert.equal tl[8][0].mx_hash.hash_key, "comment"
     
     it "should tokenize '### 2 + 2 = 4\\n4 + 4 = 8\\n###' as comment", ()->
       tl = g._tokenize "### 2 + 2 = 4\n4 + 4 = 8\n###"
       assert.equal tl.length, 1
       assert.equal tl[0][0].mx_hash.hash_key, "comment"
     
-    it "should tokenize '####################### COMMENT\\n' as comment", ()->
-      tl = g._tokenize "####################### COMMENT\n"
+    it "should tokenize '####################### COMMENT' as comment", ()->
+      tl = g._tokenize "####################### COMMENT"
       assert.equal tl.length, 1
       assert.equal tl[0][0].mx_hash.hash_key, "comment"
-      assert.equal tl[0][0].value, "####################### COMMENT\n"
+      assert.equal tl[0][0].value, "####################### COMMENT"
   
   describe "Whitespace", ()->
     it "should tokenize \\n as 0 tokens", ()->
@@ -334,7 +335,7 @@ describe 'tokenizer section', ()->
         \\n\\r\\t\\b\\f\\0\\\\\\"\\\'\\xFF\\uFFFF\\u{25}\\u{10FFFF}\n          """'
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{sample} as string_non_interpolated_literal", ()->
+          it "should tokenize #{JSON.stringify sample} as string_non_interpolated_literal", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
             assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
@@ -381,7 +382,7 @@ describe 'tokenizer section', ()->
           '''.split /\n?---\n?/ # "
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{sample}", ()->
+          it "should tokenize #{JSON.stringify sample}", ()->
             ret = g._tokenize sample
             for v in ret
               for v2 in ret
@@ -410,7 +411,7 @@ describe 'tokenizer section', ()->
       sample_list.push "'''\n            heredoc\n          '''"
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{sample} as string_literal", ()->
+          it "should tokenize #{JSON.stringify sample} as string_literal", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
             assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
@@ -470,7 +471,7 @@ describe 'tokenizer section', ()->
     # NOTE bad samples
     for sample in sample_list
       do (sample)->
-        it "should tokenize #{sample} as regexp_literal", ()->
+        it "should tokenize #{JSON.stringify sample} as regexp_literal", ()->
           tl = g._tokenize sample
           assert.equal tl.length, 1
           assert.equal tl[0][0].mx_hash.hash_key, "regexp_literal"
@@ -521,7 +522,7 @@ describe 'tokenizer section', ()->
     # NOTE bad samples
     for sample in sample_list
       do (sample)->
-        it "should tokenize #{sample} as regexp_literal", ()->
+        it "should tokenize #{JSON.stringify sample} as regexp_literal", ()->
           tl = g._tokenize sample
           assert.equal tl.length, 1
           assert.equal tl[0][0].mx_hash.hash_key, "here_regexp_literal"
