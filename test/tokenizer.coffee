@@ -1,5 +1,7 @@
 assert = require 'assert'
 util = require 'fy/test_util'
+fs = require 'fs'
+path = require 'path'
 
 g = require '../tokenizer.coffee'
 pub = require '../index.coffee'
@@ -438,7 +440,70 @@ describe 'tokenizer section', ()->
             assert.throws ()->
               g._tokenize sample
             , /Error: can't tokenize /
-
+  
+  describe "BLNS double quoted FAIL", ()->
+    path_to_blns = path.join (path.dirname require.resolve "blns"), "resources", "blns.json"
+    await fs.readFile path_to_blns, "utf8", defer err, blns_raw
+    if err or !blns_raw?
+      perr "Can't read blns.json"
+      perr err
+      return
+    blns = (blns_raw.split /[\[,\]]\s*\n\s*/)[1...-1]
+    # perr blns.length
+    for sample in blns
+      # perr sample
+      do (sample)->
+        # perr sample
+        it "should tokenize #{sample} as string_non_interpolated_literal", ()->
+          throw new Error "WHY THE FUCK THIS CODE NEVER GETS EXECUTED?!!!"
+        #   perr sample
+          tl = g._tokenize sample
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+  
+  # At least this works
+  describe "Big List of Naughty Strings", ()->
+    # https://github.com/minimaxir/big-list-of-naughty-strings
+    blns = require "blns"
+    for sample in blns
+      continue if sample.includes "\u0007" # FUCK DAT BEEP
+      sample = sample.replace /\\/g, "\\\\"
+      
+      sample_double_quoted = sample.replace /"/g, '\\"'
+      sample_double_quoted = "\"#{sample_double_quoted}\""
+      do (sample_double_quoted)->
+        it "should tokenize #{sample_double_quoted} as string_non_interpolated_literal", ()->
+          tl = g._tokenize sample_double_quoted
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+      
+      sample_single_quoted = sample.replace /'/g, "\\'"
+      sample_single_quoted = "'#{sample_single_quoted}'"
+      do (sample_single_quoted)->
+        it "should tokenize #{sample_single_quoted} as string_literal", ()->
+          tl = g._tokenize sample_single_quoted
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
+      
+      sample_double_heredoc = sample.replace /"""/g, '""\\"'
+      sample_double_heredoc = sample_double_heredoc.replace /"$/, '\\"'
+      sample_double_heredoc = "\"\"\"#{sample_double_heredoc}\"\"\""
+      do (sample_double_heredoc)->
+        it "should tokenize #{sample_double_heredoc} as string_non_interpolated_literal", ()->
+          tl = g._tokenize sample_double_heredoc
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+      
+      sample_single_heredoc = sample.replace /'''/g, "''\\'"
+      sample_single_heredoc = sample_single_heredoc.replace /'$/, "\\'"
+      sample_single_heredoc = "'''#{sample_single_heredoc}'''"
+      do (sample_single_heredoc)->
+        it "should tokenize #{sample_single_heredoc} as string_literal", ()->
+          tl = g._tokenize sample_single_heredoc
+          assert.equal tl.length, 1
+          assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
+  
+  
   describe "Regexp", ()->
     it "should tokenize 'a/b/c' as 3 tokens with regexp in the middle", ()->
       tl = g._tokenize "a/b/c"
