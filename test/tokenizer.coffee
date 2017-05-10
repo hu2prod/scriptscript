@@ -532,23 +532,6 @@ describe 'tokenizer section', ()->
       tl = g._tokenize "a | b | c"
       assert.equal tl.length, 5
   
-  describe "identifier", ()->
-    sample_list = "
-      qwerty
-      myvar123
-      someCamelCase
-      some_snake_case
-      CAPSLOCK
-      $
-      $scope
-    ".split " "
-    for sample in sample_list
-      do (sample)->
-        it "should tokenize '#{sample}' as identifier", ()->
-        v = g._tokenize sample
-        assert.equal v.length, 1
-        assert.equal v[0][0].mx_hash.hash_key, "identifier"
-      
   describe "TODO", ()->
   
   
