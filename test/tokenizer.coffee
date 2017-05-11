@@ -443,11 +443,7 @@ describe 'tokenizer section', ()->
   
   describe "BLNS double quoted FAIL", ()->
     path_to_blns = path.join (path.dirname require.resolve "blns"), "resources", "blns.json"
-    await fs.readFile path_to_blns, "utf8", defer err, blns_raw
-    if err or !blns_raw?
-      perr "Can't read blns.json"
-      perr err
-      return
+    blns_raw = fs.readFileSync path_to_blns, "utf8"
     blns = (blns_raw.split /[\[,\]]\s*\n\s*/)[1...-1]
     # perr blns.length
     for sample in blns
@@ -455,8 +451,6 @@ describe 'tokenizer section', ()->
       do (sample)->
         # perr sample
         it "should tokenize #{sample} as string_non_interpolated_literal", ()->
-          throw new Error "WHY THE FUCK THIS CODE NEVER GETS EXECUTED?!!!"
-        #   perr sample
           tl = g._tokenize sample
           assert.equal tl.length, 1
           assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
