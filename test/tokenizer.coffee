@@ -441,15 +441,12 @@ describe 'tokenizer section', ()->
               g._tokenize sample
             , /Error: can't tokenize /
   
-  describe "BLNS double quoted FAIL", ()->
+  describe "BLNS double quoted via readFileSync", ()->
     path_to_blns = path.join (path.dirname require.resolve "blns"), "resources", "blns.json"
     blns_raw = fs.readFileSync path_to_blns, "utf8"
     blns = (blns_raw.split /[\[,\]]\s*\n\s*/)[1...-1]
-    # perr blns.length
     for sample in blns
-      # perr sample
       do (sample)->
-        # perr sample
         it "should tokenize #{sample} as string_non_interpolated_literal", ()->
           tl = g._tokenize sample
           assert.equal tl.length, 1
