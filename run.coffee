@@ -23,6 +23,7 @@ switch process.argv[3]
   when "-v"
     p magenta "Input:", cyan process.argv[2]
     await (require ".").go process.argv[2], {}, defer err, res
+    throw err if err
     p yellow "Output:", green res
   
   when "--vv"
