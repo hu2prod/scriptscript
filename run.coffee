@@ -9,7 +9,8 @@ require 'fy'
 {translate} = require './translator'
 
 argv = require('minimist')(process.argv.slice(2))
-if !argv._[0]
+input = argv._[0]
+if !input
   console.error """
     -i    print input
     -t    print tokens
@@ -20,9 +21,12 @@ if !argv._[0]
     """
   process.exit 1
 
+# some escape remove
+input = input.replace /\\n/g, "\n"
+
 if argv.i
-  p magenta "Input:", cyan.bold argv._[0]
-await tokenize argv._[0], {}, defer err, tok_res
+  p magenta "Input:", cyan.bold input
+await tokenize input, {}, defer err, tok_res
 throw err if err
 if argv.t
   p "Token list:"
