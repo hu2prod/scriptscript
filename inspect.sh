@@ -1,2 +1,2 @@
 #!/bin/sh
-node --inspect --debug --debug-brk inspect-proxy.js
+node --inspect --debug --debug-brk _inspect-proxy.js
