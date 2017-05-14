@@ -100,6 +100,8 @@ describe 'gram section', ()->
     a ? b : c
     #comment
     a#comment
+    "abcd"
+    'abcd'
   """.split /\n/g
   # NOTE a +b is NOT bin_op. It's function call
   for sample in sample_list
