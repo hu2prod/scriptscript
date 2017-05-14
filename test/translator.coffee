@@ -106,7 +106,6 @@ describe 'translator section', ()->
         (function(a, b){
           b=b==null?(1):b;
         })"""
-      "=>"        : "(function(){})"
       "(a)->a"    : """
         (function(a){
           return(a)
@@ -126,6 +125,10 @@ describe 'translator section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
+        # TEMP  same
+        k2 = k.replace "->", "=>"
+        it JSON.stringify(k2), ()->
+          assert.equal full(k2), v
     # TEMP throws
     kv =
       "(a:number)->"     : "(function(a){})"
