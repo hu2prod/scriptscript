@@ -1,4 +1,5 @@
 require 'fy'
+require 'fy/codegen'
 {
   Translator
   un_op_translator_holder
@@ -99,6 +100,71 @@ trans.translator_hash["hash_pair_auto"] = translate:(ctx,node)->
 trans.translator_hash['hash_wrap']   = translate:(ctx, node)->
   list = deep ctx, node
   "{"+list.join('')+"}"
+# ###################################################################################################
+#    func_decl
+# ###################################################################################################
+trans.translator_hash["func_decl_return"] = translate:(ctx,node)->
+  str = ctx.translate node.value_array[0]
+  "return(#{str})"
+trans.translator_hash["func_decl"] = translate:(ctx,node)->
+  arg_list = []
+  if node.value_array[0].value == '(' and node.value_array[2].value == ')'
+    arg_list_node = node.value_array[1]
+    for arg in arg_list_node.value_array
+      continue if arg.value_array[0].value == ","
+      default_value_node = null
+      if arg.value_array.length == 1
+        name_node = arg.value_array[0]
+      else if arg.value_array.length == 3
+        if arg.value_array[1].value == "="
+          name_node         = arg.value_array[0]
+          default_value_node= arg.value_array[2]
+        else if arg.value_array[1].value == ":"
+          ### !pragma coverage-skip-block ###
+          throw new Error "types are unsupported arg syntax yet"
+        else
+          ### !pragma coverage-skip-block ###
+          throw new Error "unsupported arg syntax"
+      else
+        ### !pragma coverage-skip-block ###
+        throw new Error "unsupported arg syntax"
+      
+      default_value = null
+      if default_value_node
+        default_value = ctx.translate default_value_node
+      arg_list.push {
+        name : name_node.value
+        type : null
+        default_value
+      }
+  
+  body_node = node.value_array.last()
+  body_node = null if body_node.value in ["->", "=>"] # no body
+  
+  
+  arg_str_list = []
+  default_arg_str_list = []
+  for arg in arg_list
+    arg_str_list.push arg.name
+    if arg.default_value
+      default_arg_str_list.push """
+        #{arg.name}=#{arg.name}==null?(#{arg.default_value}):#{arg.name};
+      """
+  
+  body = ""
+  body = ctx.translate body_node if body_node
+  
+  body = """
+  {
+    #{join_list default_arg_str_list, '  '}
+    #{body}
+  }
+  """
+  body = body.replace /^{\s+/, '{\n  '
+  body = body.replace /\s+}$/, '\n}'
+  body = "{}" if /^\{\s+\}$/.test body
+  
+  "(function(#{arg_str_list.join ', '})#{body})"
 # ###################################################################################################
 
 @_translate = (ast, opt={})->

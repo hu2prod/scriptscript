@@ -460,7 +460,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
       square = (x) -> x * x
       cube = (x) -> square(x) * x
       fill = (container, liquid = "coffee") -> "Filling the \#{container} with \#{liquid}..."
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample
@@ -474,7 +474,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
       $('.account').attr class: 'active'
       log object.class
       turtle = {name, mask, weapon}
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample
@@ -541,7 +541,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
       eldest = if 24 > 21 then "Liz" else "Ike"
       six = (one = 1) + (two = 2) + (three = 3)
       globals = (name for name of window)[0...10]
-    """.split /\n/
+    """.split /\n/ #"
     for sample in sample_list
       do (sample)->
         it sample

@@ -159,12 +159,12 @@ q('rvalue', '#lvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_pri
 # ###################################################################################################
 #    function decl
 # ###################################################################################################
-q('rvalue', '->|=>')                                    .mx("priority=#{base_priority}")
+q('rvalue', '->|=>')                                    .mx("priority=#{base_priority} ult=func_decl")
 # NOTE ->|=> didn't work (
-q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority}")
-q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority}")
-q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority}")
-q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority}")
+q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl")
+q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl")
+q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl")
+q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority} ult=func_decl")
 
 q('arg_list', '#arg')                                   .mx("priority=#{base_priority}")
 q('arg_list', '#arg_list , #arg')                       .mx("priority=#{base_priority}")
@@ -177,15 +177,15 @@ q('arg', '#identifier = #rvalue')                       .mx("priority=#{base_pri
 q('type', '#identifier')                                .mx("priority=#{base_priority}")
 # LATER array<T> support
 
-q('function_body', '#stmt')                             .mx("priority=#{base_priority}")
-q('function_body', '#block')                            .mx("priority=#{base_priority}")
+q('function_body', '#stmt')                             .mx("priority=#{base_priority} ult=func_decl_return")
+q('function_body', '#block')                            .mx("priority=#{base_priority} ult=deep")
 # ###################################################################################################
 #    block
 # ###################################################################################################
 
-q('block', '#indent #stmt_plus #dedent')                .mx("priority=#{base_priority}")
-q('stmt_plus', '#stmt')                                 .mx("priority=#{base_priority}")
-q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority}")
+q('block', '#indent #stmt_plus #dedent')                .mx("priority=#{base_priority} ult=deep")
+q('stmt_plus', '#stmt')                                 .mx("priority=#{base_priority} ult=deep")
+q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority} ult=deep")
 
 # ###################################################################################################
 #    macro-block
