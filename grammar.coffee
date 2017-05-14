@@ -161,6 +161,7 @@ q('rvalue', '#lvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_pri
 # ###################################################################################################
 q('rvalue', '->|=>')                                    .mx("priority=#{base_priority} ult=func_decl")
 # NOTE ->|=> didn't work (
+q('rvalue', '-> #function_body')                        .mx("priority=#{base_priority} ult=func_decl")
 q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl")
 q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl")
 q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl")

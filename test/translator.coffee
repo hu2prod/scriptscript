@@ -90,6 +90,11 @@ describe 'translator section', ()->
   describe "function", ()->
     kv =
       "->"        : "(function(){})"
+      "->a"       : """
+        (function(){
+          return(a)
+        })
+        """
       "()->"      : "(function(){})"
       "(a)->"     : "(function(a){})"
       "(a,b)->"   : "(function(a, b){})"
@@ -109,6 +114,11 @@ describe 'translator section', ()->
         """
       "(a)->\n  a"    : """
         (function(a){
+          a
+        })
+        """
+      "->\n  a"    : """
+        (function(){
           a
         })
         """
