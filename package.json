@@ -23,10 +23,11 @@
     "iced-coffee-coverage": "^1.0.21",
     "iced-coffee-script": "^108.0.11",
     "istanbul": "^0.4.5",
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "blns": "^2.0.4",
+    "minimist": "^1.2.0"
   },
   "dependencies": {
-    "blns": "^2.0.4",
     "fy": "github:hu2prod/fy",
     "gram": "github:hu2prod/gram"
   }
