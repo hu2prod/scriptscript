@@ -21,8 +21,8 @@ if !argv._[0]
   process.exit 1
 
 if argv.i
-  p magenta "Input:", cyan.bold process.argv[2]
-await tokenize  process.argv[2], {}, defer err, tok_res
+  p magenta "Input:", cyan.bold argv._[0]
+await tokenize argv._[0], {}, defer err, tok_res
 throw err if err
 if argv.t
   p "Token list:"
