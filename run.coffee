@@ -27,12 +27,14 @@ input = input.replace /\\n/g, "\n"
 if argv.i
   p magenta "Input:", cyan.bold input
 await tokenize input, {}, defer err, tok_res
+### !pragma coverage-skip-block ###
 throw err if err
 if argv.t
   p "Token list:"
   pp tok_res
   debugger
 await parse     tok_res, {}, defer err, ast
+### !pragma coverage-skip-block ###
 throw err if err
 if argv.a
   p yellow.bold "AST[0]:"
@@ -40,5 +42,6 @@ if argv.a
   p yellow.bold "AST[0].value_array[0]:"
   p ast[0].value_array[0]
 await translate ast[0],  {}, defer err, res
+### !pragma coverage-skip-block ###
 throw err if err
 p yellow "Output:", green.bold res
