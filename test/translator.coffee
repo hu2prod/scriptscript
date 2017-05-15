@@ -138,6 +138,57 @@ describe 'translator section', ()->
           util.throws ()->
             full(k)
   
+  describe "macro-block", ()->
+    kv =
+      """
+      if a
+        b
+      """       : """
+        if (a) {
+          b
+        }
+        """
+      """
+      loop
+        b
+      """       : """
+        while(true) {
+          b
+        }
+        """
+      # LATER
+      # """
+      # c = if a
+        # b
+      # """       : """
+        # if (a) {
+          # c = b
+        # }
+        # """
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          assert.equal full(k), v
+    sample_list =
+      """
+      if
+        b
+      ---
+      loop a
+        b
+      ---
+      wtf a
+        b
+      ---
+      wtf
+        b
+      """.split /\n?---\n?/
+    for v in sample_list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full(v)
+  
   it 'test translate exception', (done)->
     await translate null, {}, defer(err)
     assert err?

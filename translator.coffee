@@ -166,6 +166,41 @@ trans.translator_hash["func_decl"] = translate:(ctx,node)->
   
   "(function(#{arg_str_list.join ', '})#{body})"
 # ###################################################################################################
+#    macro-block
+# ###################################################################################################
+trans.macro_block_condition_hash =
+  "if" : (ctx, condition, block)->
+    """
+    if (#{ctx.translate condition}) {
+      #{make_tab ctx.translate(block), '  '}
+    }
+    """
+trans.macro_block_hash =
+  "loop" : (ctx, block)->
+    """
+    while(true) {
+      #{make_tab ctx.translate(block), '  '}
+    }
+    """
+
+trans.translator_hash['macro_block'] = translate:(ctx,node)->
+  if node.value_array.length == 2
+    [name_node, body] = node.value_array
+    name = name_node.value
+    if !(fn = trans.macro_block_hash[name])?
+      if trans.macro_block_condition_hash[name]?
+        throw new Error "Missed condition for block '#{name}'"
+      throw new Error "unknown conditionless macro block '#{name}'"
+    fn ctx, body
+  else
+    [name_node, condition, body] = node.value_array
+    name = name_node.value
+    if !(fn = trans.macro_block_condition_hash[name])?
+      if trans.macro_block_hash[name]?
+        throw new Error "Extra condition for block '#{name}'"
+      throw new Error "unknown conditionless macro block '#{name}'"
+    fn ctx, condition, body
+# ###################################################################################################
 
 @_translate = (ast, opt={})->
   trans.go ast
