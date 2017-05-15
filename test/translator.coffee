@@ -28,6 +28,8 @@ describe 'translator section', ()->
     {}
     {a:1}
     a ? b : c
+    "abcd"
+    'abcd'
   """.split /\n/g
   for sample in sample_list
     do (sample)->
