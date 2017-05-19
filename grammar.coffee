@@ -15,18 +15,18 @@ q = (a, b)->g.rule a,b
 # ###################################################################################################
 base_priority = -9000
 q('lvalue', '#identifier')                              .mx("priority=#{base_priority} tail_space=$1.tail_space ult=value")
-q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority} tail_space=$1.tail_space ult=deep")
+q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority} tail_space=$1.tail_space ult=deep  ti=pass")
 
-q('num_const', '#decimal_literal')                      .mx("ult=value")
-q('num_const', '#octal_literal')                        .mx("ult=value")
-q('num_const', '#hexadecimal_literal')                  .mx("ult=value")
-q('num_const', '#binary_literal')                       .mx("ult=value")
-q('num_const', '#float_literal')                        .mx("ult=value")
-q('const', '#num_const')                                .mx("ult=deep")
-q('str_const', '#string_literal')                       .mx("ult=value")
-q('str_const', '#string_non_interpolated_literal')      .mx("ult=value")
-q('const', '#str_const')                                .mx("ult=deep")
-q('rvalue','#const')                                    .mx("priority=#{base_priority} ult=deep")
+q('num_const', '#decimal_literal')                      .mx("ult=value ti=const type=int")
+q('num_const', '#octal_literal')                        .mx("ult=value ti=const type=int")
+q('num_const', '#hexadecimal_literal')                  .mx("ult=value ti=const type=int")
+q('num_const', '#binary_literal')                       .mx("ult=value ti=const type=int")
+q('num_const', '#float_literal')                        .mx("ult=value ti=const type=float")
+q('const', '#num_const')                                .mx("ult=deep ti=pass")
+q('str_const', '#string_literal')                       .mx("ult=value ti=const type=string")
+q('str_const', '#string_non_interpolated_literal')      .mx("ult=value ti=const type=string")
+q('const', '#str_const')                                .mx("ult=deep  ti=pass")
+q('rvalue','#const')                                    .mx("priority=#{base_priority} ult=deep  ti=pass")
 q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value")
 q('lvalue','@ #identifier')                             .mx("priority=#{base_priority} ult=value")
 # ###################################################################################################
@@ -76,13 +76,13 @@ q('multipipe',  '[PIPE] #multipipe?')
 # NOTE need ~same rule for lvalue ???
 q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority} ult=deep")
 
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op')   .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
 # indent set
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority')              .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
+q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
+q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
+q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
 # indent+pipe
 q('pre_pipe_rvalue',  '#multipipe #rvalue')                                                           #.strict("#rvalue.priority<#{pipe_priority}")
 q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                                     #.strict("#rvalue.priority<#{pipe_priority}")
@@ -198,7 +198,7 @@ q('rvalue', '#identifier #rvalue? #block')              .mx("priority=#{base_pri
 
 # ###################################################################################################
 
-q('stmt',  '#rvalue')                                   .mx("ult=deep")
+q('stmt',  '#rvalue')                                   .mx("ult=deep ti=pass")
 q('stmt',  '#stmt #comment')                            .mx("ult=deep")
 q('stmt',  '#comment')                                  .mx("ult=deep")
 
