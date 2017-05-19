@@ -14,7 +14,7 @@ q = (a, b)->g.rule a,b
 #    1-position tokens/const
 # ###################################################################################################
 base_priority = -9000
-q('lvalue', '#identifier')                              .mx("priority=#{base_priority} tail_space=$1.tail_space ult=value")
+q('lvalue', '#identifier')                              .mx("priority=#{base_priority} tail_space=$1.tail_space ult=value ti=id")
 q('rvalue', '#lvalue')                                  .mx("priority=#{base_priority} tail_space=$1.tail_space ult=deep  ti=pass")
 
 q('num_const', '#decimal_literal')                      .mx("ult=value ti=const type=int")

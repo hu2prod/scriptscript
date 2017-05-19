@@ -3,6 +3,7 @@ require 'fy/codegen'
 {
   Translator
 } = require 'gram'
+module = @
 
 trans = new Translator
 trans.key = 'ti'
@@ -12,6 +13,9 @@ trans.translator_hash['pass'] = translate:(ctx, node)->
   if child.mx_hash.type
     node.mx_hash.type = child.mx_hash.type
   
+  return
+trans.translator_hash['id'] = translate:(ctx, node)->
+  # not implemented
   return
 
 trans.translator_hash['const'] = translate:(ctx, node)->
@@ -78,7 +82,7 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
 
 @type_inference = (ast, opt, on_end)->
   try
-    res = module._type_inference ast, opt
+    module._type_inference ast, opt
   catch e
     return on_end e
-  on_end null, res
+  on_end null

@@ -3,7 +3,7 @@ util = require 'fy/test_util'
 
 {_tokenize} = require '../tokenizer.coffee'
 {_parse   } = require '../grammar.coffee'
-{_type_inference} = require '../type_inference.coffee'
+{_type_inference, type_inference} = require '../type_inference.coffee'
 full = (t)->
   tok = _tokenize(t)
   ast = _parse(tok, mode_full:true)
@@ -45,5 +45,33 @@ describe 'type_inference section', ()->
         it JSON.stringify(k), ()->
           ast = full k
           assert.equal ast.mx_hash.type, v
-    
   
+  describe "can't detect", ()->
+    it "a + 1", ()->
+      ast = full "a + 1"
+      assert.equal ast.mx_hash.type, undefined
+    
+    it "1 + a", ()->
+      ast = full "1 + a"
+      assert.equal ast.mx_hash.type, undefined
+    
+    it "a + b", ()->
+      ast = full "a + b"
+      assert.equal ast.mx_hash.type, undefined
+  
+  describe 'external interface', ()->
+    it "ok", (done)->
+      tok = _tokenize "1"
+      ast = _parse(tok, mode_full:true)
+      
+      await type_inference ast[0], {}, defer(err)
+      assert !err?
+      done()
+    
+    it "fail", (done)->
+      tok = _tokenize "1*'1'"
+      ast = _parse(tok, mode_full:true)
+      
+      await type_inference ast[0], {}, defer(err)
+      assert err?
+      done()
