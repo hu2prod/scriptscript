@@ -29,6 +29,9 @@ q('const', '#str_const')                                .mx("ult=deep")
 q('rvalue','#const')                                    .mx("priority=#{base_priority} ult=deep")
 q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value")
 q('lvalue','@ #identifier')                             .mx("priority=#{base_priority} ult=value")
+
+q('rvalue', '#string_interpolated_start_single_literal #rvalue #string_interpolated_end_single_literal').mx("ult=string_interpolated")
+
 # ###################################################################################################
 #    operators define
 # ###################################################################################################

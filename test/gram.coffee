@@ -12,7 +12,7 @@ describe 'gram section', ()->
   ###
   a /= b / c
   ###
-  sample_list = """
+  sample_list = '''
     a
     +a
     a+b
@@ -102,7 +102,8 @@ describe 'gram section', ()->
     a#comment
     "abcd"
     'abcd'
-  """.split /\n/g
+    "a#{b+c}d"
+  '''.split /\n/g
   # NOTE a +b is NOT bin_op. It's function call
   for sample in sample_list
     do (sample)->

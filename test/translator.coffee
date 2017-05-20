@@ -60,6 +60,14 @@ describe 'translator section', ()->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
   
+  describe "strings interpolated", ()->
+    kv =
+      '"a#{b+c}d"'   : '"a"+(b+c)+"d"'
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          assert.equal full(k), v
+  
   describe "hash", ()->
     kv =
       "{a}"     : "{a:a}"

@@ -87,6 +87,16 @@ holder.mode_post()
 for v in un_op_list = ["++", '--']
   holder.op_list[v]  = new un_op_translator_framework "($1$op)"
 trans.translator_hash['post_op'] = holder
+
+# ###################################################################################################
+#    str
+# ###################################################################################################
+
+trans.translator_hash['string_interpolated'] = translate:(ctx, node)->
+  (node.value_array[0].value.replace '#{', '"+') +
+    (ctx.translate node.value_array[1]) +
+    node.value_array[2].value.replace '}', '+"'
+
 # ###################################################################################################
 #    hash
 # ###################################################################################################

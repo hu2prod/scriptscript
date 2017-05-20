@@ -32,7 +32,6 @@ throw err if err
 if argv.t
   p "Token list:"
   pp tok_res
-  debugger
 await parse     tok_res, {}, defer err, ast
 ### !pragma coverage-skip-block ###
 throw err if err
