@@ -47,6 +47,8 @@ describe 'type_inference section', ()->
       "1<<1"  : "int"
       "1>>1"  : "int"
       "1>>>1" : "int"
+      "1 and 1" : "int"
+      "1 or 1"  : "int"
       "true and true" : "bool"
       "true or  true" : "bool"
       "1 == 1" : "bool"

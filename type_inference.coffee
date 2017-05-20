@@ -39,6 +39,8 @@ for op in "+ - * // % << >> >>>".split /\s+/
 
 for op in "and or".split /\s+/
   def_bin op, "bool", "bool", "bool"
+for op in "and or".split /\s+/
+  def_bin op, "int", "int", "int"
 for type in "int float".split /\s+/
   for op in "== != < <= > >=".split /\s+/
     def_bin op, type,type, "bool"
@@ -77,7 +79,7 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
     bt = b.mx_hash.type
     key = "#{op},#{at},#{bt}"
     if !ret = bin_op_type_table[key]
-      throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt}"
+      throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
     node.mx_hash.type = ret
   else
     # case 2
@@ -129,7 +131,7 @@ trans.translator_hash['pre_op'] = translate:(ctx, node)->
     at = a.mx_hash.type
     key = "#{op},#{at}"
     if !ret = pre_op_type_table[key]
-      throw new Error "can't find pre_op=#{op} a=#{at}"
+      throw new Error "can't find pre_op=#{op} a=#{at} node=#{node.value}"
     node.mx_hash.type = ret
   
   return
@@ -175,7 +177,7 @@ trans.translator_hash['pre_op'] = translate:(ctx, node)->
 #     at = a.mx_hash.type
 #     key = "#{op},#{at}"
 #     if !ret = post_op_type_table[key]
-#       throw new Error "can't find post_op=#{op} a=#{at}"
+#       throw new Error "can't find post_op=#{op} a=#{at} node=#{node.value}"
 #     node.mx_hash.type = ret
 #   
 #   return
