@@ -172,6 +172,26 @@ describe 'type_inference section', ()->
           util.throws ()->
             full v
   
+  describe 'hash', ()->
+    kv =
+      "{}"      : "hash"
+      "{a:1}"   : "hash<int>"
+      "{a,b:1}" : "hash<int>"
+      "{(a):1}" : "hash<int>"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type, v
+    list = """
+      {a:1,b:'1'}
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
   describe "can't detect", ()->
     it "a + 1", ()->
       ast = full "a + 1"

@@ -128,7 +128,7 @@ q('pair_comma_rvalue',  '#pair_comma_rvalue #eol? , #eol? #pair').mx("ult=deep")
 q('hash',  '{ #eol? }')                                 .mx("priority=#{base_priority} ult=deep")
 q('hash',  '{ #eol? #pair_comma_rvalue #eol? }')        .mx("priority=#{base_priority} ult=deep")
 q('hash',  '{ #indent #pair_comma_rvalue? #dedent }')   .mx("priority=#{base_priority} ult=deep")
-q('rvalue',  '#hash')                                   .mx("ult=deep")
+q('rvalue',  '#hash')                                   .mx("ult=deep ti=hash")
 
 
 q('BL_pair_comma_rvalue',  '#pair')                        .mx("ult=deep")                           .strict("!#pair.auto")

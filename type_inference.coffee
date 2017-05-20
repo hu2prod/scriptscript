@@ -38,6 +38,7 @@ assert_pass_down_eq_list = (ast_list, diagnostics)->
     assert_pass_down v, type, "#{diagnostics} pos #{idx}"
   
   return
+# ###################################################################################################
 
 trans = new Translator
 trans.key = 'ti'
@@ -257,6 +258,50 @@ trans.translator_hash["array"] = translate:(ctx, node)->
     node.mx_hash.subtype_list = [subtype]
   else
     node.mx_hash.type = "array"
+  return
+# ###################################################################################################
+trans.translator_hash["hash"] = translate:(ctx, node)->
+  pair_list = []
+  walk = (node)->
+    for sn in node.value_array
+      if sn.mx_hash.hash_key == 'pair'
+        pair_list.push sn
+      else
+        walk sn
+    return
+  walk node
+  
+  element_list = []
+  
+  for el in pair_list
+    rvalue_list = []
+    id_list = []
+    for sn in el.value_array
+      if sn.mx_hash.hash_key == 'identifier'
+        id_list.push sn
+        trans.translator_hash['id'].translate ctx, sn # identifier has no ti
+      else if sn.mx_hash.hash_key == 'rvalue'
+        rvalue_list.push sn
+        ctx.translate sn
+    
+    if rvalue_list.length == 0
+      value = id_list[0]
+    else if rvalue_list.length == 1
+      value = rvalue_list[0]
+    else # if rvalue_list.length == 2
+      [key, value] = rvalue_list
+      # TODO check key castable to string # same as string iterpolated
+    element_list.push value
+  
+  assert_pass_down_eq_list element_list, "hash decl"
+  
+  if element_list[0]?.mx_hash.type?
+    subtype = element_list[0].mx_hash.type
+    node.mx_hash.type = "hash<#{subtype}>"
+    node.mx_hash.main_type = "hash"
+    node.mx_hash.subtype_list = [subtype]
+  else
+    node.mx_hash.type = "hash"
   return
 
 # ###################################################################################################
