@@ -29,6 +29,15 @@ assert_pass_down_eq = (ast1, ast2, type, diagnostics)->
     assert_pass_down ast2, ast1.mx_hash.type, "#{diagnostics} ast2 down"
     
   return
+assert_pass_down_eq_list = (ast_list, diagnostics)->
+  type = undefined
+  for v in ast_list
+    break if type = v.mx_hash.type
+  return if !type?
+  for v, idx in ast_list
+    assert_pass_down v, type, "#{diagnostics} pos #{idx}"
+  
+  return
 
 trans = new Translator
 trans.key = 'ti'
@@ -213,7 +222,6 @@ trans.translator_hash['pre_op'] = translate:(ctx, node)->
 #   
 #   return
 # # ###################################################################################################
-
 trans.translator_hash["ternary"] = translate:(ctx, node)->
   [cond, _s1, vtrue, _s2, vfalse] = node.value_array
   ctx.translate cond
@@ -225,7 +233,33 @@ trans.translator_hash["ternary"] = translate:(ctx, node)->
   
   node.mx_hash.type = vtrue.mx_hash.type if vtrue.mx_hash.type?
   return
+# ###################################################################################################
+trans.translator_hash["array"] = translate:(ctx, node)->
+  element_list = []
+  walk = (node)->
+    for sn in node.value_array
+      if sn.mx_hash.hash_key == 'rvalue'
+        element_list.push sn
+      else
+        walk sn
+    return
+  walk node
+  
+  for el in element_list
+    ctx.translate el
+  
+  assert_pass_down_eq_list element_list, "array decl"
+  
+  if element_list[0]?.mx_hash.type?
+    subtype = element_list[0].mx_hash.type
+    node.mx_hash.type = "array<#{subtype}>"
+    node.mx_hash.main_type = "array"
+    node.mx_hash.subtype_list = [subtype]
+  else
+    node.mx_hash.type = "array"
+  return
 
+# ###################################################################################################
 
 @_type_inference = (ast, opt={})->
   # phase 1 deep
