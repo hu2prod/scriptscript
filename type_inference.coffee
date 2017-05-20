@@ -5,10 +5,41 @@ require 'fy/codegen'
 } = require 'gram'
 module = @
 
+assert_pass_down = (ast, type, diagnostics)->
+  if ast.mx_hash.type?
+    if ast.mx_hash.type != type
+      throw new Error "assert pass up failed node='#{ast.value}'['#{ast.mx_hash.type}'] should be type '#{type}'; extra=#{diagnostics}"
+  else
+    ast.mx_hash.type = type
+  # if rvalue
+  # if lvalue
+  # TODO
+  return
+
+assert_pass_down_eq = (ast1, ast2, type, diagnostics)->
+  if ast1.mx_hash.type? and ast2.mx_hash.type?
+    if ast1.mx_hash.type != ast2.mx_hash.type
+      throw new Error "assert pass up eq failed node1='#{ast1.value}'[#{ast1.mx_hash.type}] != node2='#{ast2.value}'[#{ast2.mx_hash.type}]; extra=#{diagnostics}"
+  else if !ast1.mx_hash.type? and !ast2.mx_hash.type?
+    # nothing
+    return
+  else if !ast1.mx_hash.type?
+    assert_pass_down ast1, ast2.mx_hash.type, "#{diagnostics} ast1 down"
+  else #!ast2.mx_hash.type?
+    assert_pass_down ast2, ast1.mx_hash.type, "#{diagnostics} ast2 down"
+    
+  return
+
 trans = new Translator
 trans.key = 'ti'
 trans.translator_hash['pass'] = translate:(ctx, node)->
   child = node.value_array[0]
+  ctx.translate child
+  if child.mx_hash.type
+    node.mx_hash.type = child.mx_hash.type
+
+trans.translator_hash['bracket'] = translate:(ctx, node)->
+  child = node.value_array[1]
   ctx.translate child
   if child.mx_hash.type
     node.mx_hash.type = child.mx_hash.type
@@ -182,6 +213,18 @@ trans.translator_hash['pre_op'] = translate:(ctx, node)->
 #   
 #   return
 # # ###################################################################################################
+
+trans.translator_hash["ternary"] = translate:(ctx, node)->
+  [cond, _s1, vtrue, _s2, vfalse] = node.value_array
+  ctx.translate cond
+  assert_pass_down cond, 'bool', 'ternary'
+  
+  ctx.translate vtrue
+  ctx.translate vfalse
+  assert_pass_down_eq vtrue, vfalse
+  
+  node.mx_hash.type = vtrue.mx_hash.type if vtrue.mx_hash.type?
+  return
 
 
 @_type_inference = (ast, opt={})->

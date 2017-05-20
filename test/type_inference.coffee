@@ -112,6 +112,39 @@ describe 'type_inference section', ()->
         # it JSON.stringify(k), ()->
           # ast = full k
           # assert.equal ast.mx_hash.type, v
+  describe 'expr', ()->
+    kv =
+      "(1)" : "int"
+      "(a)" : undefined
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type, v
+  
+  describe 'ternary', ()->
+    kv =
+      "true?1:2" : "int"
+      "a?1:2" : "int"
+      "a?b:2" : "int"
+      "a?1:b" : "int"
+      "a?a:b" : undefined
+      # "a?a:a" : "bool" # LATER
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type, v
+    list = """
+      1?a:b
+      '1'?a:b
+      a?1:'1'
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
   
   describe "can't detect", ()->
     it "a + 1", ()->
