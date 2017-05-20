@@ -20,6 +20,9 @@ describe 'type_inference section', ()->
       "1.0" : "float"
       "'1'" : "string"
       '"1"' : "string"
+      "true"  : "bool"
+      "false" : "bool"
+      "a"     : undefined
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -36,15 +39,77 @@ describe 'type_inference section', ()->
   #         assert.equal ast.mx_hash.type, v
   describe 'bin op', ()->
     kv =
-      "1+1" : "int"
-      "1-1" : "int"
-      "1*1" : "int"
-      "1//1" : "int"
+      "a+b"   : undefined
+      "1+1"   : "int"
+      "1-1"   : "int"
+      "1*1"   : "int"
+      "1//1"  : "int"
+      "1<<1"  : "int"
+      "1>>1"  : "int"
+      "1>>>1" : "int"
+      "true and true" : "bool"
+      "true or  true" : "bool"
+      "1 == 1" : "bool"
+      "1 != 1" : "bool"
+      "1 >  1" : "bool"
+      "1 >= 1" : "bool"
+      "1 <  1" : "bool"
+      "1 <= 1" : "bool"
+      "1.0 == 1.0" : "bool"
+      "1.0 != 1.0" : "bool"
+      "1.0 >  1.0" : "bool"
+      "1.0 >= 1.0" : "bool"
+      "1.0 <  1.0" : "bool"
+      "1.0 <= 1.0" : "bool"
+      "'1' == '1'" : "bool"
+      "'1' != '1'" : "bool"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
           assert.equal ast.mx_hash.type, v
+    
+    list = """
+      1+'1'
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
+  describe 'pre op', ()->
+    kv =
+      "+a"       : undefined
+      "-1"       : "int"
+      "~1"       : "int"
+      "+'1'"     : "float"
+      "!true"    : "bool"
+      "not true" : "bool"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type, v
+    list = """
+      +1
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
+  # WRONG. Must be lvalue with proper type !!!
+  # describe 'post op', ()->
+    # kv =
+      # "a++" : "int"
+      # "a--" : "int"
+    # for k,v of kv
+      # do (k,v)->
+        # it JSON.stringify(k), ()->
+          # ast = full k
+          # assert.equal ast.mx_hash.type, v
   
   describe "can't detect", ()->
     it "a + 1", ()->

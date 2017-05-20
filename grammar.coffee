@@ -94,7 +94,7 @@ q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority
 q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
 
 
-q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op')   .strict('#rvalue[1].priority<=#pre_op.priority')
+q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op ti=pre_op').strict('#rvalue[1].priority<=#pre_op.priority')
 q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority ult=post_op') .strict('#rvalue[1].priority<#post_op.priority !#rvalue.tail_space') # a++ ++ is not allowed
 # ###################################################################################################
 #    ternary
