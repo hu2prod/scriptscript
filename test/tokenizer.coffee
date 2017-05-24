@@ -392,7 +392,7 @@ describe 'tokenizer section', ()->
                   throw new Error "\"\" parsed"
   
   describe "Single quoted strings", ()->
-    describe "valid", ()->
+    describe "valid inline strings", ()->
       sample_list = """
         ''
         'Some text'
@@ -407,16 +407,26 @@ describe 'tokenizer section', ()->
         '\#{a}'
         '\\\#{a}'
         'English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺'
-        '''English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺'''
       """.split /\n/ #"
       sample_list.push "'\\\n'"
-      sample_list.push "'''\n            heredoc\n          '''"
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{JSON.stringify sample} as string_literal", ()->
+          it "should tokenize #{JSON.stringify sample} as string_literal_singleq", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
-            assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
+            assert.equal tl[0][0].mx_hash.hash_key, "string_literal_singleq"
+    
+    describe "valid block strings", ()->
+      sample_list = [
+        "'''English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺'''",
+        "'''\n            heredoc\n          '''"
+      ]
+      for sample in sample_list
+        do (sample)->
+          it "should tokenize #{JSON.stringify sample} as block_string_literal_singleq", ()->
+            tl = g._tokenize sample
+            assert.equal tl.length, 1
+            assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_singleq"
     
     describe "invalid", ()->
       wrong_string_list = """
@@ -471,10 +481,10 @@ describe 'tokenizer section', ()->
       sample_single_quoted = sample.replace /'/g, "\\'"
       sample_single_quoted = "'#{sample_single_quoted}'"
       do (sample_single_quoted)->
-        it "should tokenize #{sample_single_quoted} as string_literal", ()->
+        it "should tokenize #{sample_single_quoted} as string_literal_singleq", ()->
           tl = g._tokenize sample_single_quoted
           assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
+          assert.equal tl[0][0].mx_hash.hash_key, "string_literal_singleq"
       
       sample_double_heredoc = sample.replace /"""/g, '""\\"'
       sample_double_heredoc = sample_double_heredoc.replace /"$/, '\\"'
@@ -489,10 +499,10 @@ describe 'tokenizer section', ()->
       sample_single_heredoc = sample_single_heredoc.replace /'$/, "\\'"
       sample_single_heredoc = "'''#{sample_single_heredoc}'''"
       do (sample_single_heredoc)->
-        it "should tokenize #{sample_single_heredoc} as string_literal", ()->
+        it "should tokenize #{sample_single_heredoc} as block_string_literal_singleq", ()->
           tl = g._tokenize sample_single_heredoc
           assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_literal"
+          assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_singleq"
   
   
   describe "Regexp", ()->
