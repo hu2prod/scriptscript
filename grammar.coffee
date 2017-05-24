@@ -112,7 +112,7 @@ q('comma_rvalue',  '#comma_rvalue #eol? , #eol? #rvalue').mx("ult=deep")
 q('array',  '[ #eol? ]')                                .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #eol? #comma_rvalue #eol? ]')            .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_priority} ult=deep")
-q('rvalue',  '#array')                                  .mx("ult=deep ti=array")
+q('rvalue',  '#array')                                  .mx("priority=#{base_priority} ult=deep ti=array")
 # NOTE lvalue array come later
 
 # ###################################################################################################

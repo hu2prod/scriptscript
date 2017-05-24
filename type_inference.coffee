@@ -172,7 +172,7 @@ for op in "and or".split /\s+/
 for op in "and or".split /\s+/
   def_bin op, "int", "int", "int"
 for type in "int float".split /\s+/
-  for op in "== != < <= > >=".split /\s+/
+  for op in "< <= > >=".split /\s+/
     def_bin op, type,type, "bool"
 
 for type in "string".split /\s+/ # NOTE any equal type !!!
@@ -207,9 +207,14 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
     # case 3
     at = a.mx_hash.type
     bt = b.mx_hash.type
-    key = "#{op},#{at},#{bt}"
-    if !_ret = bin_op_type_table[key]
-      throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
+    
+    if op in ['==', '!='] and at == bt
+      _ret = 'bool'
+    else
+      key = "#{op},#{at},#{bt}"
+      if !_ret = bin_op_type_table[key]
+        throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
+    
     if !node.mx_hash.type?
       node.mx_hash.type = _ret
       ret++

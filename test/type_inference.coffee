@@ -232,6 +232,7 @@ describe 'type_inference section', ()->
       "[1,a,a]" : "array<int>"
       "[a,1,a]" : "array<int>"
       "[a,a,1]" : "array<int>"
+      "[1] == [1]" : "bool"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -239,6 +240,7 @@ describe 'type_inference section', ()->
           assert.equal ast.mx_hash.type, v
     list = """
       [1,'1']
+      [1] == ['1']
     """.split "\n"
     for v in list
       do (v)->
