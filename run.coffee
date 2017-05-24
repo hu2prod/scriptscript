@@ -6,6 +6,7 @@ require 'fy'
 {yellow, green, cyan, magenta} = require "colors"
 {tokenize} = require './tokenizer'
 {parse   } = require './grammar'
+{type_inference} = require './type_inference'
 {translate} = require './translator'
 
 argv = require('minimist')(process.argv.slice(2))
@@ -34,12 +35,17 @@ if argv.t
   pp tok_res
 await parse     tok_res, {}, defer err, ast
 ### !pragma coverage-skip-block ###
+await type_inference ast[0],  {}, defer err, res
+throw err if err
+### !pragma coverage-skip-block ###
+
 throw err if err
 if argv.a
   p yellow.bold "AST[0]:"
   p ast[0]
   p yellow.bold "AST[0].value_array[0]:"
   p ast[0].value_array[0]
+
 await translate ast[0],  {}, defer err, res
 ### !pragma coverage-skip-block ###
 throw err if err

@@ -75,6 +75,8 @@ describe 'type_inference section', ()->
     
     list = """
       1+'1'
+      'a' or 'b'
+      'a' or 1
     """.split "\n"
     for v in list
       do (v)->

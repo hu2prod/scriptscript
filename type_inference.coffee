@@ -12,17 +12,37 @@ current_scope =
   id_map : {} # id -> ast pos list
 
 scope_list = [current_scope]
+scope_stack = []
 
 scope_state_reset = ()->
   current_scope =
     id_map : {} # id -> ast pos list
 
   scope_list = [current_scope]
+  scope_stack = []
   return
 
 scope_id_push = (node)->
   current_scope.id_map[node.value] ?= []
   current_scope.id_map[node.value].upush node
+  return
+
+_mk_scope = (node)->
+  return scope if scope = node.__inject_scope
+  
+  scope = node.__inject_scope =
+    id_map : {}
+  
+  scope_list.push scope
+  scope
+
+scope_push = (node)->
+  scope_stack.push current_scope
+  current_scope = _mk_scope node
+  return
+  
+scope_pop = ()->
+  current_scope = scope_stack.pop()
   return
 
 # ###################################################################################################
@@ -89,17 +109,14 @@ assert_pass_down_eq_list = (ast_list, type, diagnostics)->
 
 trans = new Translator
 trans.key = 'ti'
+trans.translator_hash['skip'] = translate:(ctx, node)-> 0
 trans.translator_hash['pass'] = translate:(ctx, node)->
   child = node.value_array[0]
   ret = ctx.translate child
-  ret += assert_pass_down_eq node, child, "bracket"
-  # if child.mx_hash.type?
-  #   if !node.mx_hash.type?
-  #     node.mx_hash.type = child.mx_hash.type
-  #     ret++
-  #   else
-  #     # UNIMPLEMENTED
+  ret += assert_pass_down_eq node, child, "pass"
   ret
+trans.translator_hash['block'] = translate:(ctx, node)->
+  ctx.translate node.value_array[1]
 
 trans.translator_hash['stmt_plus_last'] = translate:(ctx, node)->
   ret = 0
@@ -496,6 +513,46 @@ trans.translator_hash["hash"] = translate:(ctx, node)->
     else
       # UNIMPLEMENTED
   return ret
+# ###################################################################################################
+#    access
+# ###################################################################################################
+
+trans.translator_hash['access_stub'] = translate:(ctx, node)->
+  child = node.value_array[0]
+  ret = ctx.translate child
+  # unimplemented
+  # ret += assert_pass_down_eq node, child, "pass"
+  ret
+# ###################################################################################################
+#    function
+# ###################################################################################################
+
+trans.translator_hash['func_stub'] = translate:(ctx, node)->
+  ret = 0
+  function_body = null
+  for v in node.value_array
+    function_body = v if v.mx_hash.hash_key == 'function_body'
+  
+  scope_push node
+  # TODO translate arg default values
+  
+  if function_body?
+    ret += ctx.translate function_body
+  
+  scope_pop()
+  ret
+# ###################################################################################################
+#    access
+# ###################################################################################################
+
+trans.translator_hash['macro_stub'] = translate:(ctx, node)->
+  ret = 0
+  block = null
+  for v in node.value_array
+    block = v if v.mx_hash.hash_key == 'block'
+  
+  ret += ctx.translate block
+  ret
 # ###################################################################################################
 #    scope id pass
 # ###################################################################################################

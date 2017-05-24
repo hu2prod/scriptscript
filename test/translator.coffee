@@ -4,10 +4,19 @@ util = require 'fy/test_util'
 {_tokenize} = require '../tokenizer.coffee'
 {_parse   } = require '../grammar.coffee'
 {_translate, translate} = require '../translator.coffee'
-full = (t)->
+{_type_inference} = require '../type_inference.coffee'
+
+full = (t)-> # LEGACY. Should be removed ASAP
   tok = _tokenize(t)
   ast = _parse(tok, mode_full:true)
   _translate ast[0], {}
+
+full_ti = (t)->
+  tok = _tokenize(t)
+  ast = _parse(tok, mode_full:true)
+  _type_inference ast[0], {}
+  _translate ast[0], {}
+
 {go} = require '../index.coffee'
 
 describe 'translator section', ()->
@@ -30,11 +39,11 @@ describe 'translator section', ()->
     a ? b : c
     "abcd"
     'abcd'
-  """.split /\n/g
+  """.split /\n/g #"
   for sample in sample_list
     do (sample)->
       it JSON.stringify(sample), ()->
-        assert.equal full(sample), sample
+        assert.equal full_ti(sample), sample
   
   # bracketed
   sample_list = """
@@ -43,13 +52,43 @@ describe 'translator section', ()->
     delete a
     a++
     a--
-    a+b
-    a=b
   """.split /\n/g
   for sample in sample_list
     do (sample)->
       it JSON.stringify(sample), ()->
         assert.equal full(sample), "(#{sample})"
+  
+  describe "bin op", ()->
+    sample_list = """
+      a+b
+      a=b
+      a==b
+      a!=b
+      a<b
+      a<=b
+      a>b
+      a>=b
+    """.split /\n/g
+    for sample in sample_list
+      do (sample)->
+        it JSON.stringify(sample), ()->
+          assert.equal full_ti(sample), "(#{sample})"
+    kv =
+      "true or false"  : "(true||false)"
+      "1 or 2"  : "(1|2)"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          assert.equal full_ti(k), v
+    
+    sample_list = """
+      a or b
+    """.split /\n/g
+    for sample in sample_list
+      do (sample)->
+        it JSON.stringify(sample), ()->
+          util.throws ()->
+            full_ti(sample)
   
   describe "pre op", ()->
     kv =
@@ -88,7 +127,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full(k), v
+          assert.equal full_ti(k), v
   
   describe "comment", ()->
     kv =
@@ -97,7 +136,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full(k), v
+          assert.equal full_ti(k), v
   
   describe "access", ()->
     kv =
@@ -110,7 +149,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full(k), v
+          assert.equal full_ti(k), v
   
   describe "function", ()->
     kv =
@@ -146,14 +185,25 @@ describe 'translator section', ()->
           a
         })
         """
+      
+      """
+      ->
+        a=1
+        b=a
+      """       : """
+        (function(){
+          (a=1)
+          (b=a)
+        })
+        """
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full(k), v
+          assert.equal full_ti(k), v
         # TEMP  same
         k2 = k.replace "->", "=>"
         it JSON.stringify(k2), ()->
-          assert.equal full(k2), v
+          assert.equal full_ti(k2), v
     # TEMP throws
     kv =
       "(a:number)->"     : "(function(a){})"
@@ -161,7 +211,7 @@ describe 'translator section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           util.throws ()->
-            full(k)
+            full_ti(k)
   
   describe "macro-block", ()->
     kv =
@@ -201,7 +251,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full(k), v
+          assert.equal full_ti(k), v
     sample_list =
       """
       if
@@ -220,7 +270,7 @@ describe 'translator section', ()->
       do (v)->
         it JSON.stringify(v), ()->
           util.throws ()->
-            full(v)
+            full_ti(v)
   
   it 'test translate exception', (done)->
     await translate null, {}, defer(err)
@@ -231,6 +281,8 @@ describe 'translator section', ()->
     await go 'a', {}, defer(err, res)
     assert !(err?)
     await go 'a КИРИЛИЦА', {}, defer(err, res)
+    assert err?
+    await go '1 or true', {}, defer(err, res)
     assert err?
     await go '1a1', {}, defer(err, res)
     assert err?

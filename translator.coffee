@@ -32,8 +32,8 @@ deep = (ctx, node)->
   for v,k in value_array
     if trans.trans_skip[v.mx_hash.hash_key]?
       # LATER
-      # if node.mx_hash.eol_pass and v.mx_hash.hash_key == 'eol'
-        # list.push "\n"
+      if node.mx_hash.eol_pass and v.mx_hash.hash_key == 'eol'
+        list.push "\n"
     else if fn = trans.trans_token[v.mx_hash.hash_key]
       list.push fn v.value
     # else if trans.trans_value[v.mx_hash.hash_key]?
@@ -51,19 +51,47 @@ trans.translator_hash['value']  = translate:(ctx, node)->node.value
 trans.translator_hash['deep']   = translate:(ctx, node)->
   list = deep ctx, node
   list.join('')
+trans.translator_hash['block']   = translate:(ctx, node)->
+  list = deep ctx, node
+  make_tab list.join(''), '  '
 # ###################################################################################################
 #    bin_op
 # ###################################################################################################
-holder = new bin_op_translator_holder
-for v in bin_op_list = "+ - * /".split ' '
-  holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
-  v = v+"="
-  holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
 
-for v in bin_op_list = "=".split ' '
-  holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
+do ()->
+  holder = new bin_op_translator_holder
+  for v in bin_op_list = "+ - * /".split ' '
+    holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
+    v = v+"="
+    holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
 
-trans.translator_hash['bin_op'] = holder
+  for v in bin_op_list = "= == != < <= > >=".split ' '
+    holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
+  trans.translator_hash['bin_op'] = translate:(ctx, node)->
+    op = node.value_array[1].value
+    if op in ['or', 'and']
+      # needs type inference
+      [a,_skip,b] = node.value_array
+      a_tr = ctx.translate a
+      b_tr = ctx.translate b
+      
+      if !a.mx_hash.type? or !b.mx_hash.type?
+        throw new Error "can't translate op=#{op} because type inference can't detect type of arguments"
+      if a.mx_hash.type != b.mx_hash.type
+        # не пропустит type inference
+        ### !pragma coverage-skip-block ###
+        throw new Error "can't translate op=#{op} because type mismatch #{a.mx_hash.type} != #{b.mx_hash.type}"
+      switch a.mx_hash.type
+        when 'int'
+          return "(#{a_tr}|#{b_tr})"
+        when 'bool'
+          return "(#{a_tr}||#{b_tr})"
+        else
+          # не пропустит type inference
+          ### !pragma coverage-skip-block ###
+          throw new Error "op=#{op} doesn't support type #{a.mx_hash.type}"
+    
+    holder.translate ctx, node
 # ###################################################################################################
 #    pre_op
 # ###################################################################################################

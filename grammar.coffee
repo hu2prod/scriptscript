@@ -149,14 +149,14 @@ q('rvalue',  '#bracket_less_hash')                      .mx("ult=hash_wrap")
 #    access
 # ###################################################################################################
 # [] access
-q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority} ult=array_access")
+q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority} ult=array_access ti=access_stub")
 # . access
-q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority} ult=field_access")
+q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority} ult=field_access ti=access_stub")
 
 # opencl-like access
 # proper
-q('lvalue', '#lvalue . #decimal_literal')               .mx("priority=#{base_priority} ult=opencl_access")
-q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_priority} ult=opencl_access")
+q('lvalue', '#lvalue . #decimal_literal')               .mx("priority=#{base_priority} ult=opencl_access ti=access_stub")
+q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_priority} ult=opencl_access ti=access_stub")
 # hack for a.0123 float_enabled
 # q('lvalue', '#lvalue #float_literal')                   .mx("priority=#{base_priority}")      .strict('#lvalue.tail_space=0 #float_literal[0:0]="."')
 # ###################################################################################################
@@ -166,12 +166,12 @@ q('rvalue', '#lvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_pri
 # ###################################################################################################
 #    function decl
 # ###################################################################################################
-q('rvalue', '-> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl")
-q('rvalue', '=> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl")
-q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl")
-q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl")
-q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl")
-q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority} ult=func_decl")
+q('rvalue', '-> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
+q('rvalue', '=> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
+q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
+q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
+q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_stub")
+q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_stub")
 
 q('arg_list', '#arg')                                   .mx("priority=#{base_priority}")
 q('arg_list', '#arg_list , #arg')                       .mx("priority=#{base_priority}")
@@ -184,29 +184,29 @@ q('arg', '#identifier = #rvalue')                       .mx("priority=#{base_pri
 q('type', '#identifier')                                .mx("priority=#{base_priority}")
 # LATER array<T> support
 
-q('function_body', '#stmt')                             .mx("priority=#{base_priority} ult=func_decl_return")
-q('function_body', '#block')                            .mx("priority=#{base_priority} ult=deep")
+q('function_body', '#stmt')                             .mx("priority=#{base_priority} ult=func_decl_return ti=pass")
+q('function_body', '#block')                            .mx("priority=#{base_priority} ult=deep ti=pass")
 # ###################################################################################################
 #    block
 # ###################################################################################################
 
-q('block', '#indent #stmt_plus #dedent')                .mx("priority=#{base_priority} ult=deep")
+q('block', '#indent #stmt_plus #dedent')                .mx("priority=#{base_priority} ult=block ti=block")
 q('stmt_plus', '#stmt')                                 .mx("priority=#{base_priority} ult=deep ti=pass")
-q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority} ult=deep ti=stmt_plus_last")
+q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority} ult=deep ti=stmt_plus_last eol_pass=1")
 
 # ###################################################################################################
 #    macro-block
 # ###################################################################################################
-q('rvalue', '#identifier #rvalue? #block')              .mx("priority=#{base_priority} ult=macro_block")
+q('rvalue', '#identifier #rvalue? #block')              .mx("priority=#{base_priority} ult=macro_block ti=macro_stub")
 
 
 # ###################################################################################################
 
 q('stmt',  '#rvalue')                                   .mx("ult=deep ti=pass")
-q('stmt',  '#stmt #comment')                            .mx("ult=deep")
-q('stmt',  '#comment')                                  .mx("ult=deep")
+q('stmt',  '#stmt #comment')                            .mx("ult=deep ti=pass")
+q('stmt',  '#comment')                                  .mx("ult=deep ti=skip")
 
-q('stmt',  '__test_untranslated')                       # FOR test purposes only
+q('stmt',  '__test_untranslated')                       .mx("ti=skip")                       # FOR test purposes only
 
 show_diff = (a,b)->
   ### !pragma coverage-skip-block ###
