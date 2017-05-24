@@ -141,6 +141,7 @@ describe 'gram section', ()->
     + a
     + a # a
     a ? b:c : d
+    @=1
   """.split /\n/g
   # KNOWN fuckup a ? b:c : d # comment
   # b:c can be bracketless hash and c:d can be bracketless hash

@@ -27,7 +27,7 @@ q('str_const', '#string_literal')                       .mx("ult=value ti=const 
 q('str_const', '#string_non_interpolated_literal')      .mx("ult=value ti=const type=string")
 q('const', '#str_const')                                .mx("ult=deep  ti=pass")
 q('rvalue','#const')                                    .mx("priority=#{base_priority} ult=deep  ti=pass")
-q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value")
+q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value ti=this block_assign=1")
 q('lvalue','@ #identifier')                             .mx("priority=#{base_priority} ult=value")
 
 q('rvalue', '#string_interpolated_start_single_literal #rvalue #string_interpolated_end_single_literal').mx("ult=string_interpolated")
@@ -91,7 +91,7 @@ q('pre_pipe_rvalue',  '#multipipe #rvalue')                                     
 q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                                     #.strict("#rvalue.priority<#{pipe_priority}")
 q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}")   .strict("#rvalue[1].priority<=#{pipe_priority}")
 # assign
-q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op ti=assign_bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
+q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op ti=assign_bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority !#lvalue.block_assign')
 
 
 q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op ti=pre_op').strict('#rvalue[1].priority<=#pre_op.priority')
@@ -191,7 +191,7 @@ q('function_body', '#block')                            .mx("priority=#{base_pri
 
 q('block', '#indent #stmt_plus #dedent')                .mx("priority=#{base_priority} ult=deep")
 q('stmt_plus', '#stmt')                                 .mx("priority=#{base_priority} ult=deep ti=pass")
-q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority} ult=deep")
+q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority} ult=deep ti=stmt_plus_last")
 
 # ###################################################################################################
 #    macro-block
