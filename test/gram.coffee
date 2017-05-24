@@ -152,23 +152,23 @@ describe 'gram section', ()->
   
   it 'a+a*a priority',  ()->
     ret = full 'a+a*a'
-    rvalue = ret[0].value_array
-    assert.equal rvalue[0].value_array[1].value, "+"
+    rvalue = ret[0].value_array[0]
+    assert.equal rvalue.value_array[0].value_array[1].value, "+"
   
   it 'a*a+a priority',  ()->
     ret = full 'a*a+a'
-    rvalue = ret[0].value_array
-    assert.equal rvalue[0].value_array[1].value, "+"
+    rvalue = ret[0].value_array[0]
+    assert.equal rvalue.value_array[0].value_array[1].value, "+"
   
   it 'void a+a priority',  ()->
     ret = full 'void a+a'
-    rvalue = ret[0].value_array
-    assert.equal rvalue[0].value_array[0].value, "void"
+    rvalue = ret[0].value_array[0]
+    assert.equal rvalue.value_array[0].value_array[0].value, "void"
   
   it '-a+b priority',  ()->
     ret = full '-a+b'
-    rvalue = ret[0].value_array
-    assert.equal rvalue[0].value_array[1].value, "+"
+    rvalue = ret[0].value_array[0]
+    assert.equal rvalue.value_array[0].value_array[1].value, "+"
   
   describe 'macro-block section', ()->
     describe 'array section', ()->

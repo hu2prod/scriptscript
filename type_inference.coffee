@@ -16,7 +16,7 @@ assert_pass_down = (ast, type, diagnostics)->
   # TODO
   return
 
-assert_pass_down_eq = (ast1, ast2, type, diagnostics)->
+assert_pass_down_eq = (ast1, ast2, diagnostics)->
   if ast1.mx_hash.type? and ast2.mx_hash.type?
     if ast1.mx_hash.type != ast2.mx_hash.type
       throw new Error "assert pass up eq failed node1='#{ast1.value}'[#{ast1.mx_hash.type}] != node2='#{ast2.value}'[#{ast2.mx_hash.type}]; extra=#{diagnostics}"
@@ -123,6 +123,55 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
       throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
     node.mx_hash.type = ret
   else
+    # case 2
+    # not implemented
+    return
+  
+  return
+# ###################################################################################################
+#    assign_bin_op
+# ###################################################################################################
+trans.translator_hash['assign_bin_op'] = translate:(ctx, node)->
+  rvalue_list = []
+  bin_op_list = []
+  for v in node.value_array
+    rvalue_list.push v if v.mx_hash.hash_key in ['lvalue', 'rvalue']
+    bin_op_list.push v if v.mx_hash.hash_key == 'assign_bin_op'
+  
+  bin_op_node = bin_op_list[0]
+  op = bin_op_node.value.replace '=', ''
+  
+  for v in rvalue_list
+    ctx.translate v
+  
+  # cases
+  # no type detected - can build system that limits a, b and result
+  # 1 type detected  - can build system that limits second and result
+  # 2 type detected  - can validate and send result
+  # LATER result defined + some args
+  
+  [a,b] = rvalue_list
+  if !a.mx_hash.type? and !b.mx_hash.type?
+    # case 1
+    # not implemented
+    return
+  else if a.mx_hash.type? and b.mx_hash.type?
+    # case 3
+    if op == ''
+      assert_pass_down_eq a, b, "assign_bin_op"
+    else
+      at = a.mx_hash.type
+      bt = b.mx_hash.type
+      key = "#{op},#{at},#{bt}"
+      if !ret = bin_op_type_table[key]
+        throw new Error "can't find assign_bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
+      if ret != at
+        throw new Error "assign_bin_op conflict '#{ret}' != '#{at}'"
+      node.mx_hash.type = ret
+  else
+    if b.mx_hash.type?
+      assert_pass_down a, b.mx_hash.type, 'assign_bin_op'
+      node.mx_hash.type = b.mx_hash.type
     # case 2
     # not implemented
     return

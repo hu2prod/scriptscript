@@ -80,6 +80,25 @@ describe 'type_inference section', ()->
           util.throws ()->
             full v
   
+  describe 'assign op', ()->
+    kv =
+      "a=b"   : undefined
+      "a=1"   : "int"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type, v
+    
+    # list = """
+      # 1+'1'
+    # """.split "\n"
+    # for v in list
+      # do (v)->
+        # it JSON.stringify(v), ()->
+          # util.throws ()->
+            # full v
+  
   describe 'pre op', ()->
     kv =
       "+a"       : undefined

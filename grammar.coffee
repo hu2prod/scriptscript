@@ -91,7 +91,7 @@ q('pre_pipe_rvalue',  '#multipipe #rvalue')                                     
 q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                                     #.strict("#rvalue.priority<#{pipe_priority}")
 q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}")   .strict("#rvalue[1].priority<=#{pipe_priority}")
 # assign
-q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
+q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op ti=assign_bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority')
 
 
 q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op ti=pre_op').strict('#rvalue[1].priority<=#pre_op.priority')
@@ -190,7 +190,7 @@ q('function_body', '#block')                            .mx("priority=#{base_pri
 # ###################################################################################################
 
 q('block', '#indent #stmt_plus #dedent')                .mx("priority=#{base_priority} ult=deep")
-q('stmt_plus', '#stmt')                                 .mx("priority=#{base_priority} ult=deep")
+q('stmt_plus', '#stmt')                                 .mx("priority=#{base_priority} ult=deep ti=pass")
 q('stmt_plus', '#stmt_plus #eol #stmt')                 .mx("priority=#{base_priority} ult=deep")
 
 # ###################################################################################################
@@ -243,7 +243,7 @@ g.fix_overlapping_token = true
 @_parse = (str, opt={})->
   g.mode_full = opt.mode_full || false
   res = g.parse_text_list str,
-    expected_token : 'stmt'
+    expected_token : 'stmt_plus'
   if res.length == 0
     throw new Error "Parsing error. No proper combination found"
   if res.length != 1
