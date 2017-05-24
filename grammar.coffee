@@ -149,9 +149,9 @@ q('rvalue',  '#bracket_less_hash')                      .mx("ult=hash_wrap")
 #    access
 # ###################################################################################################
 # [] access
-q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority}")
+q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority} ult=array_access")
 # . access
-q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority}")
+q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority} ult=field_access")
 
 # opencl-like access
 # proper

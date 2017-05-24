@@ -99,6 +99,15 @@ describe 'translator section', ()->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
   
+  describe "access", ()->
+    kv =
+      "a.b"        : "a.b"
+      "a[b]"       : "a[b]"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          assert.equal full(k), v
+  
   describe "function", ()->
     kv =
       "->"        : "(function(){})"
@@ -157,6 +166,14 @@ describe 'translator section', ()->
         b
       """       : """
         if (a) {
+          b
+        }
+        """
+      """
+      while a
+        b
+      """       : """
+        while(a) {
           b
         }
         """

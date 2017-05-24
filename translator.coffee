@@ -101,15 +101,23 @@ trans.translator_hash['string_interpolated'] = translate:(ctx, node)->
 #    hash
 # ###################################################################################################
 trans.translator_hash["hash_pair_simple"] = translate:(ctx,node)->
-  [_key,skip,_value] = node.value_array
-  value = ctx.translate _value
-  "#{_key.value}:#{value}"
+  [key, _skip, value] = node.value_array
+  "#{key.value}:#{ctx.translate value}"
 trans.translator_hash["hash_pair_auto"] = translate:(ctx,node)->
-  [_value] = node.value_array
-  "#{_value.value}:#{_value.value}"
+  [value] = node.value_array
+  "#{value.value}:#{value.value}"
 trans.translator_hash['hash_wrap']   = translate:(ctx, node)->
   list = deep ctx, node
   "{"+list.join('')+"}"
+# ###################################################################################################
+#    access
+# ###################################################################################################
+trans.translator_hash["field_access"] = translate:(ctx,node)->
+  [root, _skip, field] = node.value_array
+  "#{ctx.translate root}.#{field.value}"
+trans.translator_hash["array_access"] = translate:(ctx,node)->
+  [root, _skip, field, _skip] = node.value_array
+  "#{ctx.translate root}[#{ctx.translate field}]"
 # ###################################################################################################
 #    func_decl
 # ###################################################################################################
@@ -182,6 +190,12 @@ trans.macro_block_condition_hash =
   "if" : (ctx, condition, block)->
     """
     if (#{ctx.translate condition}) {
+      #{make_tab ctx.translate(block), '  '}
+    }
+    """
+  "while" : (ctx, condition, block)->
+    """
+    while(#{ctx.translate condition}) {
       #{make_tab ctx.translate(block), '  '}
     }
     """
