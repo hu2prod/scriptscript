@@ -94,15 +94,14 @@ string_regex_craft = ///
       )\}
     )
 ///.toString().replace(/\//g,'')
-string_single_regex = ///
-  ^('''|')
+string_single_regex_craft = ///
   (?:
     [^\\] |
     #{string_regex_craft}
   )*?
-  \1
-///
-tokenizer.parser_list.push (new Token_parser 'string_literal', string_single_regex)
+///.toString().replace(/\//g,'')
+tokenizer.parser_list.push (new Token_parser 'string_literal_singleq', ///^'#{string_single_regex_craft}'///)
+tokenizer.parser_list.push (new Token_parser 'block_string_literal_singleq', ///^'''#{string_single_regex_craft}'''///)
 double_quoted_regexp_craft = ///
   (?:
     [^\\#] |
