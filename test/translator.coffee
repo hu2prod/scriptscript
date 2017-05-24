@@ -103,6 +103,10 @@ describe 'translator section', ()->
     kv =
       "a.b"        : "a.b"
       "a[b]"       : "a[b]"
+      "a.0"        : "a[0]"
+      "a.1"        : "a[1]"
+      "a.01"       : "[a[0],a[1]]"
+      "a.12"       : "[a[1],a[2]]"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->

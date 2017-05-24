@@ -118,6 +118,17 @@ trans.translator_hash["field_access"] = translate:(ctx,node)->
 trans.translator_hash["array_access"] = translate:(ctx,node)->
   [root, _skip, field, _skip] = node.value_array
   "#{ctx.translate root}[#{ctx.translate field}]"
+trans.translator_hash["opencl_access"] = translate:(ctx,node)->
+  [root, _skip, field] = node.value_array
+  root_tr = ctx.translate root
+  key = field.value
+  if key.length == 1
+    return "#{root_tr}[#{key}]"
+  # TODO ref
+  ret = []
+  for k in key
+    ret.push "#{root_tr}[#{k}]"
+  "[#{ret.join ','}]"
 # ###################################################################################################
 #    func_decl
 # ###################################################################################################
