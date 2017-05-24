@@ -82,11 +82,8 @@ tokenizer.parser_list.push (new Token_parser 'identifier', /^[_\$a-z][_\$a-z0-9]
 tokenizer.parser_list.push (new Token_parser 'arrow_function', /^[-=]>/)
 # Version from the CoffeeScript source code: /^###([^#][\s\S]*?)(?:###[^\n\S]*|###$)|^(?:\s*#(?!##[^#]).*)+/
 tokenizer.parser_list.push (new Token_parser 'comment', /^(###[^#][^]*###|#.*)/)
-tokenizer.parser_list.push (new Token_parser 'string_literal', ///
-  ^('''|')
-  # (?![^]*[^\\]\1[^]*\1)     # ensures that all corresponding quotes inside the string are escaped
-  (?:
-    [^\\] |
+
+string_regex_craft = ///
     \\[^xu] |               # x and u are case sensitive while hex letters are not
     \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
     \\u(?:
@@ -96,22 +93,21 @@ tokenizer.parser_list.push (new Token_parser 'string_literal', ///
         10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
       )\}
     )
+///.toString().replace(/\//g,'')
+string_single_regex = ///
+  ^('''|')
+  (?:
+    [^\\] |
+    #{string_regex_craft}
   )*?
   \1
-///)
+///
+tokenizer.parser_list.push (new Token_parser 'string_literal', string_single_regex)
 double_quoted_regexp_craft = ///
   (?:
     [^\\#] |
     \#(?!\{) |
-    \\[^xu] |               # x and u are case sensitive while hex letters are not
-    \\x[0-9a-fA-F]{2} |     # Hexadecimal escape sequence
-    \\u(?:
-      [0-9a-fA-F]{4} |      # Unicode escape sequence
-      \{(?:
-        [0-9a-fA-F]{1,5} |  # Unicode code point escapes from 0 to FFFFF
-        10[0-9a-fA-F]{4}    # Unicode code point escapes from 100000 to 10FFFF
-      )\}
-    )
+    #{string_regex_craft}
   )*?
 ///.toString().replace(/\//g,'')
 tokenizer.parser_list.push (new Token_parser 'string_non_interpolated_literal',          new RegExp '^("""|")'+double_quoted_regexp_craft+'\\1')
