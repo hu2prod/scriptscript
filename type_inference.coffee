@@ -175,10 +175,6 @@ for type in "int float".split /\s+/
   for op in "< <= > >=".split /\s+/
     def_bin op, type,type, "bool"
 
-for type in "string".split /\s+/ # NOTE any equal type !!!
-  for op in "== !=".split /\s+/
-    def_bin op, type,type, "bool"
-
 trans.translator_hash['bin_op'] = translate:(ctx, node)->
   ret = 0
   rvalue_list = []
