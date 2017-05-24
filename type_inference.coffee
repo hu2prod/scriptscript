@@ -362,51 +362,55 @@ trans.translator_hash['pre_op'] = translate:(ctx, node)->
   ret
 
 # LATER
-# # ###################################################################################################
-# #    post_op
-# # ###################################################################################################
-# post_op_type_table = {}
-# def_post = (op,at,ret)->
-#   key = "#{op},#{at}"
-#   post_op_type_table[key] = ret
-#   return
-# 
-# def_post "++", "int",  "int"
-# def_post "--", "int",  "int"
-# 
-# 
-# trans.translator_hash['post_op'] = translate:(ctx, node)->
-#   ret = 0
-#   rvalue_list = []
-#   post_op_list = []
-#   for v in node.value_array
-#     rvalue_list.push v if v.mx_hash.hash_key == 'rvalue'
-#     post_op_list.push v if v.mx_hash.hash_key == 'post_op'
-#   
-#   post_op_node = post_op_list[0]
-#   op = post_op_node.value
-#   
-#   for v in rvalue_list
-#     ret += ctx.translate v
-#   
-#   # cases
-#   # no type detected - can build system that limits a, b and result
-#   # 1 type detected  - can validate and send result
-#   
-#   [a] = rvalue_list
-#   if !a.mx_hash.type?
-#     # case 1
-#     # not implemented
-#   else
-#     # case 2
-#     at = a.mx_hash.type
-#     key = "#{op},#{at}"
-#     if !_ret = post_op_type_table[key]
-#       throw new Error "can't find post_op=#{op} a=#{at} node=#{node.value}"
-#     node.mx_hash.type = _ret
-#     ret++
-#   
-#   ret
+# ###################################################################################################
+#    post_op
+# ###################################################################################################
+post_op_type_table = {}
+def_post = (op,at,ret)->
+  key = "#{op},#{at}"
+  post_op_type_table[key] = ret
+  return
+
+def_post "++", "int",  "int"
+def_post "--", "int",  "int"
+
+# NOTE 1++ is not valid, but passes gram and TI
+
+trans.translator_hash['post_op'] = translate:(ctx, node)->
+  ret = 0
+  rvalue_list = []
+  post_op_list = []
+  for v in node.value_array
+    rvalue_list.push v if v.mx_hash.hash_key == 'rvalue'
+    post_op_list.push v if v.mx_hash.hash_key == 'post_op'
+  
+  post_op_node = post_op_list[0]
+  op = post_op_node.value
+  
+  for v in rvalue_list
+    ret += ctx.translate v
+  
+  # cases
+  # no type detected - can build system that limits a, b and result
+  # 1 type detected  - can validate and send result
+  
+  [a] = rvalue_list
+  if !a.mx_hash.type?
+    # case 1
+    # not implemented
+  else
+    # case 2
+    at = a.mx_hash.type
+    key = "#{op},#{at}"
+    if !_ret = post_op_type_table[key]
+      throw new Error "can't find post_op=#{op} a=#{at} node=#{node.value}"
+    if !node.mx_hash.type?
+      node.mx_hash.type = _ret
+      ret++
+    else
+      # UNIMPLEMENTED
+  
+  ret
 # # ###################################################################################################
 trans.translator_hash["ternary"] = translate:(ctx, node)->
   ret = 0
@@ -552,6 +556,17 @@ trans.translator_hash['macro_stub'] = translate:(ctx, node)->
     block = v if v.mx_hash.hash_key == 'block'
   
   ret += ctx.translate block
+  ret
+# ###################################################################################################
+#    string_interpolated
+# ###################################################################################################
+
+trans.translator_hash['string_inter_pass'] = translate:(ctx, node)->
+  ret = 0
+  for v in node.value_array
+    if v.mx_hash.hash_key == 'rvalue'
+      ret += ctx.translate v
+      # TODO check v.mx_hash.type castable to string
   ret
 # ###################################################################################################
 #    scope id pass

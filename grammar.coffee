@@ -31,7 +31,7 @@ q('rvalue','#const')                                    .mx("priority=#{base_pri
 q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value ti=this block_assign=1")
 q('lvalue','@ #identifier')                             .mx("priority=#{base_priority} ult=value")
 
-q('rvalue', '#string_interpolated_start_single_literal #rvalue #string_interpolated_end_single_literal').mx("ult=string_interpolated")
+q('rvalue', '#string_interpolated_start_single_literal #rvalue #string_interpolated_end_single_literal').mx("ult=string_interpolated ti=string_inter_pass")
 
 # ###################################################################################################
 #    operators define
@@ -90,13 +90,13 @@ q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.pr
 # indent+pipe
 q('pre_pipe_rvalue',  '#multipipe #rvalue')                                                           #.strict("#rvalue.priority<#{pipe_priority}")
 q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                                     #.strict("#rvalue.priority<#{pipe_priority}")
-q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}")   .strict("#rvalue[1].priority<=#{pipe_priority}")
+q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}")             .strict("#rvalue[1].priority<=#{pipe_priority}")
 # assign
 q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op ti=assign_bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority !#lvalue.block_assign')
 
 
-q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op ti=pre_op').strict('#rvalue[1].priority<=#pre_op.priority')
-q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority ult=post_op') .strict('#rvalue[1].priority<#post_op.priority !#rvalue.tail_space') # a++ ++ is not allowed
+q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op ti=pre_op')   .strict('#rvalue[1].priority<=#pre_op.priority')
+q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.priority ult=post_op ti=post_op').strict('#rvalue[1].priority<#post_op.priority !#rvalue.tail_space') # a++ ++ is not allowed
 # ###################################################################################################
 #    ternary
 # ###################################################################################################
@@ -138,7 +138,7 @@ q('BL_pair_comma_rvalue',  '#BL_pair_comma_rvalue , #pair').mx("ult=deep")      
 
 q('bracket_less_hash',  '#BL_pair_comma_rvalue')                 .mx("priority=#{base_priority} ult=deep")
 q('bracket_less_hash',  '#indent #BL_pair_comma_rvalue #dedent') .mx("priority=#{base_priority} ult=deep")
-q('rvalue',  '#bracket_less_hash')                      .mx("ult=hash_wrap")
+q('rvalue',  '#bracket_less_hash')                      .mx("ult=hash_wrap ti=hash")
 # LATER bracket-less hash
 # fuckup sample
 # a a:b,c:d

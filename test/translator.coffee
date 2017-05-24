@@ -6,12 +6,7 @@ util = require 'fy/test_util'
 {_translate, translate} = require '../translator.coffee'
 {_type_inference} = require '../type_inference.coffee'
 
-full = (t)-> # LEGACY. Should be removed ASAP
-  tok = _tokenize(t)
-  ast = _parse(tok, mode_full:true)
-  _translate ast[0], {}
-
-full_ti = (t)->
+full = (t)->
   tok = _tokenize(t)
   ast = _parse(tok, mode_full:true)
   _type_inference ast[0], {}
@@ -43,7 +38,7 @@ describe 'translator section', ()->
   for sample in sample_list
     do (sample)->
       it JSON.stringify(sample), ()->
-        assert.equal full_ti(sample), sample
+        assert.equal full(sample), sample
   
   # bracketed
   sample_list = """
@@ -72,14 +67,14 @@ describe 'translator section', ()->
     for sample in sample_list
       do (sample)->
         it JSON.stringify(sample), ()->
-          assert.equal full_ti(sample), "(#{sample})"
+          assert.equal full(sample), "(#{sample})"
     kv =
       "true or false"  : "(true||false)"
       "1 or 2"  : "(1|2)"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full_ti(k), v
+          assert.equal full(k), v
     
     sample_list = """
       a or b
@@ -88,7 +83,7 @@ describe 'translator section', ()->
       do (sample)->
         it JSON.stringify(sample), ()->
           util.throws ()->
-            full_ti(sample)
+            full(sample)
   
   describe "pre op", ()->
     kv =
@@ -127,7 +122,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full_ti(k), v
+          assert.equal full(k), v
   
   describe "comment", ()->
     kv =
@@ -136,7 +131,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full_ti(k), v
+          assert.equal full(k), v
   
   describe "access", ()->
     kv =
@@ -149,7 +144,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full_ti(k), v
+          assert.equal full(k), v
   
   describe "function", ()->
     kv =
@@ -199,11 +194,11 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full_ti(k), v
+          assert.equal full(k), v
         # TEMP  same
         k2 = k.replace "->", "=>"
         it JSON.stringify(k2), ()->
-          assert.equal full_ti(k2), v
+          assert.equal full(k2), v
     # TEMP throws
     kv =
       "(a:number)->"     : "(function(a){})"
@@ -211,7 +206,7 @@ describe 'translator section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           util.throws ()->
-            full_ti(k)
+            full(k)
   
   describe "macro-block", ()->
     kv =
@@ -251,7 +246,7 @@ describe 'translator section', ()->
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
-          assert.equal full_ti(k), v
+          assert.equal full(k), v
     sample_list =
       """
       if
@@ -270,7 +265,7 @@ describe 'translator section', ()->
       do (v)->
         it JSON.stringify(v), ()->
           util.throws ()->
-            full_ti(v)
+            full(v)
   
   it 'test translate exception', (done)->
     await translate null, {}, defer(err)
