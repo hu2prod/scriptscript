@@ -642,15 +642,27 @@ trans.translator_hash['id_access'] = translate:(ctx, node)->
         throw new Error "Trying to access field '#{id.value}' of not allowed type '#{root.mx_hash.type.main}'"
     
     if subtype and subtype.main != '*'
-      ret += assert_pass_down node, subtype, "array_access"
+      ret += assert_pass_down node, subtype, "id_access"
   
   ret
 
-trans.translator_hash['access_stub'] = translate:(ctx, node)->
-  child = node.value_array[0]
-  ret = ctx.translate child
-  # unimplemented
-  # ret += assert_pass_down_eq node, child, "pass"
+trans.translator_hash['opencl_access'] = translate:(ctx, node)->
+  
+  [root, _skip, id] = node.value_array
+  ret = ctx.translate root
+  
+  if root.mx_hash.type
+    subtype = root.mx_hash.type.nest[0]
+    switch root.mx_hash.type.main
+      when 'array'
+        if id.value.length != 1
+          subtype = root.mx_hash.type
+      else
+        throw new Error "Trying to access field '#{id.value}' of not allowed type '#{root.mx_hash.type.main}'"
+    
+    if subtype and subtype.main != '*'
+      ret += assert_pass_down node, subtype, "opencl_access"
+  
   ret
 # ###################################################################################################
 #    function

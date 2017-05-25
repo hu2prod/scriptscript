@@ -360,6 +360,36 @@ describe 'type_inference section', ()->
           util.throws ()->
             full v
   
+  describe 'opencl access', ()->
+    kv =
+      "a.0"             : undefined
+      "a.1"             : undefined
+      "a.01"            : undefined
+      "a.11"            : undefined
+      
+      "a = []\na.0"     : undefined
+      "a = []\na.1"     : undefined
+      
+      "a = [1]\na.0"     : "int"
+      "a = [1]\na.1"     : "int"
+      
+      "a = [1]\na.01"    : "array<int>"
+      "a = [1]\na.11"    : "array<int>"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type?.toString(), v
+    list = """
+      a = {}
+      a.0
+    """.split /\n?---\n?/g
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
   describe 'function', ()->
     kv =
       "->"          : "function<void>"

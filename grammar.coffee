@@ -166,8 +166,8 @@ q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_pri
 
 # opencl-like access
 # proper
-q('lvalue', '#lvalue . #decimal_literal')               .mx("priority=#{base_priority} ult=opencl_access ti=access_stub")
-q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_priority} ult=opencl_access ti=access_stub")
+q('lvalue', '#lvalue . #decimal_literal')               .mx("priority=#{base_priority} ult=opencl_access ti=opencl_access")
+q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_priority} ult=opencl_access ti=opencl_access")
 # hack for a.0123 float_enabled
 # q('lvalue', '#lvalue #float_literal')                   .mx("priority=#{base_priority}")      .strict('#lvalue.tail_space=0 #float_literal[0:0]="."')
 # ###################################################################################################
