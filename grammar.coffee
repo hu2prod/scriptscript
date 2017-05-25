@@ -32,7 +32,7 @@ q('rvalue','#const')                                    .mx("priority=#{base_pri
 q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value ti=this block_assign=1")
 q('lvalue','@ #identifier')                             .mx("priority=#{base_priority} ult=value")
 
-q('rvalue', '#string_interpolated_start_single_literal #rvalue #string_interpolated_end_single_literal').mx("ult=string_interpolated ti=string_inter_pass")
+q('rvalue', '#string_template_start #rvalue #string_template_end').mx("ult=string_interpolated ti=string_inter_pass")
 
 # ###################################################################################################
 #    operators define

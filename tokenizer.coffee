@@ -94,14 +94,14 @@ string_regex_craft = ///
       )\}
     )
 ///.toString().replace(/\//g,'')
-string_single_regex_craft = ///
+single_quoted_regex_craft = ///
   (?:
     [^\\] |
     #{string_regex_craft}
   )*?
 ///.toString().replace(/\//g,'')
-tokenizer.parser_list.push (new Token_parser 'string_literal_singleq', ///^'#{string_single_regex_craft}'///)
-tokenizer.parser_list.push (new Token_parser 'block_string_literal_singleq', ///^'''#{string_single_regex_craft}'''///)
+tokenizer.parser_list.push (new Token_parser 'string_literal_singleq'      , /// ^  ' #{single_quoted_regex_craft} '    ///)
+tokenizer.parser_list.push (new Token_parser 'block_string_literal_singleq', /// ^''' #{single_quoted_regex_craft} '''  ///)
 double_quoted_regexp_craft = ///
   (?:
     [^\\#] |
@@ -109,13 +109,13 @@ double_quoted_regexp_craft = ///
     #{string_regex_craft}
   )*?
 ///.toString().replace(/\//g,'')
-tokenizer.parser_list.push (new Token_parser 'string_literal_doubleq', ///^"#{double_quoted_regexp_craft}"///)
-tokenizer.parser_list.push (new Token_parser 'block_string_literal_doubleq', ///^"""#{double_quoted_regexp_craft}"""///)
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_single_literal', new RegExp '^"'+double_quoted_regexp_craft+'#{')
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_single_literal',   new RegExp '^}'+double_quoted_regexp_craft+'"')
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_mid_literal',          new RegExp '^}'+double_quoted_regexp_craft+'#{')
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_triple_literal', new RegExp '^"""'+double_quoted_regexp_craft+'#{')
-tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_triple_literal',   new RegExp '^}'+double_quoted_regexp_craft+'"""')
+tokenizer.parser_list.push (new Token_parser 'string_literal_doubleq'      , /// ^  " #{double_quoted_regexp_craft} "    ///)
+tokenizer.parser_list.push (new Token_parser 'block_string_literal_doubleq', /// ^""" #{double_quoted_regexp_craft} """  ///)
+tokenizer.parser_list.push (new Token_parser 'string_template_start'       , /// ^  " #{double_quoted_regexp_craft} \#\{ ///)
+tokenizer.parser_list.push (new Token_parser 'string_template_end'         , /// ^  } #{double_quoted_regexp_craft} "    ///)
+tokenizer.parser_list.push (new Token_parser 'string_template_mid'         , /// ^  } #{double_quoted_regexp_craft} \#\{ ///)
+tokenizer.parser_list.push (new Token_parser 'block_string_template_start' , /// ^""" #{double_quoted_regexp_craft} \#\{ ///)
+tokenizer.parser_list.push (new Token_parser 'block_string_template_end'   , /// ^  } #{double_quoted_regexp_craft} """  ///)
 
 # NOTE don't check flags. Because of reasons
 tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///
