@@ -140,7 +140,7 @@ q('pair_comma_rvalue',  '#pair_comma_rvalue #eol? , #eol? #pair').mx("ult=deep")
 q('hash',  '{ #eol? }')                                 .mx("priority=#{base_priority} ult=deep")
 q('hash',  '{ #eol? #pair_comma_rvalue #eol? }')        .mx("priority=#{base_priority} ult=deep")
 q('hash',  '{ #indent #pair_comma_rvalue? #dedent }')   .mx("priority=#{base_priority} ult=deep")
-q('rvalue',  '#hash')                                   .mx("ult=deep ti=hash")
+q('rvalue',  '#hash')                                   .mx("priority=#{base_priority} ult=deep ti=hash")
 
 
 q('BL_pair_comma_rvalue',  '#pair')                        .mx("ult=deep")                           .strict("!#pair.auto")
@@ -149,7 +149,7 @@ q('BL_pair_comma_rvalue',  '#BL_pair_comma_rvalue , #pair').mx("ult=deep")      
 
 q('bracket_less_hash',  '#BL_pair_comma_rvalue')                 .mx("priority=#{base_priority} ult=deep")
 q('bracket_less_hash',  '#indent #BL_pair_comma_rvalue #dedent') .mx("priority=#{base_priority} ult=deep")
-q('rvalue',  '#bracket_less_hash')                      .mx("ult=hash_wrap ti=hash")
+q('rvalue',  '#bracket_less_hash')                      .mx("priority=#{base_priority} ult=hash_wrap ti=hash")
 # LATER bracket-less hash
 # fuckup sample
 # a a:b,c:d
@@ -160,7 +160,7 @@ q('rvalue',  '#bracket_less_hash')                      .mx("ult=hash_wrap ti=ha
 #    access
 # ###################################################################################################
 # [] access
-q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority} ult=array_access ti=access_stub")
+q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority} ult=array_access ti=array_access")
 # . access
 q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority} ult=field_access ti=access_stub")
 

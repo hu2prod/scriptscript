@@ -34,12 +34,12 @@ if argv.t
   p "Token list:"
   pp tok_res
 await parse     tok_res, {}, defer err, ast
+throw err if err
 ### !pragma coverage-skip-block ###
 await type_inference ast[0],  {}, defer err, res
 throw err if err
 ### !pragma coverage-skip-block ###
 
-throw err if err
 if argv.a
   p yellow.bold "AST[0]:"
   p ast[0]

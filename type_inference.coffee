@@ -70,34 +70,33 @@ class @Type
       "#{@main}"
   
   can_match : (t)->
+    return true if @main == '*'
+    return true if t.main == '*'
+    
     return false if @main != t.main
     return false if @nest.length != t.nest.length
     for v,k in @nest
-      continue if v.main == '*'
       v2 = t.nest[k]
-      continue if v2.main == '*'
       return false if !v.can_match v2
+    
     true
   
   exchange_missing_info : (t)->
+    if @main == '*' and t.main == '*'
+      return 0 # nothing
+    else if @main == '*'
+      @main = t.main
+      @nest = t.nest.clone()
+      return 1
+    else if t.main == '*'
+      t.main = @main
+      t.nest = @nest.clone()
+      return 1
+    
     ret = 0
     for v,k in @nest
       v2 = t.nest[k]
-      continue if v.eq v2
-      if v.main == v2.main
-        ret += v.exchange_missing_info v2
-        continue
-      
-      if v.main == '*'
-        @nest[k] = v2
-        ret++
-      else if v2.main == '*'
-        t.nest[k] = v
-        ret++
-      else
-        ### !pragma coverage-skip-block ###
-        # Этой ситуации быть не может
-        # Иначе сработал бы v.main == v2.main
+      ret += v.exchange_missing_info v2
     ret
 
 mk_type = (str, nest=[])->
@@ -301,7 +300,7 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
           ret += at.exchange_missing_info bt
           _ret = 'bool'
           break
-    
+      
       key = "#{op},#{at},#{bt}"
       if !_ret = bin_op_type_table[key]
         throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
@@ -596,6 +595,34 @@ trans.translator_hash["hash"] = translate:(ctx, node)->
 #    access
 # ###################################################################################################
 
+trans.translator_hash['array_access'] = translate:(ctx, node)->
+  ret = 0
+  [root, _skip, rvalue] = node.value_array
+  ret += ctx.translate root
+  ret += ctx.translate rvalue
+  # cases
+  # 1 array<T> [int   ] -> T
+  # 2 hash<T>  [string] -> T
+  
+  if root.mx_hash.type
+    subtype = root.mx_hash.type.nest[0]
+    switch root.mx_hash.type.main
+      when 'array'
+        ret += assert_pass_down rvalue, mk_type("int"), "array_access array"
+      when 'hash' # Прим. здесь я считаю hash == dictionary. А есть еще тип named tuple
+        ret += assert_pass_down rvalue, mk_type("string"), "array_access hash"
+      when 'string'
+        ret += assert_pass_down rvalue, mk_type("int"), "array_access hash"
+        subtype = mk_type 'string'
+      # when '*'  # can't pass as main type
+        # OK
+      else
+        throw new Error "Trying to access array of not allowed type '#{root.mx_hash.type.main}'"
+    
+    if subtype and subtype.main != '*'
+      ret += assert_pass_down node, subtype, "array_access"
+  
+  ret
 trans.translator_hash['access_stub'] = translate:(ctx, node)->
   child = node.value_array[0]
   ret = ctx.translate child
@@ -669,7 +696,7 @@ trans.translator_hash['func_stub'] = translate:(ctx, node)->
   assert_pass_down node, craft_type, "function"
   ret
 # ###################################################################################################
-#    access
+#    macro
 # ###################################################################################################
 
 trans.translator_hash['macro_stub'] = translate:(ctx, node)->

@@ -142,7 +142,7 @@ describe 'type_inference section', ()->
       a='1'
       b=1
       a+=b
-    """.split /\n?---\n?/
+    """.split /\n?---\n?/g
     ###
       a=1
       b='1'
@@ -189,7 +189,7 @@ describe 'type_inference section', ()->
     list = """
       a='1'
       a++
-    """.split /\n?---\n?/
+    """.split /\n?---\n?/g
     for v in list
       do (v)->
         it JSON.stringify(v), ()->
@@ -253,7 +253,16 @@ describe 'type_inference section', ()->
       "[1,a,a]" : "array<int>"
       "[a,1,a]" : "array<int>"
       "[a,a,1]" : "array<int>"
-      "[1] == [1]" : "bool"
+      "[]  == []"   : "bool"
+      "[1] == [1]"  : "bool"
+      "[]  == [1]"  : "bool"
+      "[1] == []"   : "bool"
+      
+      "[[]]  == [[]]"   : "bool"
+      "[[1]] == [[1]]"  : "bool"
+      "[[]]  == [[1]]"  : "bool"
+      "[[1]] == [[]]"   : "bool"
+      
       "a=[]\na=[1]" : "array<int>"
     for k,v of kv
       do (k,v)->
@@ -284,6 +293,44 @@ describe 'type_inference section', ()->
     list = """
       {a:1,b:'1'}
     """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
+  describe 'array access', ()->
+    kv =
+      "a[b]"                : undefined
+      
+      # * should not pass as main type
+      "arr=[]\narr[0]"        : undefined
+      "arr=[]\na=arr[0]\na"   : undefined
+      "arr=[]\na=arr[0]\na[b]": undefined
+      
+      "a='1'\na[b]"         : "string"
+      "a='1'\na[b]\nb"      : "int"
+      
+      "a=[1]\na[b]"         : "int"
+      "a=[1]\na[b]\nb"      : "int"
+      
+      "a=['1']\na[b]"       : "string"
+      "a=['1']\na[b]\nb"    : "int"
+      
+      "a={a:1}\na[b]"       : "int"
+      "a={a:1}\na[b]\nb"    : "string"
+      
+      "a={a:'1'}\na[b]"     : "string"
+      "a={a:'1'}\na[b]\nb"  : "string"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type?.toString(), v
+    list = """
+      a = 1
+      a[b]
+    """.split /\n?---\n?/g
     for v in list
       do (v)->
         it JSON.stringify(v), ()->
