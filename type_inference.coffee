@@ -44,13 +44,78 @@ scope_push = (node)->
 scope_pop = ()->
   current_scope = scope_stack.pop()
   return
+# ###################################################################################################
+#    Type
+# ###################################################################################################
+class @Type
+  main : ''
+  nest : []
+  
+  constructor:()->
+    
+  eq : (t)->
+    return false if @main != t.main
+    return false if @nest.length != t.nest.length
+    for v,k in @nest
+      return false if !v.eq t.nest[k]
+    true
+  
+  toString : ()->
+    if @nest.length
+      list = []
+      for v in @nest
+        list.push v.toString()
+      "#{@main}<#{list.join ','}>"
+    else
+      "#{@main}"
+  
+  can_match : (t)->
+    return false if @main != t.main
+    return false if @nest.length != t.nest.length
+    for v,k in @nest
+      continue if v.main == '*'
+      v2 = t.nest[k]
+      continue if v2.main == '*'
+      return false if !v.can_match v2
+    true
+  
+  exchange_missing_info : (t)->
+    ret = 0
+    for v,k in @nest
+      v2 = t.nest[k]
+      continue if v.eq v2
+      if v.main == v2.main
+        ret += v.exchange_missing_info v2
+        continue
+      
+      if v.main == '*'
+        @nest[k] = v2
+        ret++
+      else if v2.main == '*'
+        t.nest[k] = v
+        ret++
+      else
+        ### !pragma coverage-skip-block ###
+        # Этой ситуации быть не может
+        # Иначе сработал бы v.main == v2.main
+    ret
+
+mk_type = (str, nest=[])->
+  ret = new module.Type
+  ret.main = str
+  ret.nest = nest
+  ret
 
 # ###################################################################################################
 
 assert_pass_down = (ast, type, diagnostics)->
   ret = 0
   if ast.mx_hash.type?
-    if ast.mx_hash.type != type
+    loop
+      break if ast.mx_hash.type.eq type
+      if ast.mx_hash.type.can_match type
+        ret += ast.mx_hash.type.exchange_missing_info type
+        break
       throw new Error "assert pass up failed node='#{ast.value}'['#{ast.mx_hash.type}'] should be type '#{type}'; extra=#{diagnostics}"
   else
     ast.mx_hash.type = type
@@ -84,7 +149,11 @@ assert_pass_down = (ast, type, diagnostics)->
 assert_pass_down_eq = (ast1, ast2, diagnostics)->
   ret = 0
   if ast1.mx_hash.type? and ast2.mx_hash.type?
-    if ast1.mx_hash.type != ast2.mx_hash.type
+    loop
+      break if ast1.mx_hash.type.eq ast2.mx_hash.type
+      if ast1.mx_hash.type.can_match ast2.mx_hash.type
+        ret += ast1.mx_hash.type.exchange_missing_info ast2.mx_hash.type
+        break
       throw new Error "assert pass up eq failed node1='#{ast1.value}'[#{ast1.mx_hash.type}] != node2='#{ast2.value}'[#{ast2.mx_hash.type}]; extra=#{diagnostics}"
   else if !ast1.mx_hash.type? and !ast2.mx_hash.type?
     # nothing
@@ -113,7 +182,7 @@ trans.translator_hash['skip'] = translate:(ctx, node)-> 0
 trans.translator_hash['pass'] = translate:(ctx, node)->
   child = node.value_array[0]
   ret = ctx.translate child
-  ret += assert_pass_down_eq node, child, "pass"
+  ret += assert_pass_down_eq node, child, "pass rule=#{node?.rule?.signature}"
   ret
 trans.translator_hash['block'] = translate:(ctx, node)->
   ctx.translate node.value_array[1]
@@ -149,7 +218,7 @@ trans.translator_hash['id'] = translate:(ctx, node)->
   if node.value in ['true', 'false'] # .toLowerCase() ??
     is_prefefined_const = true
     if !node.mx_hash.type?
-      node.mx_hash.type = 'bool'
+      node.mx_hash.type = mk_type 'bool'
       ret++
     else
       # UNIMPLEMENTED
@@ -170,27 +239,29 @@ trans.translator_hash['const'] = translate:(ctx, node)->
   if !node.mx_hash.type?
     ### !pragma coverage-skip-block ###
     throw new Error "You forgot specify type at ti=const"
-  
+  unless node.mx_hash.type instanceof module.Type
+    node.mx_hash.type = mk_type node.mx_hash.type
   return 0
 # ###################################################################################################
 #    bin_op
 # ###################################################################################################
 bin_op_type_table = {}
-def_bin = (op,at,bt,ret)->
-  key = "#{op},#{at},#{bt}"
-  bin_op_type_table[key] = ret
-  return
+do ()->
+  def_bin = (op,at,bt,ret)->
+    key = "#{op},#{at},#{bt}"
+    bin_op_type_table[key] = ret
+    return
 
-for op in "+ - * // % << >> >>>".split /\s+/
-  def_bin op, "int", "int", "int"
+  for op in "+ - * // % << >> >>>".split /\s+/
+    def_bin op, "int", "int", "int"
 
-for op in "and or".split /\s+/
-  def_bin op, "bool", "bool", "bool"
-for op in "and or".split /\s+/
-  def_bin op, "int", "int", "int"
-for type in "int float".split /\s+/
-  for op in "< <= > >=".split /\s+/
-    def_bin op, type,type, "bool"
+  for op in "and or".split /\s+/
+    def_bin op, "bool", "bool", "bool"
+  for op in "and or".split /\s+/
+    def_bin op, "int", "int", "int"
+  for type in "int float".split /\s+/
+    for op in "< <= > >=".split /\s+/
+      def_bin op, type,type, "bool"
 
 trans.translator_hash['bin_op'] = translate:(ctx, node)->
   ret = 0
@@ -221,22 +292,29 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
     at = a.mx_hash.type
     bt = b.mx_hash.type
     
-    if op in ['==', '!='] and at == bt
-      _ret = 'bool'
-    else
+    loop
+      if op in ['==', '!=']
+        if at.eq bt
+          _ret = 'bool'
+          break
+        if at.can_match bt
+          ret += at.exchange_missing_info bt
+          _ret = 'bool'
+          break
+    
       key = "#{op},#{at},#{bt}"
       if !_ret = bin_op_type_table[key]
         throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
+      break
     
     if !node.mx_hash.type?
-      node.mx_hash.type = _ret
+      node.mx_hash.type = mk_type _ret
       ret++
     else
       # UNIMPLEMENTED
   else
     # case 2
     # not implemented
-    
   
   return ret
 # ###################################################################################################
@@ -276,13 +354,14 @@ trans.translator_hash['assign_bin_op'] = translate:(ctx, node)->
       key = "#{op},#{at},#{bt}"
       if !_ret = bin_op_type_table[key]
         throw new Error "can't find assign_bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
-      if _ret != at
+      _ret_t = mk_type _ret
+      if !_ret_t.eq at
         ### !pragma coverage-skip-block ###
         # ПРИМ. Пока сейчас нет операций у которых a.type != b.type
-        throw new Error "assign_bin_op conflict '#{_ret}' != '#{at}'"
+        throw new Error "assign_bin_op conflict '#{_ret_t}' != '#{at}'"
       
       if !node.mx_hash.type?
-        node.mx_hash.type = _ret
+        node.mx_hash.type = _ret_t
         ret++
       else
         # UNIMPLEMENTED
@@ -354,7 +433,7 @@ trans.translator_hash['pre_op'] = translate:(ctx, node)->
     if !_ret = pre_op_type_table[key]
       throw new Error "can't find pre_op=#{op} a=#{at} node=#{node.value}"
     if !node.mx_hash.type?
-      node.mx_hash.type = _ret
+      node.mx_hash.type = mk_type _ret
       ret++
     else
       # UNIMPLEMENTED
@@ -405,7 +484,7 @@ trans.translator_hash['post_op'] = translate:(ctx, node)->
     if !_ret = post_op_type_table[key]
       throw new Error "can't find post_op=#{op} a=#{at} node=#{node.value}"
     if !node.mx_hash.type?
-      node.mx_hash.type = _ret
+      node.mx_hash.type = mk_type _ret
       ret++
     else
       # UNIMPLEMENTED
@@ -416,7 +495,7 @@ trans.translator_hash["ternary"] = translate:(ctx, node)->
   ret = 0
   [cond, _s1, vtrue, _s2, vfalse] = node.value_array
   ret += ctx.translate cond
-  ret += assert_pass_down cond, 'bool', 'ternary'
+  ret += assert_pass_down cond, mk_type('bool'), 'ternary'
   
   ret += ctx.translate vtrue
   ret += ctx.translate vfalse
@@ -450,15 +529,13 @@ trans.translator_hash["array"] = translate:(ctx, node)->
   if element_list[0]?.mx_hash.type?
     subtype = element_list[0].mx_hash.type
     if !node.mx_hash.type?
-      node.mx_hash.type = "array<#{subtype}>"
-      node.mx_hash.main_type = "array"
-      node.mx_hash.subtype_list = [subtype]
+      node.mx_hash.type = mk_type "array", [subtype]
       ret++
     else
       # UNIMPLEMENTED
   else
     if !node.mx_hash.type?
-      node.mx_hash.type = "array"
+      node.mx_hash.type = mk_type "array", [mk_type '*']
       ret++
     else
       # UNIMPLEMENTED
@@ -504,15 +581,13 @@ trans.translator_hash["hash"] = translate:(ctx, node)->
   if element_list[0]?.mx_hash.type?
     subtype = element_list[0].mx_hash.type
     if !node.mx_hash.type?
-      node.mx_hash.type = "hash<#{subtype}>"
-      node.mx_hash.main_type = "hash"
-      node.mx_hash.subtype_list = [subtype]
+      node.mx_hash.type = mk_type "hash", [subtype]
       ret++
     else
       # UNIMPLEMENTED
   else
     if !node.mx_hash.type?
-      node.mx_hash.type = "hash"
+      node.mx_hash.type = mk_type "hash", [mk_type '*']
       ret++
     else
       # UNIMPLEMENTED
@@ -530,20 +605,68 @@ trans.translator_hash['access_stub'] = translate:(ctx, node)->
 # ###################################################################################################
 #    function
 # ###################################################################################################
+type_ast_to_obj = (ast)->
+  # NOTE WRONG. Need proper handle <>
+  mk_type ast.value
 
 trans.translator_hash['func_stub'] = translate:(ctx, node)->
   ret = 0
   function_body = null
+  arg_list_node = null
+  ret_type_node = null
   for v in node.value_array
+    arg_list_node = v if v.mx_hash.hash_key == 'arg_list'
     function_body = v if v.mx_hash.hash_key == 'function_body'
+    ret_type_node = v if v.mx_hash.hash_key == 'type'
   
   scope_push node
   # TODO translate arg default values
+  arg_list = []
+  if arg_list_node?
+    walk = (node)->
+      for v in node.value_array
+        if v.mx_hash.hash_key == 'arg'
+          arg_list.push v
+        else
+          walk v
+      return
+    walk arg_list_node
+    for v in arg_list
+      for sn in v.value_array
+        if sn.mx_hash.hash_key == 'identifier'
+          scope_id_push sn
+        else if sn.mx_hash.hash_key == 'rvalue'
+          ctx.translate sn
   
   if function_body?
     ret += ctx.translate function_body
-  
   scope_pop()
+  
+  arg_type_list = []
+  if ret_type_node?
+    arg_type_list.push type_ast_to_obj ret_type_node
+  else
+    arg_type_list.push mk_type 'void'
+  
+  for v in arg_list
+    type = null
+    rvalue = null
+    if v.value_array.length == 3
+      [id,_skip,type_or_rvalue] = v.value_array
+      type  = type_or_rvalue if type_or_rvalue.mx_hash.hash_key == 'type'
+      rvalue= type_or_rvalue if type_or_rvalue.mx_hash.hash_key == 'rvalue'
+    else
+      [id] = v.value_array
+    if type?
+      type_str = type_ast_to_obj type
+      assert_pass_down id, type_str, "func arg '#{id.value}'"
+    if rvalue?
+      assert_pass_down_eq id, rvalue, "func arg '#{id.value}'"
+    arg_type_list.push id.mx_hash.type or mk_type "*"
+  
+  craft_type = mk_type "function", arg_type_list
+  
+  assert_pass_down node, craft_type, "function"
   ret
 # ###################################################################################################
 #    access
@@ -598,7 +721,7 @@ scope_id_pass = ()->
     
     # phase 2 same scope id lookup
     change_count += scope_id_pass()
-    
+    # p "change_count=#{change_count}" # DEBUG
     if change_count == 0
       return
   

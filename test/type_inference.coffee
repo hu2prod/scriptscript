@@ -29,7 +29,7 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
   
   # describe 'special const', ()->
   #   kv = 
@@ -38,7 +38,7 @@ describe 'type_inference section', ()->
   #     do (k,v)->
   #       it JSON.stringify(k), ()->
   #         ast = full k
-  #         assert.equal ast.mx_hash.type, v
+  #         assert.equal ast.mx_hash.type?.toString(), v
   describe 'bin op', ()->
     kv =
       "a+b"           : undefined
@@ -71,7 +71,7 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
     
     list = """
       1+'1'
@@ -118,7 +118,7 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
     
     list = """
       a=1
@@ -167,7 +167,7 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
     list = """
       +1
     """.split "\n"
@@ -185,7 +185,7 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
     list = """
       a='1'
       a++
@@ -205,7 +205,7 @@ describe 'type_inference section', ()->
       # do (k,v)->
         # it JSON.stringify(k), ()->
           # ast = full k
-          # assert.equal ast.mx_hash.type, v
+          # assert.equal ast.mx_hash.type?.toString(), v
   describe 'expr', ()->
     kv =
       "(1)" : "int"
@@ -214,7 +214,7 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
   
   describe 'ternary', ()->
     kv =
@@ -229,7 +229,7 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
     list = """
       1?a:b
       '1'?a:b
@@ -243,7 +243,7 @@ describe 'type_inference section', ()->
   
   describe 'array', ()->
     kv =
-      "[]"      : "array"
+      "[]"      : "array<*>"
       "[1]"     : "array<int>"
       "[1,1]"   : "array<int>"
       "[1,1,1]" : "array<int>"
@@ -254,11 +254,12 @@ describe 'type_inference section', ()->
       "[a,1,a]" : "array<int>"
       "[a,a,1]" : "array<int>"
       "[1] == [1]" : "bool"
+      "a=[]\na=[1]" : "array<int>"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
     list = """
       [1,'1']
       [1] == ['1']
@@ -271,7 +272,7 @@ describe 'type_inference section', ()->
   
   describe 'hash', ()->
     kv =
-      "{}"      : "hash"
+      "{}"      : "hash<*>"
       "{a:1}"   : "hash<int>"
       "{a,b:1}" : "hash<int>"
       "{(a):1}" : "hash<int>"
@@ -279,9 +280,45 @@ describe 'type_inference section', ()->
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
-          assert.equal ast.mx_hash.type, v
+          assert.equal ast.mx_hash.type?.toString(), v
     list = """
       {a:1,b:'1'}
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
+  describe 'function', ()->
+    kv =
+      "->"          : "function<void>"
+      "():int->1"   : "function<int>"
+      "(a)->"       : "function<void,*>"
+      "(a:int)->"   : "function<void,int>"
+      "(a)->\n  a=1": "function<void,int>"
+      "(a,b)->\n  a=1": "function<void,int,*>"
+      
+      "((a,b)->a=1) == ((a,b)->b='1')": "bool"
+      "((a,b)->b='1') == ((a,b)->a=1)": "bool"
+      
+      "((a)->a=[]) == ((a)->a=[1])": "bool"
+      "((a)->a=([])) == ((a)->a=[1])": "bool"
+      
+      "(a=1)->": "function<void,int>"
+      "(a=[],b=a)->b=[1]": "function<void,array<int>,array<int>>"
+      
+      "((a,b)->a=1) == ((a,b)->)": "bool"
+      "((a,b)->) == ((a,b)->a=1)": "bool"
+      "((a,b=1)->a=1) == ((a,b=1)->)": "bool"
+      "((a,b=1)->) == ((a,b=1)->a=1)": "bool"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type?.toString(), v
+    list = """
+      -> == (a)->
     """.split "\n"
     for v in list
       do (v)->
@@ -292,15 +329,15 @@ describe 'type_inference section', ()->
   describe "can't detect", ()->
     it "a + 1", ()->
       ast = full "a + 1"
-      assert.equal ast.mx_hash.type, undefined
+      assert.equal ast.mx_hash.type?.toString(), undefined
     
     it "1 + a", ()->
       ast = full "1 + a"
-      assert.equal ast.mx_hash.type, undefined
+      assert.equal ast.mx_hash.type?.toString(), undefined
     
     it "a + b", ()->
       ast = full "a + b"
-      assert.equal ast.mx_hash.type, undefined
+      assert.equal ast.mx_hash.type?.toString(), undefined
   
   describe 'external interface', ()->
     it "ok", (done)->

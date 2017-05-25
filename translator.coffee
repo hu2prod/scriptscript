@@ -77,11 +77,11 @@ do ()->
       
       if !a.mx_hash.type? or !b.mx_hash.type?
         throw new Error "can't translate op=#{op} because type inference can't detect type of arguments"
-      if a.mx_hash.type != b.mx_hash.type
+      if !a.mx_hash.type.eq b.mx_hash.type
         # не пропустит type inference
         ### !pragma coverage-skip-block ###
         throw new Error "can't translate op=#{op} because type mismatch #{a.mx_hash.type} != #{b.mx_hash.type}"
-      switch a.mx_hash.type
+      switch a.mx_hash.type.toString()
         when 'int'
           return "(#{a_tr}|#{b_tr})"
         when 'bool'
