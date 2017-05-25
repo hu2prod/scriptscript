@@ -121,9 +121,13 @@ trans.translator_hash['post_op'] = holder
 # ###################################################################################################
 
 trans.translator_hash['string_interpolated'] = translate:(ctx, node)->
-  (node.value_array[0].value.replace '#{', '"+') +
+  if node.value_array[0].value_array.length > 1
+    start = ctx.translate node.value_array[0]
+  else
+    start = node.value_array[0].value.replace '#{', '"+'
+  start +
     (ctx.translate node.value_array[1]) +
-    node.value_array[2].value.replace '}', '+"'
+    (node.value_array[2].value.replace '}', '+"').replace '#{', '"+'
 
 # ###################################################################################################
 #    hash

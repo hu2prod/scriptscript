@@ -96,9 +96,11 @@ describe 'translator section', ()->
   
   describe "strings interpolated", ()->
     kv =
-      '"a#{b+c}d"'      : '"a"+(b+c)+"d"'
+      '"a#{b+c}d"'        : '"a"+(b+c)+"d"'
+      '"a#{b+c}d#{e+f}g"' : '"a"+(b+c)+"d"+(e+f)+"g"'
+      '"a#{b+c}d#{e+f}g#{h+i}j"' : '"a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j"'
       '"a{} #{b+c} {} #d"': '"a{} "+(b+c)+" {} #d"'
-      # '"a{ #{b+c} } # #{d} } #d"': '"a{ "+(b+c)+"  } # "+d+" } #d"' # LATER
+      '"a{ #{b+c} } # #{d} } #d"': '"a{ "+(b+c)+" } # "+d+" } #d"'
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->

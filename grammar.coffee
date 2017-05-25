@@ -32,7 +32,17 @@ q('rvalue','#const')                                    .mx("priority=#{base_pri
 q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value ti=this block_assign=1")
 q('lvalue','@ #identifier')                             .mx("priority=#{base_priority} ult=value")
 
-q('rvalue', '#string_template_start #rvalue #string_template_end').mx("ult=string_interpolated ti=string_inter_pass")
+# ###################################################################################################
+#    string interpolation
+# ###################################################################################################
+q('str_tpl_start', '#string_template_start')            # How do I fill up mx here?
+q('str_tpl_start', '#block_string_template_start')      # How do I fill up mx here?
+q('str_tpl_mid', '#string_template_mid')                # How do I fill up mx here?
+q('str_tpl_end', '#string_template_end')                # How do I fill up mx here?
+q('str_tpl_end', '#block_string_template_end')          # How do I fill up mx here?
+
+q('str_tpl_start','#str_tpl_start #rvalue #str_tpl_mid').mx("ult=string_interpolated ti=string_inter_pass")
+q('rvalue', '#str_tpl_start #rvalue #str_tpl_end')      .mx("ult=string_interpolated ti=string_inter_pass")
 
 # ###################################################################################################
 #    operators define
