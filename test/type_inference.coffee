@@ -337,6 +337,29 @@ describe 'type_inference section', ()->
           util.throws ()->
             full v
   
+  describe 'id access', ()->
+    kv =
+      "a.b"             : undefined
+      "a = []\na.length": "int"
+      "a = {}\na.b"     : undefined
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type?.toString(), v
+    list = """
+      a = []
+      a.b
+      ---
+      a = 1
+      a.b
+    """.split /\n?---\n?/g
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
   describe 'function', ()->
     kv =
       "->"          : "function<void>"

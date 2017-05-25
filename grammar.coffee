@@ -162,7 +162,7 @@ q('rvalue',  '#bracket_less_hash')                      .mx("priority=#{base_pri
 # [] access
 q('lvalue', '#lvalue [ #rvalue ]')                      .mx("priority=#{base_priority} ult=array_access ti=array_access")
 # . access
-q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority} ult=field_access ti=access_stub")
+q('lvalue', '#lvalue . #identifier')                    .mx("priority=#{base_priority} ult=field_access ti=id_access")
 
 # opencl-like access
 # proper
