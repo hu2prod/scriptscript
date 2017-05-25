@@ -109,7 +109,8 @@ double_quoted_regexp_craft = ///
     #{string_regex_craft}
   )*?
 ///.toString().replace(/\//g,'')
-tokenizer.parser_list.push (new Token_parser 'string_non_interpolated_literal',          new RegExp '^("""|")'+double_quoted_regexp_craft+'\\1')
+tokenizer.parser_list.push (new Token_parser 'string_literal_doubleq', ///^"#{double_quoted_regexp_craft}"///)
+tokenizer.parser_list.push (new Token_parser 'block_string_literal_doubleq', ///^"""#{double_quoted_regexp_craft}"""///)
 tokenizer.parser_list.push (new Token_parser 'string_interpolated_start_single_literal', new RegExp '^"'+double_quoted_regexp_craft+'#{')
 tokenizer.parser_list.push (new Token_parser 'string_interpolated_end_single_literal',   new RegExp '^}'+double_quoted_regexp_craft+'"')
 tokenizer.parser_list.push (new Token_parser 'string_interpolated_mid_literal',          new RegExp '^}'+double_quoted_regexp_craft+'#{')

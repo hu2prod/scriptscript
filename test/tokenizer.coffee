@@ -299,7 +299,7 @@ describe 'tokenizer section', ()->
       assert.equal tl[4][0].mx_hash.hash_key, "identifier"
   
   describe "Double quoted strings", ()->
-    describe "valid", ()->
+    describe "valid inline strings", ()->
       sample_list = """
         ""
         "Some text"
@@ -328,19 +328,28 @@ describe 'tokenizer section', ()->
         "\\u{10fFFf}"
         "# {a}"
         "English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺"
-        ""\"English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺""\"
       """.split /\n/ # "
       sample_list.push '"\\n"'
       sample_list.push '"\\\n"'
-      sample_list.push '"""\n            heredoc\n          """'
-      sample_list.push '"""\n            heredoc with escapes
-        \\n\\r\\t\\b\\f\\0\\\\\\"\\\'\\xFF\\uFFFF\\u{25}\\u{10FFFF}\n          """'
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{JSON.stringify sample} as string_non_interpolated_literal", ()->
+          it "should tokenize #{JSON.stringify sample} as string_literal_doubleq", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
-            assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+            assert.equal tl[0][0].mx_hash.hash_key, "string_literal_doubleq"
+    
+    describe "valid block strings", ()->
+      sample_list = [
+        '"""English Français Українська Ελληνικά ქართული עברית العربية 日本語 中文 한국어 हिन्दी བོད་སྐད रोमानी 𐌲𐌿𐍄𐌹𐍃𐌺"""',
+        '"""\n            heredoc\n          """',
+        '"""\n            heredoc with escapes            \\n\\r\\t\\b\\f\\0\\\\\\"\\\'\\xFF\\uFFFF\\u{25}\\u{10FFFF}\n"""'
+      ]
+      for sample in sample_list
+        do (sample)->
+          it "should tokenize #{JSON.stringify sample} as block_string_literal_doubleq", ()->
+            tl = g._tokenize sample
+            assert.equal tl.length, 1
+            assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_doubleq"
     
     describe "invalid", ()->
       wrong_string_list = """
@@ -457,10 +466,10 @@ describe 'tokenizer section', ()->
     blns = (blns_raw.split /[\[,\]]\s*\n\s*/)[1...-1]
     for sample in blns
       do (sample)->
-        it "should tokenize #{sample} as string_non_interpolated_literal", ()->
+        it "should tokenize #{sample} as string_literal_doubleq", ()->
           tl = g._tokenize sample
           assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+          assert.equal tl[0][0].mx_hash.hash_key, "string_literal_doubleq"
   
   # At least this works
   describe "Big List of Naughty Strings", ()->
@@ -473,10 +482,10 @@ describe 'tokenizer section', ()->
       sample_double_quoted = sample.replace /"/g, '\\"'
       sample_double_quoted = "\"#{sample_double_quoted}\""
       do (sample_double_quoted)->
-        it "should tokenize #{sample_double_quoted} as string_non_interpolated_literal", ()->
+        it "should tokenize #{sample_double_quoted} as string_literal_doubleq", ()->
           tl = g._tokenize sample_double_quoted
           assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+          assert.equal tl[0][0].mx_hash.hash_key, "string_literal_doubleq"
       
       sample_single_quoted = sample.replace /'/g, "\\'"
       sample_single_quoted = "'#{sample_single_quoted}'"
@@ -490,10 +499,10 @@ describe 'tokenizer section', ()->
       sample_double_heredoc = sample_double_heredoc.replace /"$/, '\\"'
       sample_double_heredoc = "\"\"\"#{sample_double_heredoc}\"\"\""
       do (sample_double_heredoc)->
-        it "should tokenize #{sample_double_heredoc} as string_non_interpolated_literal", ()->
+        it "should tokenize #{sample_double_heredoc} as block_string_literal_doubleq", ()->
           tl = g._tokenize sample_double_heredoc
           assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_non_interpolated_literal"
+          assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_doubleq"
       
       sample_single_heredoc = sample.replace /'''/g, "''\\'"
       sample_single_heredoc = sample_single_heredoc.replace /'$/, "\\'"
