@@ -460,58 +460,62 @@ describe 'tokenizer section', ()->
               g._tokenize sample
             , /Error: can't tokenize /
   
-  describe "BLNS double quoted via readFileSync", ()->
-    path_to_blns = path.join (path.dirname require.resolve "blns"), "resources", "blns.json"
-    blns_raw = fs.readFileSync path_to_blns, "utf8"
-    blns = (blns_raw.split /[\[,\]]\s*\n\s*/)[1...-1]
-    for sample in blns
-      do (sample)->
-        it "should tokenize #{sample} as string_literal_doubleq", ()->
-          tl = g._tokenize sample
-          assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_literal_doubleq"
-  
-  # At least this works
   describe "Big List of Naughty Strings", ()->
     # https://github.com/minimaxir/big-list-of-naughty-strings
+
+    # helper
+    test = (sample, i, token_name) ->
+      try
+        tl = g._tokenize sample
+      catch e
+        throw new Error """The tokenizer fails to process the string number #{i}: #{sample}
+          due to this error:
+          #{e}"""
+      assert.equal tl.length, 1
+      assert.equal tl[0][0].mx_hash.hash_key, token_name
+    
+    it "BLNS double quoted via readFileSync", ()->
+      path_to_blns = path.join (path.dirname require.resolve "blns"), "resources", "blns.json"
+      blns_raw = fs.readFileSync path_to_blns, "utf8"
+      blns = (blns_raw.split /[\[,\]]\s*\n\s*/)[1...-1]
+      for sample, i in blns
+        test sample, i, "string_literal_doubleq"
+    
     blns = require "blns"
-    for sample in blns
-      continue if sample.includes "\u0007" # FUCK DAT BEEP
-      sample = sample.replace /\\/g, "\\\\"
-      
-      sample_double_quoted = sample.replace /"/g, '\\"'
-      sample_double_quoted = "\"#{sample_double_quoted}\""
-      do (sample_double_quoted)->
-        it "should tokenize #{sample_double_quoted} as string_literal_doubleq", ()->
-          tl = g._tokenize sample_double_quoted
-          assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_literal_doubleq"
-      
-      sample_single_quoted = sample.replace /'/g, "\\'"
-      sample_single_quoted = "'#{sample_single_quoted}'"
-      do (sample_single_quoted)->
-        it "should tokenize #{sample_single_quoted} as string_literal_singleq", ()->
-          tl = g._tokenize sample_single_quoted
-          assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "string_literal_singleq"
-      
-      sample_double_heredoc = sample.replace /"""/g, '""\\"'
-      sample_double_heredoc = sample_double_heredoc.replace /"$/, '\\"'
-      sample_double_heredoc = "\"\"\"#{sample_double_heredoc}\"\"\""
-      do (sample_double_heredoc)->
-        it "should tokenize #{sample_double_heredoc} as block_string_literal_doubleq", ()->
-          tl = g._tokenize sample_double_heredoc
-          assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_doubleq"
-      
-      sample_single_heredoc = sample.replace /'''/g, "''\\'"
-      sample_single_heredoc = sample_single_heredoc.replace /'$/, "\\'"
-      sample_single_heredoc = "'''#{sample_single_heredoc}'''"
-      do (sample_single_heredoc)->
-        it "should tokenize #{sample_single_heredoc} as block_string_literal_singleq", ()->
-          tl = g._tokenize sample_single_heredoc
-          assert.equal tl.length, 1
-          assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_singleq"
+
+    it "BLNS double quoted via require", ()->
+      for sample, i in blns
+        continue if sample.includes "\u0007" # FUCK DAT BEEP
+        sample = sample.replace /\\/g, "\\\\"
+        sample = sample.replace /"/g, '\\"'
+        sample = "\"#{sample}\""
+        test sample, i, "string_literal_doubleq"
+    
+    it "BLNS single quoted", ()->
+      for sample, i in blns
+        continue if sample.includes "\u0007" # FUCK DAT BEEP
+        sample = sample.replace /\\/g, "\\\\"
+        sample = sample.replace /'/g, "\\'"
+        sample = "'#{sample}'"
+        test sample, i, "string_literal_singleq"
+    
+    it "BLNS double quoted block (heredoc)", ()->
+      for sample, i in blns
+        continue if sample.includes "\u0007" # FUCK DAT BEEP
+        sample = sample.replace /\\/g, "\\\\"
+        sample = sample.replace /"""/g, '""\\"'
+        sample = sample.replace /"$/, '\\"'
+        sample = "\"\"\"#{sample}\"\"\""
+        test sample, i, "block_string_literal_doubleq"
+    
+    it "BLNS single quoted block (heredoc)", ()->
+      for sample, i in blns
+        continue if sample.includes "\u0007" # FUCK DAT BEEP
+        sample = sample.replace /\\/g, "\\\\"
+        sample = sample.replace /'''/g, "''\\'"
+        sample = sample.replace /'$/, "\\'"
+        sample = "'''#{sample}'''"
+        test sample, i, "block_string_literal_singleq"
   
   
   describe "Regexp", ()->
