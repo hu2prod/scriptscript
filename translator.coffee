@@ -125,7 +125,7 @@ trans.translator_hash['string_interpolated'] = translate:(ctx, node)->
   start = if first_child.value_array.length > 1 \
     then ctx.translate first_child              \
     else first_child.value.replace '#{', '"+'
-  start +
+  
   mid = ctx.translate node.value_array[1]
   end = (node.value_array[2].value.replace '}', '+"').replace '#{', '"+'
   start + mid + end
