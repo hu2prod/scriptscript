@@ -10,3 +10,10 @@ test
     npm test            # also passes results to coveralls
     npm run test-simple # no pass to coveralls
     npm run test-watch  # no report generating, just watch that all is ok
+
+test lifehacks
+
+    npm run test-watch -- --grep tok    # tokenizer only
+    npm run test-watch -- --grep gram   # grammar only
+    npm run test-watch -- --grep infer  # type inference only
+    npm run test-watch -- --grep trans  # translator only

@@ -691,3 +691,7 @@ describe "Gram TODO: all exapmles from coffeescript documentation (oneliners onl
         it sample
         # it sample, ()->
         #   full sample
+
+describe "Gram TODO: fuckups", ()->
+  it "a/2+b/7"  # Parsing error. No proper combination found
+  it "{1}"      # Parsing error. No proper combination found
