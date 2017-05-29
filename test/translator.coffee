@@ -119,7 +119,9 @@ describe 'translator section', ()->
       '"a{} #{b+c} {} #d"': '"a{} "+(b+c)+" {} #d"'
       '"a{ #{b+c} } # #{d} } #d"': '"a{ "+(b+c)+" } # "+d+" } #d"'
       '"""a#{b}c"""'        : '"a"+(b)+"c"'
-      "'''a\#{b}c'''"        : '"a#{b}c"'
+      "'''a\#{b}c'''"       : '"a#{b}c"'
+      '"a\\#{#{b}c"'        : '"a#{"+(b)+"c"'
+      '"a\\#{a}#{b}c"'      : '"a#{a}"+(b)+"c"'
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
