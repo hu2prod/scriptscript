@@ -121,10 +121,10 @@ trans.translator_hash['post_op'] = holder
 # ###################################################################################################
 
 trans.translator_hash['string_singleq'] = translate:(ctx, node)->
-  '"' + (node.value[1...-1].replace /"/, '\\"') + '"'
+  '"' + (node.value[1...-1].replace /"/g, '\\"') + '"'
 
 trans.translator_hash['block_string'] = translate:(ctx, node)->
-  '"' + (node.value[3...-3].replace /"/, '\\"') + '"'
+  '"' + (node.value[3...-3].replace /"/g, '\\"') + '"'
 
 trans.translator_hash['string_interpolated'] = translate:(ctx, node)->
   first_child = node.value_array[0]
