@@ -96,13 +96,19 @@ describe 'translator section', ()->
   
   describe "trstr", ()->
     kv =
-      '""'     : '""'
-      '"abcd"' : '"abcd"'
-      '"\\""'  : '"\\""'
-      '"\\a"'  : '"\\a"'
-      "''"     : '""'
-      "'abcd'" : '"abcd"'
-      "'\"'"   : '"\\\""'
+      '""'          : '""'
+      '"abcd"'      : '"abcd"'
+      '"\\""'       : '"\\""'
+      '"\\a"'       : '"\\a"'
+      "''"          : '""'
+      "'abcd'"      : '"abcd"'
+      "'\"'"        : '"\\""'
+      '""""""'      : '""'
+      "''''''"      : '""'
+      '"""abcd"""'  : '"abcd"'
+      "'''abcd'''"  : '"abcd"'
+      '""" " """'   : '" \\" "'
+      "'''\"'''"    : '"\\""'
     pending =
       '"\\a"'  : '"a"'
     for k, v of kv
@@ -112,7 +118,7 @@ describe 'translator section', ()->
     for k, v of pending
       do (k, v)->
         it "#{k} -> #{v}"
-  
+
   # describe "strings single quote", ()->
   #   kv =
   #     "'a\#{b}c'"     : "'a\#{b}c'"
