@@ -35,14 +35,21 @@ q('lvalue','@ #identifier')                             .mx("priority=#{base_pri
 # ###################################################################################################
 #    string interpolation
 # ###################################################################################################
-q('str_tpl_start', '#string_template_start')            # How do I fill up mx here?
-q('str_tpl_start', '#block_string_template_start')      # How do I fill up mx here?
+q('str_tpl1_start', '#string_template_start')            # How do I fill up mx here?
+q('str_tpl3_start', '#block_string_template_start')      # How do I fill up mx here?
 q('str_tpl_mid', '#string_template_mid')                # How do I fill up mx here?
-q('str_tpl_end', '#string_template_end')                # How do I fill up mx here?
-q('str_tpl_end', '#block_string_template_end')          # How do I fill up mx here?
+q('str_tpl1_end', '#string_template_end')                # How do I fill up mx here?
+q('str_tpl3_end', '#block_string_template_end')          # How do I fill up mx here?
 
-q('str_tpl_start','#str_tpl_start #rvalue #str_tpl_mid').mx("ult=string_interpolated ti=string_inter_pass")
-q('rvalue', '#str_tpl_start #rvalue #str_tpl_end')      .mx("ult=string_interpolated ti=string_inter_pass")
+q('str_tpl1_start','#str_tpl1_start #rvalue #str_tpl_mid').mx("ult=string_interpolated ti=string_inter_pass")
+q('str_tpl3_start','#str_tpl3_start #rvalue #str_tpl_mid').mx("ult=string_interpolated ti=string_inter_pass")
+q('rvalue', '#str_tpl1_start #rvalue #str_tpl1_end')      .mx("ult=string_interpolated ti=string_inter_pass")
+q('rvalue', '#str_tpl3_start #rvalue #str_tpl3_end')      .mx("ult=string_interpolated ti=string_inter_pass")
+
+q('str_tpl1_start','#str_tpl1_start #str_tpl_mid').mx("ult=string_interpolated_empty_m ti=string_inter_pass")
+q('str_tpl3_start','#str_tpl3_start #str_tpl_mid').mx("ult=string_interpolated_empty_m ti=string_inter_pass")
+q('rvalue', '#str_tpl1_start #str_tpl1_end')      .mx("ult=string_interpolated_empty ti=string_inter_pass")
+q('rvalue', '#str_tpl3_start #str_tpl3_end')      .mx("ult=string_interpolated_empty ti=string_inter_pass")
 
 # ###################################################################################################
 #    operators define

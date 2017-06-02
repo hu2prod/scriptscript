@@ -94,73 +94,87 @@ describe 'translator section', ()->
   
   describe "trstr", ()->
     kv =
-      '""'          : '""'
-      '"abcd"'      : '"abcd"'
-      '"\\""'       : '"\\""'
-      '"\\a"'       : '"\\a"'
-      "''"          : '""'
-      "'abcd'"      : '"abcd"'
-      "'\"'"        : '"\\""'
-      "'\"\"'"      : '"\\"\\""'
-      '""""""'      : '""'
-      "''''''"      : '""'
-      '"""abcd"""'  : '"abcd"'
-      "'''abcd'''"  : '"abcd"'
-      '""" " """'   : '" \\" "'
-      '""" "" """'  : '" \\"\\" "'
-      "'''\"'''"    : '"\\""'
-      "'''\"\"'''"  : '"\\"\\""'
-    pending =
-      '"\\a"'  : '"a"'
-    for k, v of kv
-      do (k, v)->
-        it "#{k} -> #{v}", ()->
-          assert.equal full(k), v
-    for k, v of pending
-      do (k, v)->
-        it "#{k} -> #{v}"
+      '""'            : '""'
+      '"abcd"'        : '"abcd"'
+      '"\\""'         : '"\\""'
+      '"\\a"'         : '"\\a"'
+      "''"            : '""'
+      "'abcd'"        : '"abcd"'
+      "'\"'"          : '"\\""'
+      "'\"\"'"        : '"\\"\\""'
+      '""""""'        : '""'
+      "''''''"        : '""'
+      '"""abcd"""'    : '"abcd"'
+      "'''abcd'''"    : '"abcd"'
+      '""" " """'     : '" \\" "'
+      '""" "" """'    : '" \\"\\" "'
+      "'''\"'''"      : '"\\""'
+      "'''\"\"'''"    : '"\\"\\""'
+      "'a\#{b}c'"     : '"a\#{b}c"'
+      "'''a\#{b}c'''" : '"a\#{b}c"'
 
-  # describe "strings single quote", ()->
+  describe "strings single quote", ()->
   #   kv =
-  #     "'a\#{b}c'"     : "'a\#{b}c'"
-  #     "'''a\#{b}c'''" : "'a\#{b}c'"
   #   for k,v of kv
   #     do (k,v)->
   #       it JSON.stringify(k), ()->
   #         assert.equal full(k), v
-  #   sample_list = """
-  #     '''a\#{b}'
-  #   """.split /\n?---\n?/g
-  #   for sample in sample_list
-  #     do (sample)->
-  #       it JSON.stringify(sample), ()->
-  #         util.throws ()->
-  #           full(sample)
+    sample_list = """
+      '''a\#{b}'
+    """.split /\n?---\n?/g
+    for sample in sample_list
+      do (sample)->
+        it sample, ()->
+          util.throws ()->
+            full(sample)
   
-  # describe "strings interpolated", ()->
-  #   kv =
-  #     '"a#{b+c}d"'        : '"a"+(b+c)+"d"'
-  #     '"a#{b+c}d#{e+f}g"' : '"a"+(b+c)+"d"+(e+f)+"g"'
-  #     '"a#{b+c}d#{e+f}g#{h+i}j"' : '"a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j"'
-  #     '"a{} #{b+c} {} #d"': '"a{} "+(b+c)+" {} #d"'
-  #     '"a{ #{b+c} } # #{d} } #d"': '"a{ "+(b+c)+" } # "+d+" } #d"'
-  #     '"""a#{b}c"""'        : '"a"+(b)+"c"'
-  #     "'''a\#{b}c'''"       : '"a#{b}c"'
-  #     '"a\\#{#{b}c"'        : '"a#{"+(b)+"c"'
-  #     '"a\\#{a}#{b}c"'      : '"a#{a}"+(b)+"c"'
-  #   for k,v of kv
-  #     do (k,v)->
-  #       it JSON.stringify(k), ()->
-  #         assert.equal full(k), v
+  describe "strings interpolated", ()->
+    kv =
+      '"a#{b+c}d"'        : '"a"+(b+c)+"d"'
+      '"a#{b+c}d#{e+f}g"' : '"a"+(b+c)+"d"+(e+f)+"g"'
+      '"a#{b+c}d#{e+f}g#{h+i}j"' : '"a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j"'
+      '"a{} #{b+c} {} #d"': '"a{} "+(b+c)+" {} #d"'
+      '"a{ #{b+c} } # #{d} } #d"': '"a{ "+(b+c)+" } # "+d+" } #d"'
+      '"""a#{b}c"""'        : '"a"+b+"c"'
+      "'''a\#{b}c'''"       : '"a#{b}c"'
+      '"a\\#{#{b}c"'        : '"a\\#{"+b+"c"'
+      '"a\\#{a}#{b}c"'      : '"a\\#{a}"+b+"c"'
+      '"#{}"'               : '""'
+      '"#{}#{}"'            : '""'
+      '"#{}#{}#{}"'         : '""'
+      '"#{}#{}#{}#{}"'      : '""'
+      '"a#{}#{}#{}#{}"'     : '"a"'
+      '"#{1}#{}#{}#{}"'     : '""+1+""'
+      '"#{}b#{}#{}#{}"'     : '"b"'
+      '"#{}#{}c#{}#{}"'     : '"c"'
+      '"#{}#{}#{}d#{}"'     : '"d"'
+      '"#{}#{}#{}#{}e"'     : '"e"'
+    for k,v of kv
+      do (k,v)->
+        it k, ()->
+          assert.equal full(k), v
     
-  #   sample_list = '''
-  #     """a#{b}"
-  #   '''.split /\n?---\n?/g
-  #   for sample in sample_list
-  #     do (sample)->
-  #       it JSON.stringify(sample), ()->
-  #         util.throws ()->
-  #           full(sample)
+    describe "fuckups", ()->
+      fuckups =
+        '"#{}#{2}#{}#{}"'     : '""+2+""'
+        '"#{}#{}#{3}#{}"'     : '""+3+""'
+        '"#{}#{}#{}#{4}"'     : '""+4+""'
+      for k, v of kv
+        do (k, v)->
+          it "#{k} -> #{v}", ()->
+            assert.equal full(k), v
+      for k, v of fuckups
+        do (k, v)->
+          it "#{k} -> #{v}"
+    
+    sample_list = '''
+      """a#{b}"
+    '''.split /\n?---\n?/g
+    for sample in sample_list
+      do (sample)->
+        it sample, ()->
+          util.throws ()->
+            full(sample)
   
   describe "hash", ()->
     kv =

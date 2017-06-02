@@ -130,11 +130,29 @@ trans.translator_hash['string_interpolated'] = translate:(ctx, node)->
   first_child = node.value_array[0]
   start = if first_child.value_array.length > 1 \
     then ctx.translate first_child              \
-    else first_child.value.replace '#{', '"+'
+    else first_child.value[...-2] + '"+'
   
   mid = ctx.translate node.value_array[1]
   end = (node.value_array[2].value.replace '}', '+"').replace '#{', '"+'
   (start + mid + end).replace /"""/g, '"'
+
+trans.translator_hash['string_interpolated_empty'] = translate:(ctx, node)->
+  first_child = node.value_array[0]
+  start = (if first_child.value_array.length > 1 \
+    then ctx.translate first_child              \
+    else first_child.value)[...-2]
+  
+  end = (node.value_array[1].value.replace '}', '')#.replace '#{', '"+'
+  start + end#.replace /"""/g, '"'
+
+trans.translator_hash['string_interpolated_empty_m'] = translate:(ctx, node)->
+  first_child = node.value_array[0]
+  start = (if first_child.value_array.length > 1 \
+    then ctx.translate first_child              \
+    else first_child.value)[...-2]
+  
+  mid = (node.value_array[1].value.replace '}', '')#.replace '#{', '"+'
+  start + mid#.replace /"""/g, '"'
 
 # ###################################################################################################
 #    hash
