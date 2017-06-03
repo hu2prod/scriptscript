@@ -126,33 +126,19 @@ trans.translator_hash['string_singleq'] = translate:(ctx, node)->
 trans.translator_hash['block_string'] = translate:(ctx, node)->
   '"' + (node.value[3...-3].replace /"/g, '\\"') + '"'
 
-trans.translator_hash['string_interpolated'] = translate:(ctx, node)->
-  first_child = node.value_array[0]
-  start = if first_child.value_array.length > 1 \
-    then ctx.translate first_child              \
-    else first_child.value[...-2] + '"+'
-  
-  mid = ctx.translate node.value_array[1]
-  end = (node.value_array[2].value.replace '}', '+"').replace '#{', '"+'
-  (start + mid + end).replace /"""/g, '"'
-
-trans.translator_hash['string_interpolated_empty'] = translate:(ctx, node)->
-  first_child = node.value_array[0]
-  start = (if first_child.value_array.length > 1 \
-    then ctx.translate first_child              \
-    else first_child.value)[...-2]
-  
-  end = (node.value_array[1].value.replace '}', '')#.replace '#{', '"+'
-  start + end#.replace /"""/g, '"'
-
-trans.translator_hash['string_interpolated_empty_m'] = translate:(ctx, node)->
-  first_child = node.value_array[0]
-  start = (if first_child.value_array.length > 1 \
-    then ctx.translate first_child              \
-    else first_child.value)[...-2]
-  
-  mid = (node.value_array[1].value.replace '}', '')#.replace '#{', '"+'
-  start + mid#.replace /"""/g, '"'
+trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
+  children = node.value_array
+  ret = switch children.length
+    when 0, 1
+      node.value
+    when 2
+      ctx.translate(children[0])[...-2] + children[1].value[1...]
+    when 3
+      ctx.translate(children[0])[...-2] + '"+' + ctx.translate(children[1]) + '+"' + children[2].value[1...]
+  if children.last().mx_hash.hash_key[-3...] == "end"
+    ret = ret.replace /"""/g, '"'
+    ret = ret.replace /\+""/g, ''
+  ret
 
 # ###################################################################################################
 #    hash
