@@ -190,6 +190,14 @@ describe 'translator section', ()->
           util.throws ()->
             full(sample)
   
+  describe "regexp", ()->
+    kv =
+      '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
+    for k,v of kv
+      do (k,v)->
+        it "#{k} -> #{v}", ()->
+          assert.equal full(k), v
+  
   describe "hash", ()->
     kv =
       "{a}"     : "{a:a}"

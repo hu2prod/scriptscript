@@ -50,6 +50,13 @@ q('rvalue', '#str_template_start #string_template_end')                         
 q('rvalue', '#blk_string_template_start #block_string_template_end')                      .mx("ult=string_interpolation ti=string_inter_pass")
 
 # ###################################################################################################
+#    regexp
+# ###################################################################################################
+
+q('regexp', '#regexp_literal')                          .mx("ult=value ti=const type=regexp")
+q('rvalue', '#regexp')                                  .mx("ult=value ti=pass")
+
+# ###################################################################################################
 #    operators define
 # ###################################################################################################
 q('pre_op',  '!')                                       .mx('priority=1')
