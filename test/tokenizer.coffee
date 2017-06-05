@@ -333,7 +333,7 @@ describe 'tokenizer section', ()->
       sample_list.push '"\\\n"'
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{JSON.stringify sample} as string_literal_doubleq", ()->
+          it "should tokenize #{sample} as string_literal_doubleq", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
             assert.equal tl[0][0].mx_hash.hash_key, "string_literal_doubleq"
@@ -346,7 +346,7 @@ describe 'tokenizer section', ()->
       ]
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{JSON.stringify sample} as block_string_literal_doubleq", ()->
+          it "should tokenize #{sample} as block_string_literal_doubleq", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
             assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_doubleq"
@@ -393,7 +393,7 @@ describe 'tokenizer section', ()->
           '''.split /\n?---\n?/ # "
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{JSON.stringify sample}", ()->
+          it "should tokenize #{sample}", ()->
             ret = g._tokenize sample
             for v in ret
               for v2 in ret
@@ -420,7 +420,7 @@ describe 'tokenizer section', ()->
       sample_list.push "'\\\n'"
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{JSON.stringify sample} as string_literal_singleq", ()->
+          it "should tokenize #{sample} as string_literal_singleq", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
             assert.equal tl[0][0].mx_hash.hash_key, "string_literal_singleq"
@@ -432,7 +432,7 @@ describe 'tokenizer section', ()->
       ]
       for sample in sample_list
         do (sample)->
-          it "should tokenize #{JSON.stringify sample} as block_string_literal_singleq", ()->
+          it "should tokenize #{sample} as block_string_literal_singleq", ()->
             tl = g._tokenize sample
             assert.equal tl.length, 1
             assert.equal tl[0][0].mx_hash.hash_key, "block_string_literal_singleq"

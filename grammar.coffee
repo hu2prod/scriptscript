@@ -23,10 +23,10 @@ q('num_const', '#hexadecimal_literal')                  .mx("ult=value ti=const 
 q('num_const', '#binary_literal')                       .mx("ult=value ti=const type=int")
 q('num_const', '#float_literal')                        .mx("ult=value ti=const type=float")
 q('const', '#num_const')                                .mx("ult=deep ti=pass")
-q('str_const', '#string_literal_singleq')               .mx("ult=value ti=const type=string")
-q('str_const', '#block_string_literal_singleq')         .mx("ult=value ti=const type=string")
+q('str_const', '#string_literal_singleq')               .mx("ult=string_singleq ti=const type=string")
+q('str_const', '#block_string_literal_singleq')         .mx("ult=block_string ti=const type=string")
 q('str_const', '#string_literal_doubleq')               .mx("ult=value ti=const type=string")
-q('str_const', '#block_string_literal_doubleq')         .mx("ult=value ti=const type=string")
+q('str_const', '#block_string_literal_doubleq')         .mx("ult=block_string ti=const type=string")
 q('const', '#str_const')                                .mx("ult=deep  ti=pass")
 q('rvalue','#const')                                    .mx("priority=#{base_priority} ult=deep  ti=pass")
 q('lvalue','@')                                         .mx("priority=#{base_priority} ult=value ti=this block_assign=1")
@@ -35,14 +35,26 @@ q('lvalue','@ #identifier')                             .mx("priority=#{base_pri
 # ###################################################################################################
 #    string interpolation
 # ###################################################################################################
-q('str_tpl_start', '#string_template_start')            # How do I fill up mx here?
-q('str_tpl_start', '#block_string_template_start')      # How do I fill up mx here?
-q('str_tpl_mid', '#string_template_mid')                # How do I fill up mx here?
-q('str_tpl_end', '#string_template_end')                # How do I fill up mx here?
-q('str_tpl_end', '#block_string_template_end')          # How do I fill up mx here?
 
-q('str_tpl_start','#str_tpl_start #rvalue #str_tpl_mid').mx("ult=string_interpolated ti=string_inter_pass")
-q('rvalue', '#str_tpl_start #rvalue #str_tpl_end')      .mx("ult=string_interpolated ti=string_inter_pass")
+q('str_template_start', '#string_template_start')                                         .mx("ult=string_interpolation ti=string_inter_pass")
+q('blk_string_template_start', '#block_string_template_start')                            .mx("ult=value ti=string_inter_pass")
+
+q('str_template_start', '#str_template_start #rvalue #string_template_mid')               .mx("ult=string_interpolation ti=string_inter_pass")
+q('blk_string_template_start', '#blk_string_template_start #rvalue #string_template_mid') .mx("ult=string_interpolation ti=string_inter_pass")
+q('rvalue', '#str_template_start #rvalue #string_template_end')                           .mx("ult=string_interpolation ti=string_inter_pass")
+q('rvalue', '#blk_string_template_start #rvalue #block_string_template_end')              .mx("ult=string_interpolation ti=string_inter_pass")
+
+q('str_template_start', '#str_template_start #string_template_mid')                       .mx("ult=string_interpolation ti=string_inter_pass")
+q('blk_string_template_start', '#blk_string_template_start #string_template_mid')         .mx("ult=string_interpolation ti=string_inter_pass")
+q('rvalue', '#str_template_start #string_template_end')                                   .mx("ult=string_interpolation ti=string_inter_pass")
+q('rvalue', '#blk_string_template_start #block_string_template_end')                      .mx("ult=string_interpolation ti=string_inter_pass")
+
+# ###################################################################################################
+#    regexp
+# ###################################################################################################
+
+q('regexp', '#regexp_literal')                          .mx("ult=value ti=const type=regexp")
+q('rvalue', '#regexp')                                  .mx("ult=value ti=pass")
 
 # ###################################################################################################
 #    operators define

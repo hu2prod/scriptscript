@@ -109,13 +109,13 @@ double_quoted_regexp_craft = ///
     #{string_regex_craft}
   )*?
 ///.toString().replace(/\//g,'')
-tokenizer.parser_list.push (new Token_parser 'string_literal_doubleq'      , /// ^  " #{double_quoted_regexp_craft} "    ///)
-tokenizer.parser_list.push (new Token_parser 'block_string_literal_doubleq', /// ^""" #{double_quoted_regexp_craft} """  ///)
-tokenizer.parser_list.push (new Token_parser 'string_template_start'       , /// ^  " #{double_quoted_regexp_craft} \#\{ ///)
-tokenizer.parser_list.push (new Token_parser 'string_template_end'         , /// ^  } #{double_quoted_regexp_craft} "    ///)
-tokenizer.parser_list.push (new Token_parser 'string_template_mid'         , /// ^  } #{double_quoted_regexp_craft} \#\{ ///)
-tokenizer.parser_list.push (new Token_parser 'block_string_template_start' , /// ^""" #{double_quoted_regexp_craft} \#\{ ///)
-tokenizer.parser_list.push (new Token_parser 'block_string_template_end'   , /// ^  } #{double_quoted_regexp_craft} """  ///)
+tokenizer.parser_list.push (new Token_parser 'string_literal_doubleq'      , /// ^  "     #{double_quoted_regexp_craft} "    ///)
+tokenizer.parser_list.push (new Token_parser 'block_string_literal_doubleq', /// ^"""     #{double_quoted_regexp_craft} """  ///)
+tokenizer.parser_list.push (new Token_parser 'string_template_start'       , /// ^"(?!"") #{double_quoted_regexp_craft} \#\{ ///)
+tokenizer.parser_list.push (new Token_parser 'string_template_end'         , /// ^  }     #{double_quoted_regexp_craft} "    ///)
+tokenizer.parser_list.push (new Token_parser 'string_template_mid'         , /// ^  }     #{double_quoted_regexp_craft} \#\{ ///)
+tokenizer.parser_list.push (new Token_parser 'block_string_template_start' , /// ^"""     #{double_quoted_regexp_craft} \#\{ ///)
+tokenizer.parser_list.push (new Token_parser 'block_string_template_end'   , /// ^  }     #{double_quoted_regexp_craft} """  ///)
 
 # NOTE don't check flags. Because of reasons
 tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///

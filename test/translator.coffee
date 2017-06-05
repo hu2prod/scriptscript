@@ -32,8 +32,6 @@ describe 'translator section', ()->
     {}
     {a:1}
     a ? b : c
-    "abcd"
-    'abcd'
   """.split /\n/g #"
   for sample in sample_list
     do (sample)->
@@ -94,6 +92,41 @@ describe 'translator section', ()->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
   
+  describe "strings non-interpolated", ()->
+    kv =
+      '""'            : '""'
+      '"abcd"'        : '"abcd"'
+      '"\\""'         : '"\\""'
+      '"\\a"'         : '"\\a"'
+      "''"            : '""'
+      "'abcd'"        : '"abcd"'
+      "'\"'"          : '"\\""'
+      "'\"\"'"        : '"\\"\\""'
+      '""""""'        : '""'
+      "''''''"        : '""'
+      '"""abcd"""'    : '"abcd"'
+      "'''abcd'''"    : '"abcd"'
+      '""" " """'     : '" \\" "'
+      '""" "" """'    : '" \\"\\" "'
+      "'''\"'''"      : '"\\""'
+      "'''\"\"'''"    : '"\\"\\""'
+      "'a\#{b}c'"     : '"a\#{b}c"'
+      "'''a\#{b}c'''" : '"a\#{b}c"'
+    for k,v of kv
+      do (k,v)->
+        it "#{k} -> #{v}", ()->
+          assert.equal full(k), v
+
+    sample_list = """
+      '''a\#{b}'
+      'a\#{b}'''
+    """.split '\n'
+    for sample in sample_list
+      do (sample)->
+        it "#{sample} throws", ()->
+          util.throws ()->
+            full(sample)
+  
   describe "strings interpolated", ()->
     kv =
       '"a#{b+c}d"'        : '"a"+(b+c)+"d"'
@@ -101,9 +134,68 @@ describe 'translator section', ()->
       '"a#{b+c}d#{e+f}g#{h+i}j"' : '"a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j"'
       '"a{} #{b+c} {} #d"': '"a{} "+(b+c)+" {} #d"'
       '"a{ #{b+c} } # #{d} } #d"': '"a{ "+(b+c)+" } # "+d+" } #d"'
+      '"""a#{b}c"""'        : '"a"+b+"c"'
+      "'''a\#{b}c'''"       : '"a#{b}c"'
+      '"a\\#{#{b}c"'        : '"a\\#{"+b+"c"'
+      '"a\\#{a}#{b}c"'      : '"a\\#{a}"+b+"c"'
+      '"#{}"'               : '""'
+      '"a#{}"'              : '"a"'
+      '"#{}b"'              : '"b"'
+      '"a#{}b"'             : '"ab"'
+      '"#{}#{}"'            : '""'
+      '"#{}#{}#{}"'         : '""'
+      '"#{}#{}#{}#{}"'      : '""'
+      '"a#{}#{}"'           : '"a"'
+      '"#{1}#{}"'           : '""+1'
+      '"#{}b#{}"'           : '"b"'
+      '"#{}#{2}"'           : '""+2'
+      '"#{}#{}c"'           : '"c"'
+      '"a#{1}#{}"'          : '"a"+1'
+      '"a#{}b#{}"'          : '"ab"'
+      '"a#{}#{2}"'          : '"a"+2'
+      '"a#{}#{}c"'          : '"ac"'
+      '"#{1}b#{}"'          : '""+1+"b"'
+      '"#{1}#{2}"'          : '""+1+2'
+      '"#{1}#{}c"'          : '""+1+"c"'
+      '"#{1}#{2}c"'         : '""+1+2+"c"'
+      '"#{1}b#{}c"'         : '""+1+"bc"'
+      '"a#{1}b#{}c"'        : '"a"+1+"bc"'
+      '"a#{}b#{}c"'         : '"abc"'
+      '"#{2+2}#{3-8}"'      : '""+(2+2)+(3-8)'
+      '"a#{-8}"'            : '"a"+-8'  # Валідний код, але непогано було би -8 в дужки взяти
+      '"#{[]}"'             : '""+[]'
+      '"""a#{2+2}b"""'      : '"a"+(2+2)+"b"'
     for k,v of kv
       do (k,v)->
-        it JSON.stringify(k), ()->
+        it "#{k} -> #{v}", ()->
+          assert.equal full(k), v
+    
+    describe "fuckups", ()->
+      fuckups =
+        '""" " #{1}"""'       : '" \\" "+1'   # LATER
+        '"#{5 #comment}"'     : '""+5'
+        '"#{5 #{comment}"'    : '""+5'
+      for k, v of fuckups
+        do (k, v)->
+          it "#{k} -> #{v}"
+    
+    sample_list = '''
+      """a#{b}"
+      "a#{b}"""
+      "a#{{}}"
+    '''.split '\n' # Note that "#{{}}" is valid IcedCoffeeScript (but "#{{{}}}" isn't)
+    for sample in sample_list
+      do (sample)->
+        it "#{sample} throws", ()->
+          util.throws ()->
+            full(sample)
+  
+  describe "regexp", ()->
+    kv =
+      '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
+    for k,v of kv
+      do (k,v)->
+        it "#{k} -> #{v}", ()->
           assert.equal full(k), v
   
   describe "hash", ()->
