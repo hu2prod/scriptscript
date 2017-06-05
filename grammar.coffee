@@ -130,7 +130,7 @@ q('rvalue',  '#rvalue #post_op')                        .mx('priority=#post_op.p
 # ###################################################################################################
 #    ternary
 # ###################################################################################################
-q('rvalue',  '#rvalue [QUESTION] #rvalue : #rvalue')    .mx("priority=#{base_priority} ult=deep delimiter='[SPACE]' ti=ternary")
+q('rvalue',  '#rvalue [QUESTION] #rvalue : #rvalue')    .mx("priority=#{base_priority} ult=ternary delimiter='[SPACE]' ti=ternary")
 # ###################################################################################################
 #    array
 # ###################################################################################################
@@ -271,11 +271,10 @@ show_diff = (a,b)->
     show_diff a.value_array[i], b.value_array[i]
   return
 
-g.fix_overlapping_token = true
 @_parse = (str, opt={})->
-  g.mode_full = opt.mode_full || false
   res = g.go str,
     expected_token : 'stmt_plus'
+    mode_full      : opt.mode_full or false
   if res.length == 0
     throw new Error "Parsing error. No proper combination found"
   if res.length != 1

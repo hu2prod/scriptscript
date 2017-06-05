@@ -128,7 +128,7 @@ do ()->
   # trans.translator_hash['post_op'] = holder
   # PORTING BUG UGLY FIX gram2
   trans.translator_hash['post_op'] = translate:(ctx, node)->
-    node.value_array[0].value = node.value_array[1].value_view
+    node.value_array[1].value = node.value_array[1].value_view
     holder.translate ctx, node
 
 # ###################################################################################################
@@ -154,6 +154,13 @@ trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
     ret = ret.replace /"""/g, '"' #'
     ret = ret.replace /\+""/g, ''
   ret
+
+# ###################################################################################################
+#    ternary
+# ###################################################################################################
+trans.translator_hash["ternary"] = translate:(ctx,node)->
+  [cond, _s1, tnode, _s2, fnode] = node.value_array
+  "#{ctx.translate cond} ? #{ctx.translate tnode} : #{ctx.translate fnode}"
 
 # ###################################################################################################
 #    hash
