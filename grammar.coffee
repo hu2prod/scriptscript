@@ -136,10 +136,8 @@ q('rvalue',  '#rvalue [QUESTION] #rvalue : #rvalue')    .mx("priority=#{base_pri
 # ###################################################################################################
 q('comma_rvalue',  '#rvalue')                           .mx("ult=deep")
 # q('comma_rvalue',  '#eol #comma_rvalue')                .mx("ult=deep") # NOTE eol in back will not work. Gram bug
-q('comma_rvalue',  '#comma_rvalue , #rvalue')           .mx("ult=deep")
 q('comma_rvalue',  '#comma_rvalue #eol #rvalue')        .mx("ult=deep delimiter=','")
-# PORTING BUG gram2 dedupe issue
-# q('comma_rvalue',  '#comma_rvalue #eol? , #eol? #rvalue').mx("ult=deep")
+q('comma_rvalue',  '#comma_rvalue #eol? , #eol? #rvalue').mx("ult=deep")
 q('array',  '[ #eol? ]')                                .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #eol? #comma_rvalue #eol? ]')            .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_priority} ult=deep")
