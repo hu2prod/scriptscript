@@ -13,6 +13,7 @@ describe 'gram section', ()->
   a /= b / c
   ###
   sample_list = '''
+    HEAT_UP
     a
     +a
     a+b

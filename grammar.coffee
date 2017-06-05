@@ -1,5 +1,5 @@
 require 'fy'
-{Gram} = require 'gram'
+{Gram} = require 'gram2'
 module = @
 
 # ###################################################################################################
@@ -8,6 +8,11 @@ module = @
 # API should be async by default in case we make some optimizations in future
 
 g = new Gram
+{_tokenizer} = require './tokenizer'
+do ()->
+  for v in _tokenizer.parser_list
+    g.extra_hash_key_list.push v.name
+  
 q = (a, b)->g.rule a,b
 
 # ###################################################################################################
@@ -104,12 +109,14 @@ q('multipipe',  '[PIPE] #multipipe?')
 q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority} ult=deep ti=bracket")
 
 q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
-# indent set
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority=#bin_op.priority #bin_op.left_assoc')
-q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority=#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority==#bin_op.priority #bin_op.left_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority==#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
+
+# BUG in gram2
+# # indent set
+# q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
+# q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority==#bin_op.priority #bin_op.left_assoc')
+# q('rvalue',  '#rvalue #bin_op #indent #rvalue #dedent') .mx('priority=#bin_op.priority ti=bin_op')              .strict('#rvalue[1].priority==#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
 # indent+pipe
 q('pre_pipe_rvalue',  '#multipipe #rvalue')                                                           #.strict("#rvalue.priority<#{pipe_priority}")
 q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                                     #.strict("#rvalue.priority<#{pipe_priority}")
@@ -130,7 +137,7 @@ q('rvalue',  '#rvalue [QUESTION] #rvalue : #rvalue')    .mx("priority=#{base_pri
 q('comma_rvalue',  '#rvalue')                           .mx("ult=deep")
 # q('comma_rvalue',  '#eol #comma_rvalue')                .mx("ult=deep") # NOTE eol in back will not work. Gram bug
 q('comma_rvalue',  '#comma_rvalue , #rvalue')           .mx("ult=deep")
-q('comma_rvalue',  '#comma_rvalue #eol #rvalue')        .mx("ult=deep delimiter=,")
+q('comma_rvalue',  '#comma_rvalue #eol #rvalue')        .mx("ult=deep delimiter=','")
 q('comma_rvalue',  '#comma_rvalue #eol? , #eol? #rvalue').mx("ult=deep")
 q('array',  '[ #eol? ]')                                .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #eol? #comma_rvalue #eol? ]')            .mx("priority=#{base_priority} ult=deep")
@@ -147,7 +154,7 @@ q('pair',  '#const : #rvalue')                          .mx("ult=deep")
 q('pair',  '( #rvalue ) : #rvalue')                     .mx("ult=hash_pair_eval")
 q('pair',  '#identifier')                               .mx("ult=hash_pair_auto auto=1")
 q('pair_comma_rvalue',  '#pair')                        .mx("ult=deep")
-q('pair_comma_rvalue',  '#pair_comma_rvalue #eol #pair').mx("ult=deep delimiter=,")
+q('pair_comma_rvalue',  '#pair_comma_rvalue #eol #pair').mx("ult=deep delimiter=','")
 q('pair_comma_rvalue',  '#pair_comma_rvalue #eol? , #eol? #pair').mx("ult=deep")
 q('hash',  '{ #eol? }')                                 .mx("priority=#{base_priority} ult=deep")
 q('hash',  '{ #eol? #pair_comma_rvalue #eol? }')        .mx("priority=#{base_priority} ult=deep")
@@ -266,7 +273,7 @@ show_diff = (a,b)->
 g.fix_overlapping_token = true
 @_parse = (str, opt={})->
   g.mode_full = opt.mode_full || false
-  res = g.parse_text_list str,
+  res = g.go str,
     expected_token : 'stmt_plus'
   if res.length == 0
     throw new Error "Parsing error. No proper combination found"

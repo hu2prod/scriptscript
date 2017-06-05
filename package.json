@@ -30,6 +30,6 @@
   },
   "dependencies": {
     "fy": "github:hu2prod/fy",
-    "gram": "github:hu2prod/gram"
+    "gram2": "github:hu2prod/gram2"
   }
 }

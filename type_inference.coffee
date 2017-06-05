@@ -2,7 +2,7 @@ require 'fy'
 require 'fy/codegen'
 {
   Translator
-} = require 'gram'
+} = require 'gram2'
 module = @
 # ###################################################################################################
 #    scope state

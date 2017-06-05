@@ -6,7 +6,7 @@ require 'fy/codegen'
   un_op_translator_framework
   bin_op_translator_holder
   bin_op_translator_framework
-} = require 'gram'
+} = require 'gram2'
 module = @
 
 # ###################################################################################################
@@ -35,11 +35,9 @@ deep = (ctx, node)->
       if node.mx_hash.eol_pass and v.mx_hash.hash_key == 'eol'
         list.push "\n"
     else if fn = trans.trans_token[v.mx_hash.hash_key]
-      list.push fn v.value
+      list.push fn v.value_view
     # else if trans.trans_value[v.mx_hash.hash_key]?
       # list.push v.value
-    else if /^proxy_/.test v.mx_hash.hash_key
-      list.push v.value
     else
       list.push ctx.translate v
   if delimiter = node.mx_hash.delimiter
@@ -47,7 +45,7 @@ deep = (ctx, node)->
     list = [ list.join(delimiter) ]
   list
 
-trans.translator_hash['value']  = translate:(ctx, node)->node.value
+trans.translator_hash['value']  = translate:(ctx, node)->node.value_view
 trans.translator_hash['deep']   = translate:(ctx, node)->
   list = deep ctx, node
   list.join('')
