@@ -102,8 +102,7 @@ describe 'type_inference section', ()->
       "a=c=d=e=f\nb=1\na=b\na" : "int"
       "a=(b=e)\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
       "a=(b=f)\nf=e\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
-      # TOO LONG !!!
-      # "a=(b=g)\ng=f\nf=e\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
+      "a=(b=g)\ng=f\nf=e\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
       # redundant
       "a=e=f\na=1\nf=z=1\ne" : "int"
       "a=e=f\na=z=1\nf=1\ne" : "int"
