@@ -40,7 +40,7 @@ deep = (ctx, node)->
       if node.mx_hash.eol_pass and v.mx_hash.hash_key == 'eol'
         list.push "\n"
     else if fn = trans.trans_token[v.mx_hash.hash_key]
-      list.push fn v.value_view
+      list.push fn v.value
     else if trans.trans_value[v.mx_hash.hash_key]?
       list.push v.value
     else
@@ -136,22 +136,22 @@ do ()->
 # ###################################################################################################
 
 trans.translator_hash['string_singleq'] = translate:(ctx, node)->
-  '"' + (node.value[1...-1].replace /"/g, '\\"') + '"'
+  '"' + (node.value_view[1...-1].replace /"/g, '\\"') + '"' #"
 
 trans.translator_hash['block_string'] = translate:(ctx, node)->
-  '"' + (node.value[3...-3].replace /"/g, '\\"') + '"'
+  '"' + (node.value_view[3...-3].replace /"/g, '\\"') + '"' #"
 
 trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
   children = node.value_array
   ret = switch children.length
     when 0, 1
-      node.value
+      node.value_view
     when 2
       ctx.translate(children[0])[...-2] + children[1].value[1...]
     when 3
       ctx.translate(children[0])[...-2] + '"+' + ctx.translate(children[1]) + '+"' + children[2].value[1...]
   if children.last().mx_hash.hash_key[-3...] == "end"
-    ret = ret.replace /"""/g, '"'
+    ret = ret.replace /"""/g, '"' #'
     ret = ret.replace /\+""/g, ''
   ret
 
@@ -198,7 +198,7 @@ trans.translator_hash["func_decl"] = translate:(ctx,node)->
   if node.value_array[0].value == '(' and node.value_array[2].value == ')'
     arg_list_node = node.value_array[1]
     for arg in arg_list_node.value_array
-      continue if arg.value_array[0].value == ","
+      continue if arg.value == ","
       default_value_node = null
       if arg.value_array.length == 1
         name_node = arg.value_array[0]
@@ -220,7 +220,7 @@ trans.translator_hash["func_decl"] = translate:(ctx,node)->
       if default_value_node
         default_value = ctx.translate default_value_node
       arg_list.push {
-        name : name_node.value
+        name : name_node.value or name_node.value_view
         type : null
         default_value
       }

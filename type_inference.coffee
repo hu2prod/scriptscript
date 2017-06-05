@@ -214,7 +214,7 @@ trans.translator_hash['this'] = translate:(ctx, node)->
 trans.translator_hash['id'] = translate:(ctx, node)->
   ret = 0
   is_prefefined_const = false
-  if node.value in ['true', 'false'] # .toLowerCase() ??
+  if node.value_view in ['true', 'false'] # .toLowerCase() ??
     is_prefefined_const = true
     if !node.mx_hash.type?
       node.mx_hash.type = mk_type 'bool'
