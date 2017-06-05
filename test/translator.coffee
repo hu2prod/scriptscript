@@ -110,6 +110,7 @@ describe 'translator section', ()->
     kv =
       "{a}"     : "{a:a}"
       "a:1"     : "{a:1}"
+      "a:1,b:1"     : "{a:1,b:1}"
       "{\na:b\nc:d}": "{a:b,c:d}"
       # "{(a):b}" : "(_t={},_t[a]=b,_t)"
     for k,v of kv

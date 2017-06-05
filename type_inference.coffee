@@ -500,12 +500,7 @@ trans.translator_hash["ternary"] = translate:(ctx, node)->
   ret += ctx.translate vfalse
   ret += assert_pass_down_eq vtrue, vfalse
   
-  if vtrue.mx_hash.type?
-    if !node.mx_hash.type?
-      node.mx_hash.type = vtrue.mx_hash.type
-      ret++
-    else
-      # UNIMPLEMENTED
+  ret += assert_pass_down_eq vtrue, node, "ternary"
   return ret
 # ###################################################################################################
 trans.translator_hash["array"] = translate:(ctx, node)->
@@ -737,8 +732,13 @@ trans.translator_hash['func_stub'] = translate:(ctx, node)->
 trans.translator_hash['macro_stub'] = translate:(ctx, node)->
   ret = 0
   block = null
+  rvalue = null
   for v in node.value_array
     block = v if v.mx_hash.hash_key == 'block'
+    rvalue = v if v.mx_hash.hash_key == 'rvalue'
+  
+  if rvalue?
+    ret += ctx.translate rvalue
   
   ret += ctx.translate block
   ret

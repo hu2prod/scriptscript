@@ -102,7 +102,8 @@ describe 'type_inference section', ()->
       "a=c=d=e=f\nb=1\na=b\na" : "int"
       "a=(b=e)\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
       "a=(b=f)\nf=e\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
-      "a=(b=g)\ng=f\nf=e\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
+      # TOO LONG !!!
+      # "a=(b=g)\ng=f\nf=e\ne=d\nd=c\nc=1\na=1\nb" : "int" # не срабатывает
       # redundant
       "a=e=f\na=1\nf=z=1\ne" : "int"
       "a=e=f\na=z=1\nf=1\ne" : "int"
@@ -224,6 +225,7 @@ describe 'type_inference section', ()->
       "a?1:b"   : "int"
       "a?a:b"   : "bool"
       "a?a:a"   : "bool"
+      # "!!1?a:a"   : "bool"
       "@?a:a"   : undefined
     for k,v of kv
       do (k,v)->
@@ -245,6 +247,7 @@ describe 'type_inference section', ()->
     kv =
       "[]"      : "array<*>"
       "[1]"     : "array<int>"
+      "[[1]]"   : "array<array<int>>"
       "[1,1]"   : "array<int>"
       "[1,1,1]" : "array<int>"
       "[a,1,1]" : "array<int>"
@@ -419,6 +422,7 @@ describe 'type_inference section', ()->
           assert.equal ast.mx_hash.type?.toString(), v
     list = """
       -> == (a)->
+      (a)->a=1 == (a)->a='1'
     """.split "\n"
     for v in list
       do (v)->
