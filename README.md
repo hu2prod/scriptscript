@@ -11,6 +11,7 @@ test
     npm run test-simple         # no pass to coveralls
     npm run test-watch          # no report generating, just watch that all is ok
     npm run test-grep <pattern> # run selected test sections only; a grep pattern is required
+    time npm run test-perf      # show test execution time without instrumentation
 
 test lifehacks
 
