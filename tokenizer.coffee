@@ -27,7 +27,6 @@ tokenizer.parser_list.push (new Token_parser 'Xdent', /^\n/, (_this, ret_value, 
       ret_value.push [node]
       last_space -= 2
   else
-    # PORTING BUG
     return if _this.ret_access.last()?[0].mx_hash.hash_key == 'eol' # do not duplicate
     node = new Node
     node.mx_hash.hash_key = 'eol'

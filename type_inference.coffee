@@ -664,7 +664,7 @@ trans.translator_hash['opencl_access'] = translate:(ctx, node)->
 # ###################################################################################################
 type_ast_to_obj = (ast)->
   # NOTE WRONG. Need proper handle <>
-  mk_type ast.value
+  mk_type ast.value_view
 
 trans.translator_hash['func_stub'] = translate:(ctx, node)->
   ret = 0
