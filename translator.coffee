@@ -16,7 +16,12 @@ trans.trans_skip =
   dedent : true
   eol    : true
 
-# trans.trans_value = {}
+trans.trans_value =
+  bracket       : true
+  comma         : true
+  pair_separator: true
+  arrow_function: true
+
 trans.trans_token =
   comment : (v)-> "//" + v.substr 1
 deep = (ctx, node)->
@@ -36,8 +41,8 @@ deep = (ctx, node)->
         list.push "\n"
     else if fn = trans.trans_token[v.mx_hash.hash_key]
       list.push fn v.value_view
-    # else if trans.trans_value[v.mx_hash.hash_key]?
-      # list.push v.value
+    else if trans.trans_value[v.mx_hash.hash_key]?
+      list.push v.value
     else
       list.push ctx.translate v
   if delimiter = node.mx_hash.delimiter
@@ -66,7 +71,9 @@ do ()->
   for v in bin_op_list = "= == != < <= > >=".split ' '
     holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
   trans.translator_hash['bin_op'] = translate:(ctx, node)->
-    op = node.value_array[1].value
+    op = node.value_array[1].value_view
+    # PORTING BUG gram2
+    node.value_array[1].value = node.value_array[1].value_view
     if op in ['or', 'and']
       # needs type inference
       [a,_skip,b] = node.value_array
@@ -93,26 +100,36 @@ do ()->
 # ###################################################################################################
 #    pre_op
 # ###################################################################################################
-holder = new un_op_translator_holder
-holder.mode_pre()
-for v in un_op_list = "~ + - !".split ' '
-  holder.op_list[v]  = new un_op_translator_framework "$op$1"
+do ()->
+  holder = new un_op_translator_holder
+  holder.mode_pre()
+  for v in un_op_list = "~ + - !".split ' '
+    holder.op_list[v]  = new un_op_translator_framework "$op$1"
 
-holder.op_list["not"]  = new un_op_translator_framework "!$1"
-holder.op_list["void"] = new un_op_translator_framework "null"
+  holder.op_list["not"]  = new un_op_translator_framework "!$1"
+  holder.op_list["void"] = new un_op_translator_framework "null"
 
-for v in un_op_list = "typeof new delete".split ' '
-  holder.op_list[v]  = new un_op_translator_framework "($op $1)"
-trans.translator_hash['pre_op'] = holder
+  for v in un_op_list = "typeof new delete".split ' '
+    holder.op_list[v]  = new un_op_translator_framework "($op $1)"
+  # trans.translator_hash['pre_op'] = holder
+  # PORTING BUG UGLY FIX gram2
+  trans.translator_hash['pre_op'] = translate:(ctx, node)->
+    node.value_array[0].value = node.value_array[0].value_view
+    holder.translate ctx, node
 
 # ###################################################################################################
 #    post_op
 # ###################################################################################################
-holder = new un_op_translator_holder
-holder.mode_post()
-for v in un_op_list = ["++", '--']
-  holder.op_list[v]  = new un_op_translator_framework "($1$op)"
-trans.translator_hash['post_op'] = holder
+do ()->
+  holder = new un_op_translator_holder
+  holder.mode_post()
+  for v in un_op_list = ["++", '--']
+    holder.op_list[v]  = new un_op_translator_framework "($1$op)"
+  # trans.translator_hash['post_op'] = holder
+  # PORTING BUG UGLY FIX gram2
+  trans.translator_hash['post_op'] = translate:(ctx, node)->
+    node.value_array[0].value = node.value_array[1].value_view
+    holder.translate ctx, node
 
 # ###################################################################################################
 #    str

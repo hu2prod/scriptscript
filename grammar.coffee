@@ -64,39 +64,39 @@ q('rvalue', '#regexp')                                  .mx("ult=value ti=pass")
 # ###################################################################################################
 #    operators define
 # ###################################################################################################
-q('pre_op',  '!')                                       .mx('priority=1')
-q('pre_op',  'not')                                     .mx('priority=1')
-q('pre_op',  '~')                                       .mx('priority=1')
-q('pre_op',  '-')                                       .mx('priority=1')                             .strict('!$1.tail_space')
-q('pre_op',  '+')                                       .mx('priority=1')                             .strict('!$1.tail_space')
-q('pre_op',  'typeof')                                  .mx('priority=1')
+q('pre_op',  '!')                                       .mx('priority=1')  .strict('$1.hash_key==unary_operator')
+q('pre_op',  'not')                                     .mx('priority=1')  .strict('$1.hash_key==unary_operator')
+q('pre_op',  '~')                                       .mx('priority=1')  .strict('$1.hash_key==unary_operator')
+q('pre_op',  '-')                                       .mx('priority=1')  .strict('$1.hash_key==unary_operator !$1.tail_space')
+q('pre_op',  '+')                                       .mx('priority=1')  .strict('$1.hash_key==unary_operator !$1.tail_space')
+q('pre_op',  'typeof')                                  .mx('priority=1')  .strict('$1.hash_key==unary_operator')
 
-q('pre_op',  'void')                                    .mx('priority=15')
-q('pre_op',  'new')                                     .mx('priority=15')
-q('pre_op',  'delete')                                  .mx('priority=15')
+q('pre_op',  'void')                                    .mx('priority=15') .strict('$1.hash_key==unary_operator')
+q('pre_op',  'new')                                     .mx('priority=15') .strict('$1.hash_key==unary_operator')
+q('pre_op',  'delete')                                  .mx('priority=15') .strict('$1.hash_key==unary_operator')
 # ++ -- pre_op is banned.
 
-q('post_op', '++')                                      .mx('priority=1')
-q('post_op', '--')                                      .mx('priority=1')
-q('post_op', '[QUESTION]')                              .mx('priority=1')
+q('post_op', '++')                                      .mx('priority=1')  .strict('$1.hash_key==unary_operator')
+q('post_op', '--')                                      .mx('priority=1')  .strict('$1.hash_key==unary_operator')
+q('post_op', '[QUESTION]')                              .mx('priority=1')  #.strict('$1.hash_key==unary_operator')
 
 # https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 # TODO all ops
 pipe_priority = 100
 
-q('bin_op',  '//|%%')                                   .mx('priority=4  right_assoc=1')
-q('bin_op',  '**')                                      .mx('priority=4  left_assoc=1') # because JS
-q('bin_op',  '*|/|%')                                   .mx('priority=5  right_assoc=1')
-q('bin_op',  '+|-')                                     .mx('priority=6  right_assoc=1')
-q('bin_op',  '<<|>>|>>>')                               .mx('priority=7  right_assoc=1')
-q('bin_op',  'instanceof')                              .mx('priority=8  right_assoc=1')
-q('bin_op',  '<|<=|>|>=')                               .mx('priority=9')                 # NOTE NOT associative, because chained comparison
-q('bin_op',  '!=|==')                                   .mx('priority=9  right_assoc=1') # NOTE == <= has same priority
+q('bin_op',  '//|%%')                                   .mx('priority=4  right_assoc=1') .strict('$1.hash_key==binary_operator') 
+q('bin_op',  '**')                                      .mx('priority=4  left_assoc=1')  .strict('$1.hash_key==binary_operator') # because JS
+q('bin_op',  '*|/|%')                                   .mx('priority=5  right_assoc=1') .strict('$1.hash_key==binary_operator') 
+q('bin_op',  '+|-')                                     .mx('priority=6  right_assoc=1') .strict('$1.hash_key==binary_operator') 
+q('bin_op',  '<<|>>|>>>')                               .mx('priority=7  right_assoc=1') .strict('$1.hash_key==binary_operator') 
+q('bin_op',  'instanceof')                              .mx('priority=8  right_assoc=1') .strict('$1.hash_key==binary_operator') 
+q('bin_op',  '<|<=|>|>=')                               .mx('priority=9')                .strict('$1.hash_key==binary_operator')  # NOTE NOT associative, because chained comparison
+q('bin_op',  '!=|==')                                   .mx('priority=9  right_assoc=1') .strict('$1.hash_key==binary_operator') # NOTE == <= has same priority
 # WARNING a == b < c is bad style. So all fuckups are yours
 
-q('bin_op',  '&&|and|or|[PIPE][PIPE]')                  .mx('priority=10 right_assoc=1')
+q('bin_op',  '&&|and|or|[PIPE][PIPE]')                  .mx('priority=10 right_assoc=1') .strict('$1.hash_key==binary_operator')
 
-q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx('priority=3')
+q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx('priority=3') .strict('$1.hash_key==binary_operator')
 
 
 # ###################################################################################################
@@ -138,7 +138,8 @@ q('comma_rvalue',  '#rvalue')                           .mx("ult=deep")
 # q('comma_rvalue',  '#eol #comma_rvalue')                .mx("ult=deep") # NOTE eol in back will not work. Gram bug
 q('comma_rvalue',  '#comma_rvalue , #rvalue')           .mx("ult=deep")
 q('comma_rvalue',  '#comma_rvalue #eol #rvalue')        .mx("ult=deep delimiter=','")
-q('comma_rvalue',  '#comma_rvalue #eol? , #eol? #rvalue').mx("ult=deep")
+# PORTING BUG gram2 dedupe issue
+# q('comma_rvalue',  '#comma_rvalue #eol? , #eol? #rvalue').mx("ult=deep")
 q('array',  '[ #eol? ]')                                .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #eol? #comma_rvalue #eol? ]')            .mx("priority=#{base_priority} ult=deep")
 q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_priority} ult=deep")

@@ -271,7 +271,7 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
     bin_op_list.push v if v.mx_hash.hash_key == 'bin_op'
   
   bin_op_node = bin_op_list[0]
-  op = bin_op_node.value
+  op = bin_op_node.value_view
   
   for v in rvalue_list
     ret += ctx.translate v
@@ -328,7 +328,7 @@ trans.translator_hash['assign_bin_op'] = translate:(ctx, node)->
     bin_op_list.push v if v.mx_hash.hash_key == 'assign_bin_op'
   
   bin_op_node = bin_op_list[0]
-  op = bin_op_node.value.replace '=', ''
+  op = bin_op_node.value_view.replace '=', ''
   
   for v in rvalue_list
     ctx.translate v
@@ -412,7 +412,7 @@ trans.translator_hash['pre_op'] = translate:(ctx, node)->
     pre_op_list.push v if v.mx_hash.hash_key == 'pre_op'
   
   pre_op_node = pre_op_list[0]
-  op = pre_op_node.value
+  op = pre_op_node.value_view
   
   for v in rvalue_list
     ret += ctx.translate v
@@ -463,7 +463,7 @@ trans.translator_hash['post_op'] = translate:(ctx, node)->
     post_op_list.push v if v.mx_hash.hash_key == 'post_op'
   
   post_op_node = post_op_list[0]
-  op = post_op_node.value
+  op = post_op_node.value_view
   
   for v in rvalue_list
     ret += ctx.translate v
