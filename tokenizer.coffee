@@ -129,7 +129,9 @@ tokenizer.parser_list.push (new Token_parser 'regexp_literal', ///
 ///)
 tokenizer.parser_list.push (new Token_parser 'here_regexp_literal', ///
   ^\/\/\/ 
-  (?:(?!\/\/\/)[^])+
+  # (?:(?!\/\/\/)[^])+
+  # [^]+(?!\/\/\/)
+  [^]+?
   \/\/\/[imgy]*
 ///)
 @_tokenizer = tokenizer

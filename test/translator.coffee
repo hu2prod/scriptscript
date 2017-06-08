@@ -197,6 +197,28 @@ describe 'translator section', ()->
       do (k,v)->
         it "#{k} -> #{v}", ()->
           assert.equal full(k), v
+    
+  describe "regexp todo", ()->
+    todo =
+      '///ab+c///i'           : '/ab+c/i'
+      '/// ///'               : '/(?:)/'     # O_O
+      '/// / ///'             : '/\//'       # escape /
+      '/// / // ///'          : '/\/\/\//'   # more /-s to be escaped
+      '/// a b + c ///'       : '/ab+c/'     # spaces to be ignored
+      '///ab+c#omment///'     : '/ab+c/'     # comment
+      '/todo interpolation/'  : '/todo interpolation/'
+      '''///multiline
+      lalala
+      tratata///'''           : '/multilinelalalatratata/'
+      '''///multiline
+      with #comment
+      # and
+      some continuation
+      ///'''                  : '/multilinewithsomecontinuation/'
+    for k, v of todo
+      do (k, v)->
+        it "#{k} -> #{v}"
+    
   
   describe "hash", ()->
     kv =
