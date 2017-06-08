@@ -384,6 +384,55 @@ describe 'translator section', ()->
           util.throws ()->
             full(v)
   
+  # TEMP impl tests
+  describe "pipeline", ()->
+    kv =
+      """
+      [1] | a
+      """       : """
+        a = [1]
+        """
+      """
+      fn = ()->
+      [1] | fn
+      """       : """
+        (fn=(function(){}))
+        ([1]).map(fn)
+        """
+      """
+      fn = ()->
+      [1] | fn | b
+      """       : """
+        (fn=(function(){}))
+        b = ([1]).map(fn)
+        """
+      """
+      b = []
+      fn = ()->
+      [1] | fn | b
+      """       : """
+        (b=[])
+        (fn=(function(){}))
+        b = ([1]).map(fn)
+        """
+      
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          assert.equal full(k), v
+    sample_list =
+      """
+      1 | a
+      ---
+      a = 1
+      [1] | a
+      """.split /\n?---\n?/
+    for v in sample_list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full(v)
+  
   it 'test translate exception', (done)->
     await translate null, {}, defer(err)
     assert err?

@@ -46,7 +46,7 @@ deep = (ctx, node)->
     else
       list.push ctx.translate v
   if delimiter = node.mx_hash.delimiter
-    delimiter = ' ' if delimiter == "'[SPACE]'"
+    # delimiter = ' ' if delimiter == "'[SPACE]'" # not used -> commented
     list = [ list.join(delimiter) ]
   list
 
@@ -95,6 +95,23 @@ do ()->
           # не пропустит type inference
           ### !pragma coverage-skip-block ###
           throw new Error "op=#{op} doesn't support type #{a.mx_hash.type}"
+    if op == '|'
+      # pipes logic
+      [a,_skip,b] = node.value_array
+      a_tr = ctx.translate a
+      b_tr = ctx.translate b
+      if b.mx_hash.type?
+        pp b.mx_hash.type
+        switch b.mx_hash.type.main
+          when "function"
+            return "(#{a_tr}).map(#{b_tr})"
+          when "array"
+            return "#{b_tr} = #{a_tr}"
+          # else не нужен т.к. не пропустит type inference
+      
+      
+      return "#{b_tr} = #{a_tr}"
+      
     
     holder.translate ctx, node
 # ###################################################################################################

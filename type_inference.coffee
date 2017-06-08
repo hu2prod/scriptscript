@@ -283,6 +283,19 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
   # LATER result defined + some args
   
   [a,b] = rvalue_list
+  if op == '|'
+    if a.mx_hash.type?
+      unless a.mx_hash.type.main in ["array"]
+        pp a.mx_hash.type
+        throw new Error "pipe can't be used for left type #{a.mx_hash.type}"
+    if b.mx_hash.type?
+      unless b.mx_hash.type.main in ["function", "array"]
+        throw new Error "pipe can't be used for right type #{b.mx_hash.type}"
+      
+    return 0
+  
+  
+  
   if !a.mx_hash.type? and !b.mx_hash.type?
     # case 1
     # not implemented
