@@ -194,11 +194,13 @@ describe 'translator section', ()->
     kv =
       '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
       '///ab+c///i'           : '/ab+c/i'
-      '/// / ///'             : '/\\//'       # escape /
+      '/// / ///'             : '/\\//'         # escape /
       '/// / // ///'          : '/\\/\\/\\//'   # more /-s to be escaped
-      '/// a b + c ///'       : '/ab+c/'     # spaces to be ignored
-      '///\ta\tb\t+\tc\t///'  : '/ab+c/'     # tabs to be ignored as well
-      '///ab+c#omment///'     : '/ab+c/'     # comment
+      '/// a b + c ///'       : '/ab+c/'        # spaces to be ignored
+      '///\ta\tb\t+\tc\t///'  : '/ab+c/'        # tabs to be ignored as well
+      '///ab+c #comment///'   : '/ab+c/'        # comment
+      '///ab+c#omment///'     : '/ab+c#omment/' # comments should be preceded by whitespace
+      '///[#]///'             : '/[#]/'
       '''///multiline
       lalala
       tratata///'''           : '/multilinelalalatratata/'

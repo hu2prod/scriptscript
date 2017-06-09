@@ -179,7 +179,7 @@ trans.translator_hash['block_regexp'] = translate:(ctx, node)->
   parts = node.value_view.split "///"
   # Assuming that the token starts with "///" and therefore parts[0] is an empty string.
   # Not checking flags for now.
-  parts[1] = parts[1].replace /#.*/g, ''
+  parts[1] = parts[1].replace /\s#.*/g, ''
   parts[1] = parts[1].replace /\s/g, ''
   if parts[1] == ""
     parts[1] = "(?:)"
