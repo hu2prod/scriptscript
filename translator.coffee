@@ -151,7 +151,6 @@ do ()->
 # ###################################################################################################
 #    str
 # ###################################################################################################
-
 trans.translator_hash['string_singleq'] = translate:(ctx, node)->
   '"' + (node.value_view[1...-1].replace /"/g, '\\"') + '"' #"
 
@@ -171,6 +170,22 @@ trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
     ret = ret.replace /"""/g, '"' #'
     ret = ret.replace /\+""/g, ''
   ret
+
+# ###################################################################################################
+#    regexp
+# ###################################################################################################
+
+trans.translator_hash['block_regexp'] = translate:(ctx, node)->
+  parts = node.value_view.split "///"
+  # Assuming that the token starts with "///" and therefore parts[0] is an empty string.
+  # Not checking flags for now.
+  parts[1] = parts[1].replace /#.*/g, ''
+  parts[1] = parts[1].replace /\s/g, ''
+  if parts[1] == ""
+    parts[1] = "(?:)"
+  else
+    parts[1] = parts[1].replace /\//g, '\\/'
+  '/' + parts[1] + '/' + parts[2] #"
 
 # ###################################################################################################
 #    ternary

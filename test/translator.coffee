@@ -190,31 +190,36 @@ describe 'translator section', ()->
           util.throws ()->
             full(sample)
   
-  describe "regexp", ()->
+  describe "dev regexp", ()->
     kv =
       '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
+      '///ab+c///i'           : '/ab+c/i'
+      '/// / ///'             : '/\\//'       # escape /
+      '/// / // ///'          : '/\\/\\/\\//'   # more /-s to be escaped
+      '/// a b + c ///'       : '/ab+c/'     # spaces to be ignored
+      '///\ta\tb\t+\tc\t///'  : '/ab+c/'     # tabs to be ignored as well
+      '///ab+c#omment///'     : '/ab+c/'     # comment
+      '''///multiline
+      lalala
+      tratata///'''           : '/multilinelalalatratata/'
+      '''///multiline
+      with # a comment
+      # and
+      some continuation
+      ///'''                  : '/multilinewithsomecontinuation/'
+      '/// ///'               : '/(?:)/'     # O_O
+      '''///
+      ///'''                  : '/(?:)/'     # multiline O_O
+      '''///   # comment
+      ///'''                  : '/(?:)/'     # multiline O_O with comment
+      '/todo interpolation/'  : '/todo interpolation/'
     for k,v of kv
       do (k,v)->
         it "#{k} -> #{v}", ()->
           assert.equal full(k), v
     
-  describe "regexp todo", ()->
-    todo =
-      '///ab+c///i'           : '/ab+c/i'
-      '/// ///'               : '/(?:)/'     # O_O
-      '/// / ///'             : '/\//'       # escape /
-      '/// / // ///'          : '/\/\/\//'   # more /-s to be escaped
-      '/// a b + c ///'       : '/ab+c/'     # spaces to be ignored
-      '///ab+c#omment///'     : '/ab+c/'     # comment
-      '/todo interpolation/'  : '/todo interpolation/'
-      '''///multiline
-      lalala
-      tratata///'''           : '/multilinelalalatratata/'
-      '''///multiline
-      with #comment
-      # and
-      some continuation
-      ///'''                  : '/multilinewithsomecontinuation/'
+  describe "dev regexp todo", ()->
+    todo = {}
     for k, v of todo
       do (k, v)->
         it "#{k} -> #{v}"

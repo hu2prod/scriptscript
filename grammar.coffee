@@ -59,8 +59,8 @@ q('rvalue', '#blk_string_template_start #block_string_template_end')            
 # ###################################################################################################
 
 q('regexp', '#regexp_literal')                          .mx("ult=value ti=const type=regexp")
-q('regexp', '#here_regexp_literal')                     .mx("ult=value ti=const type=regexp")
-q('rvalue', '#regexp')                                  .mx("ult=value ti=pass")
+q('regexp', '#here_regexp_literal')                     .mx("ult=block_regexp ti=const type=regexp")
+q('rvalue', '#regexp')                                  .mx("ult=deep ti=pass")
 
 # ###################################################################################################
 #    operators define
