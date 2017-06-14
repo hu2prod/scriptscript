@@ -121,7 +121,7 @@ q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx(
 q('bin_op',  '#multipipe')                              .mx("priority=#{pipe_priority} right_assoc=1") # возможно стоит это сделать отдельной конструкцией языка дабы проверять всё более тсчательно
 q('multipipe',  '[PIPE] #multipipe?')
 # NOTE need ~same rule for lvalue ???
-q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority} ult=deep ti=bracket")
+q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority} ult=bracket ti=bracket")
 
 q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
 q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority==#bin_op.priority #bin_op.left_assoc')

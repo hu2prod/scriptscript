@@ -38,6 +38,13 @@ describe 'translator section', ()->
       it JSON.stringify(sample), ()->
         assert.equal full(sample), sample
   
+  kv =
+    '((a))': '(a)' # ensure bracket
+  for k,v of kv
+    do (k,v)->
+      it "#{k} -> #{v}", ()->
+        assert.equal full(k), v
+  
   # bracketed
   sample_list = """
     typeof a
@@ -348,6 +355,10 @@ describe 'translator section', ()->
         (function(a, b){
           b=b==null?(1):b;
         })"""
+      "(a,b=(1))->" : """
+        (function(a, b){
+          b=b==null?(1):b;
+        })"""
       "(a,b=1):number->" : """
         (function(a, b){
           b=b==null?(1):b;
@@ -465,6 +476,13 @@ describe 'translator section', ()->
       """
       fn = ()->
       [1] | fn
+      """       : """
+        (fn=(function(){}))
+        ([1]).map(fn)
+        """
+      """
+      fn = ()->
+      ([1]) | fn
       """       : """
         (fn=(function(){}))
         ([1]).map(fn)
