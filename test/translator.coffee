@@ -38,8 +38,10 @@ describe 'translator section', ()->
       it JSON.stringify(sample), ()->
         assert.equal full(sample), sample
   
+  # ensure bracket
   kv =
-    '((a))': '(a)' # ensure bracket
+    '((a))': '(a)'
+    '((a)+(b))': '((a)+(b))'
   for k,v of kv
     do (k,v)->
       it "#{k} -> #{v}", ()->
