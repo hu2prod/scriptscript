@@ -162,7 +162,7 @@ describe 'translator section', ()->
       '"a#{1}b#{}c"'        : '"a"+1+"bc"'
       '"a#{}b#{}c"'         : '"abc"'
       '"#{2+2}#{3-8}"'      : '""+(2+2)+(3-8)'
-      '"a#{-8}"'            : '"a"+-8'  # Валідний код, але непогано було би -8 в дужки взяти
+      '"a#{-8}"'            : '"a"+-8'  # This output is valid JavaScript but it would be nice to parenthesize -8
       '"#{[]}"'             : '""+[]'
       '"""a#{2+2}b"""'      : '"a"+(2+2)+"b"'
     for k,v of kv
@@ -183,23 +183,26 @@ describe 'translator section', ()->
       """a#{b}"
       "a#{b}"""
       "a#{{}}"
-    '''.split '\n' # Note that "#{{}}" is valid IcedCoffeeScript (but "#{{{}}}" isn't)
+    '''.split '\n'
+    # Note that "#{{}}" is valid IcedCoffeeScript (though "#{{{}}}" isn't)
     for sample in sample_list
       do (sample)->
         it "#{sample} throws", ()->
           util.throws ()->
             full(sample)
   
-  describe "dev regexp", ()->
+  describe "regexp", ()->
     kv =
       '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
       '///ab+c///i'           : '/ab+c/i'
+      '//////'                : '/(?:)/'        # this is invalid IcedCoffeeScript
       '/// / ///'             : '/\\//'         # escape /
       '/// / // ///'          : '/\\/\\/\\//'   # more /-s to be escaped
       '/// a b + c ///'       : '/ab+c/'        # spaces to be ignored
       '///\ta\tb\t+\tc\t///'  : '/ab+c/'        # tabs to be ignored as well
       '///ab+c #comment///'   : '/ab+c/'        # comment
       '///ab+c#omment///'     : '/ab+c#omment/' # comments should be preceded by whitespace
+      '///ab+c \\#omment///'  : '/ab+c\\#omment/'
       '///[#]///'             : '/[#]/'
       '''///multiline
       lalala
@@ -214,18 +217,78 @@ describe 'translator section', ()->
       ///'''                  : '/(?:)/'     # multiline O_O
       '''///   # comment
       ///'''                  : '/(?:)/'     # multiline O_O with comment
-      '/todo interpolation/'  : '/todo interpolation/'
     for k,v of kv
       do (k,v)->
         it "#{k} -> #{v}", ()->
           assert.equal full(k), v
-    
-  describe "dev regexp todo", ()->
-    todo = {}
+  
+  describe "regexp todo", ()->
+    todo =
+      '/todo interpolation with flags/'  : '/todo interpolation with flags/'
     for k, v of todo
       do (k, v)->
         it "#{k} -> #{v}"
+  
+  describe "regexp interpolation", ()->
+    kv =
+      '///ab+c\\#{///'                  : '/ab+c\\#{/'  # interpolation escaped
+      '///ab+c #comment #{2+2} de+f///' : 'RegExp("ab+c"+(2+2)+"de+f")'
+      '''///ab+c #comment #{2+2} de+f
+      another line # with a comment
+      # one more comment #{4+4}///'''   : 'RegExp("ab+c"+(2+2)+"de+fanotherline"+(4+4))'
+
+      # The following samples are borrowed from the string interpolation section:
+      '///a#{b+c}d///'                : 'RegExp("a"+(b+c)+"d")'
+      '///a#{b+c}d#{e+f}g///'         : 'RegExp("a"+(b+c)+"d"+(e+f)+"g")'
+      '///a#{b+c}d#{e+f}g#{h+i}j///'  : 'RegExp("a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j")'
+      '///a{} #{b+c} {} #d///'        : 'RegExp("a{}"+(b+c)+"{}")'
+      '///a{ #{b+c} } # #{d} } #d///' : 'RegExp("a{"+(b+c)+"}"+d+"}")'
+      '///a\\#{#{b}c///'              : 'RegExp("a\\#{"+b+"c")'
+      '///a\\#{a}#{b}c///'            : 'RegExp("a\\#{a}"+b+"c")'
+      '///#{}///'                     : 'RegExp("")'  # this is invalid IcedCoffeeScript
+      '///a#{}///'                    : 'RegExp("a")'
+      '///#{}b///'                    : 'RegExp("b")'
+      '///a#{}b///'                   : 'RegExp("ab")'
+      '///#{}#{}///'                  : 'RegExp("")'  # this is invalid IcedCoffeeScript
+      '///#{}#{}#{}///'               : 'RegExp("")'  # this is invalid IcedCoffeeScript
+      '///#{}#{}#{}#{}///'            : 'RegExp("")'  # this is invalid IcedCoffeeScript
+      '///a#{}#{}///'                 : 'RegExp("a")'
+      '///#{1}#{}///'                 : 'RegExp(""+1)'
+      '///#{}b#{}///'                 : 'RegExp("b")'
+      '///#{}#{2}///'                 : 'RegExp(""+2)'
+      '///#{}#{}c///'                 : 'RegExp("c")'
+      '///a#{1}#{}///'                : 'RegExp("a"+1)'
+      '///a#{}b#{}///'                : 'RegExp("ab")'
+      '///a#{}#{2}///'                : 'RegExp("a"+2)'
+      '///a#{}#{}c///'                : 'RegExp("ac")'
+      '///#{1}b#{}///'                : 'RegExp(""+1+"b")'
+      '///#{1}#{2}///'                : 'RegExp(""+1+2)'
+      '///#{1}#{}c///'                : 'RegExp(""+1+"c")'
+      '///#{1}#{2}c///'               : 'RegExp(""+1+2+"c")'
+      '///#{1}b#{}c///'               : 'RegExp(""+1+"bc")'
+      '///a#{1}b#{}c///'              : 'RegExp("a"+1+"bc")'
+      '///a#{}b#{}c///'               : 'RegExp("abc")'
+      '///#{2+2}#{3-8}///'            : 'RegExp(""+(2+2)+(3-8))'
+      '///a#{-8}///'                  : 'RegExp("a"+-8)'  # This output is valid JavaScript but it would be nice to parenthesize -8
+      '///#{[]}///'                   : 'RegExp(""+[])'
+    for k, v of kv
+      do (k, v)->
+        it "#{k} -> #{v}", ()->
+          assert.equal full(k), v
     
+  describe "regexp invalid", ()->
+    sample_list = '''
+      /// ////
+      /// /// ///
+      ///a#{{}}///
+    '''.split '\n'
+    # Note that "#{{}}" is valid IcedCoffeeScript (though "#{{{}}}" isn't)
+    for sample in sample_list
+      do (sample)->
+        it "#{sample} throws", ()->
+          util.throws ()->
+            full(sample)
+  
   
   describe "hash", ()->
     kv =

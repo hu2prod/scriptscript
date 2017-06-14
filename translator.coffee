@@ -176,16 +176,48 @@ trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
 # ###################################################################################################
 
 trans.translator_hash['block_regexp'] = translate:(ctx, node)->
-  parts = node.value_view.split "///"
   # Assuming that the token starts with "///" and therefore parts[0] is an empty string.
-  # Not checking flags for now.
+  parts = node.value_view.split "///"
   parts[1] = parts[1].replace /\s#.*/g, ''
   parts[1] = parts[1].replace /\s/g, ''
   if parts[1] == ""
     parts[1] = "(?:)"
   else
     parts[1] = parts[1].replace /\//g, '\\/'
-  '/' + parts[1] + '/' + parts[2] #"
+  '/' + parts[1] + '/' + parts[2]
+
+trans.translator_hash['block_regexp_start'] = translate:(ctx, node)->
+  ret = node.value_view[3...-2]
+  ret = ret.replace /\s#.*/g, ''
+  ret = ret.replace /\s/g, ''
+  ret = ret.replace /\//g, '\\/'
+
+trans.translator_hash['block_regexp_mid'] = translate:(ctx, node)->
+  ret = node.value_view[1...-2]
+  ret = ret.replace /\s#.*/g, ''
+  ret = ret.replace /\s/g, ''
+  ret = ret.replace /\//g, '\\/'
+
+trans.translator_hash['block_regexp_end'] = translate:(ctx, node)->
+  ret = node.value_view[1...-3]
+  ret = ret.replace /\s#.*/g, ''
+  ret = ret.replace /\s/g, ''
+  ret = ret.replace /\//g, '\\/'
+
+trans.translator_hash['regexp_interpolation'] = translate:(ctx, node)->
+  children = node.value_array
+  ret = switch children.length
+    when 0, 1
+      node.value_view
+    when 2
+      ctx.translate(children[0]) + ctx.translate(children[1])
+    when 3
+      ctx.translate(children[0]) + '"+' + ctx.translate(children[1]) + '+"' + ctx.translate(children[2])
+  if children.last().mx_hash.hash_key[-3...] == "end"
+    ret = """RegExp("#{ret}")"""
+    ret = ret.replace /\+""/g, ''
+    # ret = ret.replace /"""/g, '"' #'
+  ret
 
 # ###################################################################################################
 #    ternary
