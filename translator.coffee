@@ -57,6 +57,9 @@ trans.translator_hash['deep']   = translate:(ctx, node)->
 trans.translator_hash['block']   = translate:(ctx, node)->
   list = deep ctx, node
   make_tab list.join(''), '  '
+ensure_bracket = (t)->
+  return t if t[0] == "(" and t[t.length-1] == ")"
+  "(#{t})"
 # ###################################################################################################
 #    bin_op
 # ###################################################################################################
@@ -104,7 +107,7 @@ do ()->
         pp b.mx_hash.type
         switch b.mx_hash.type.main
           when "function"
-            return "(#{a_tr}).map(#{b_tr})"
+            return "#{ensure_bracket a_tr}.map(#{b_tr})"
           when "array"
             return "#{b_tr} = #{a_tr}"
           # else не нужен т.к. не пропустит type inference
@@ -165,7 +168,7 @@ trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
     when 2
       ctx.translate(children[0])[...-2] + children[1].value[1...]
     when 3
-      ctx.translate(children[0])[...-2] + '"+' + ctx.translate(children[1]) + '+"' + children[2].value[1...]
+      ctx.translate(children[0])[...-2] + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + children[2].value[1...]
   if children.last().mx_hash.hash_key[-3...] == "end"
     ret = ret.replace /"""/g, '"' #'
     ret = ret.replace /\+""/g, ''
@@ -207,12 +210,12 @@ trans.translator_hash['block_regexp_end'] = translate:(ctx, node)->
 trans.translator_hash['regexp_interpolation'] = translate:(ctx, node)->
   children = node.value_array
   ret = switch children.length
-    when 0, 1
-      node.value_view
+    # when 0, 1 # NEVER, because ult=block_regexp_start
+    #   node.value_view
     when 2
       ctx.translate(children[0]) + ctx.translate(children[1])
     when 3
-      ctx.translate(children[0]) + '"+' + ctx.translate(children[1]) + '+"' + ctx.translate(children[2])
+      ctx.translate(children[0]) + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + ctx.translate(children[2])
   if children.last().mx_hash.hash_key[-3...] == "end"
     ret = """RegExp("#{ret}")"""
     ret = ret.replace /\+""/g, ''
@@ -306,7 +309,7 @@ trans.translator_hash["func_decl"] = translate:(ctx,node)->
     arg_str_list.push arg.name
     if arg.default_value
       default_arg_str_list.push """
-        #{arg.name}=#{arg.name}==null?(#{arg.default_value}):#{arg.name};
+        #{arg.name}=#{arg.name}==null?#{ensure_bracket arg.default_value}:#{arg.name};
       """
   
   body = ""
