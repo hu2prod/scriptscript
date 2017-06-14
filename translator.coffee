@@ -179,15 +179,15 @@ trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
 # ###################################################################################################
 
 trans.translator_hash['block_regexp'] = translate:(ctx, node)->
-  # Assuming that the token starts with "///" and therefore parts[0] is an empty string.
-  parts = node.value_view.split "///"
-  parts[1] = parts[1].replace /\s#.*/g, ''
-  parts[1] = parts[1].replace /\s/g, ''
-  if parts[1] == ""
-    parts[1] = "(?:)"
+  # Assuming that the token starts with "///" and therefore _skip is an empty string.
+  [_skip, body, flags] = node.value_view.split "///"
+  body = body.replace /\s#.*/g, ''
+  body = body.replace /\s/g, ''
+  if body == ""
+    body = "(?:)"
   else
-    parts[1] = parts[1].replace /\//g, '\\/'
-  '/' + parts[1] + '/' + parts[2]
+    body = body.replace /\//g, '\\/'
+  '/' + body + '/' + flags
 
 trans.translator_hash['block_regexp_start'] = translate:(ctx, node)->
   ret = node.value_view[3...-2]
