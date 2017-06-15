@@ -136,29 +136,10 @@ regexp_template_craft = ///
   )*?
 ///.toString().replace(/\//g,'')
 
-tokenizer.parser_list.push (new Token_parser 'here_regexp_literal', ///
-  ^\/\/\/
-  #{regexp_template_craft}
-  \/\/\/[imgy]*
-///)
-
-tokenizer.parser_list.push (new Token_parser 'regexp_template_start', ///
-  ^\/\/\/
-  #{regexp_template_craft}
-  \#\{
-///)
-
-tokenizer.parser_list.push (new Token_parser 'regexp_template_mid', ///
-  ^}
-  #{regexp_template_craft}
-  \#\{
-///)
-
-tokenizer.parser_list.push (new Token_parser 'regexp_template_end', ///
-  ^}
-  #{regexp_template_craft}
-  \/\/\/[imgy]*
-///)
+tokenizer.parser_list.push (new Token_parser 'here_regexp_literal',   /// ^\/\/\/ #{regexp_template_craft} \/\/\/[imgy]* ///)
+tokenizer.parser_list.push (new Token_parser 'regexp_template_start', /// ^\/\/\/ #{regexp_template_craft} \#\{          ///)
+tokenizer.parser_list.push (new Token_parser 'regexp_template_mid',   ///      ^} #{regexp_template_craft} \#\{          ///)
+tokenizer.parser_list.push (new Token_parser 'regexp_template_end',   ///      ^} #{regexp_template_craft} \/\/\/[imgy]* ///)
 
 
 @_tokenizer = tokenizer

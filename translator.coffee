@@ -179,29 +179,28 @@ trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
 # ###################################################################################################
 
 trans.translator_hash['block_regexp'] = translate:(ctx, node)->
-  # Assuming that the token starts with "///" and therefore _skip is an empty string.
-  [_skip, body, flags] = node.value_view.split "///"
-  body = body.replace /\s#.*/g, ''
-  body = body.replace /\s/g, ''
+  [_skip, body, flags] = node.value_view.split "///"  # '///ab+c///imgy' -> ['', 'ab+c', 'imgy']
+  body = body.replace /\s#.*/g, ''    # comments
+  body = body.replace /\s/g, ''       # whitespace
   if body == ""
     body = "(?:)"
   else
-    body = body.replace /\//g, '\\/'
+    body = body.replace /\//g, '\\/'  # escaping '/'
   '/' + body + '/' + flags
 
 trans.translator_hash['regexp_interpolation_prepare'] = translate:(ctx, node)->
   switch node.mx_hash.hash_key
     when 'rextem_start'
-      ret = node.value_view[3...-2]
+      ret = node.value_view[3...-2]   # '///ab+c#{' -> 'ab+c'
     when 'rextem_mid'
-      ret = node.value_view[1...-2]
+      ret = node.value_view[1...-2]   # '}ab+c#{' -> 'ab+c'
     when 'rextem_end'
-      [body, flags] = node.value_view.split "///"
+      [body, flags] = node.value_view.split "///"   # '}ab+c///imgy' -> ['}ab+c', 'imgy']
       node.flags = flags
-      ret = body[1...]
-  ret = ret.replace /\s#.*/g, ''
-  ret = ret.replace /\s/g, ''
-  ret = ret.replace /"/g, '\\"'
+      ret = body[1...]                # '}ab+c' -> 'ab+c'
+  ret = ret.replace /\s#.*/g, ''      # comments
+  ret = ret.replace /\s/g, ''         # whitespace
+  ret = ret.replace /"/g, '\\"'       # escaping quotes
 
 trans.translator_hash['regexp_interpolation_put_together'] = translate:(ctx, node)->
   children = node.value_array
@@ -216,7 +215,7 @@ trans.translator_hash['regexp_interpolation_put_together'] = translate:(ctx, nod
   if last.mx_hash.hash_key == "rextem_end"
     ret += """","#{last.flags}""" if last.flags
     ret = """RegExp("#{ret}")"""
-    ret = ret.replace /\+""/g, ''
+    ret = ret.replace /\+""/g, ''   # 'RegExp("a"+"b")' -> 'RegExp("ab")'
   ret
 
 # ###################################################################################################
