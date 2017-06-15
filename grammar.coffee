@@ -66,15 +66,15 @@ q('rvalue', '#regexp')                                  .mx("ult=deep ti=pass")
 #    regexp interpolation
 # ###################################################################################################
 
-q('rextem_start', '#regexp_template_start')             .mx("ult=block_regexp_start ti=string_inter_pass")
-q('rextem_mid', '#regexp_template_mid')                 .mx("ult=block_regexp_mid ti=string_inter_pass")
-q('rextem_end', '#regexp_template_end')                 .mx("ult=block_regexp_end ti=string_inter_pass")
+q('rextem_start', '#regexp_template_start')             .mx("ult=regexp_interpolation_prepare ti=string_inter_pass")
+q('rextem_mid', '#regexp_template_mid')                 .mx("ult=regexp_interpolation_prepare ti=string_inter_pass")
+q('rextem_end', '#regexp_template_end')                 .mx("ult=regexp_interpolation_prepare ti=string_inter_pass")
 
-q('rextem_start', '#rextem_start #rvalue #rextem_mid')  .mx("ult=regexp_interpolation ti=string_inter_pass")
-q('rvalue', '#rextem_start #rvalue #rextem_end')        .mx("ult=regexp_interpolation ti=string_inter_pass")
+q('rextem_start', '#rextem_start #rvalue #rextem_mid')  .mx("ult=regexp_interpolation_put_together ti=string_inter_pass")
+q('rvalue', '#rextem_start #rvalue #rextem_end')        .mx("ult=regexp_interpolation_put_together ti=string_inter_pass")
 
-q('rextem_start', '#rextem_start #rextem_mid')          .mx("ult=regexp_interpolation ti=string_inter_pass")
-q('rvalue', '#rextem_start #rextem_end')                .mx("ult=regexp_interpolation ti=string_inter_pass")
+q('rextem_start', '#rextem_start #rextem_mid')          .mx("ult=regexp_interpolation_put_together ti=string_inter_pass")
+q('rvalue', '#rextem_start #rextem_end')                .mx("ult=regexp_interpolation_put_together ti=string_inter_pass")
 
 # ###################################################################################################
 #    operators define

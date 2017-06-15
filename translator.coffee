@@ -189,27 +189,21 @@ trans.translator_hash['block_regexp'] = translate:(ctx, node)->
     body = body.replace /\//g, '\\/'
   '/' + body + '/' + flags
 
-trans.translator_hash['block_regexp_start'] = translate:(ctx, node)->
-  ret = node.value_view[3...-2]
+trans.translator_hash['regexp_interpolation_prepare'] = translate:(ctx, node)->
+  switch node.mx_hash.hash_key
+    when 'rextem_start'
+      ret = node.value_view[3...-2]
+    when 'rextem_mid'
+      ret = node.value_view[1...-2]
+    when 'rextem_end'
+      [body, flags] = node.value_view.split "///"
+      node.flags = flags
+      ret = body[1...]
   ret = ret.replace /\s#.*/g, ''
   ret = ret.replace /\s/g, ''
-  ret = ret.replace /\//g, '\\/'
+  ret = ret.replace /"/g, '\\"'
 
-trans.translator_hash['block_regexp_mid'] = translate:(ctx, node)->
-  ret = node.value_view[1...-2]
-  ret = ret.replace /\s#.*/g, ''
-  ret = ret.replace /\s/g, ''
-  ret = ret.replace /\//g, '\\/'
-
-trans.translator_hash['block_regexp_end'] = translate:(ctx, node)->
-  [body, flags] = node.value_view.split "///"
-  node.flags = flags
-  ret = body[1...]
-  ret = ret.replace /\s#.*/g, ''
-  ret = ret.replace /\s/g, ''
-  ret = ret.replace /\//g, '\\/'
-
-trans.translator_hash['regexp_interpolation'] = translate:(ctx, node)->
+trans.translator_hash['regexp_interpolation_put_together'] = translate:(ctx, node)->
   children = node.value_array
   ret = switch children.length
     # when 0, 1 # NEVER, because ult=block_regexp_start
@@ -220,11 +214,9 @@ trans.translator_hash['regexp_interpolation'] = translate:(ctx, node)->
       ctx.translate(children[0]) + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + ctx.translate(children[2])
   last = children.last()
   if last.mx_hash.hash_key == "rextem_end"
-    if last.flags
-      ret += """","#{last.flags}"""
+    ret += """","#{last.flags}""" if last.flags
     ret = """RegExp("#{ret}")"""
     ret = ret.replace /\+""/g, ''
-    # ret = ret.replace /"""/g, '"' #'
   ret
 
 # ###################################################################################################
