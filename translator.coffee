@@ -202,7 +202,9 @@ trans.translator_hash['block_regexp_mid'] = translate:(ctx, node)->
   ret = ret.replace /\//g, '\\/'
 
 trans.translator_hash['block_regexp_end'] = translate:(ctx, node)->
-  ret = node.value_view[1...-3]
+  [body, flags] = node.value_view.split "///"
+  node.flags = flags
+  ret = body[1...]
   ret = ret.replace /\s#.*/g, ''
   ret = ret.replace /\s/g, ''
   ret = ret.replace /\//g, '\\/'
@@ -216,7 +218,10 @@ trans.translator_hash['regexp_interpolation'] = translate:(ctx, node)->
       ctx.translate(children[0]) + ctx.translate(children[1])
     when 3
       ctx.translate(children[0]) + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + ctx.translate(children[2])
-  if children.last().mx_hash.hash_key[-3...] == "end"
+  last = children.last()
+  if last.mx_hash.hash_key == "rextem_end"
+    if last.flags
+      ret += """","#{last.flags}"""
     ret = """RegExp("#{ret}")"""
     ret = ret.replace /\+""/g, ''
     # ret = ret.replace /"""/g, '"' #'

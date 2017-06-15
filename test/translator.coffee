@@ -231,12 +231,12 @@ describe 'translator section', ()->
         it "#{k} -> #{v}", ()->
           assert.equal full(k), v
   
-  describe "regexp todo", ()->
-    todo =
-      '/todo interpolation with flags/'  : '/todo interpolation with flags/'
-    for k, v of todo
-      do (k, v)->
-        it "#{k} -> #{v}"
+  # describe "regexp todo", ()->
+  #   todo =
+  #     '/todo interpolation with flags/'  : '/todo interpolation with flags/'
+  #   for k, v of todo
+  #     do (k, v)->
+  #       it "#{k} -> #{v}"
   
   describe "regexp interpolation", ()->
     kv =
@@ -245,7 +245,9 @@ describe 'translator section', ()->
       '''///ab+c #comment #{2+2} de+f
       another line # with a comment
       # one more comment #{4+4}///'''   : 'RegExp("ab+c"+(2+2)+"de+fanotherline"+(4+4))'
-
+      '///a#{1}b///i'                   : 'RegExp("a"+(1)+"b","i")'
+      '///a#{1}b///iiii'                : 'RegExp("a"+(1)+"b","iiii")'
+      
       # The following samples are borrowed from the string interpolation section:
       '///a#{b+c}d///'                : 'RegExp("a"+(b+c)+"d")'
       '///a#{b+c}d#{e+f}g///'         : 'RegExp("a"+(b+c)+"d"+(e+f)+"g")'
