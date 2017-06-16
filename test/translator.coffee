@@ -174,6 +174,7 @@ describe 'translator section', ()->
       '"a#{-8}"'            : '"a"+(-8)'
       '"#{[]}"'             : '""+([])'
       '"""a#{2+2}b"""'      : '"a"+(2+2)+"b"'
+      '""" " #{1}"""'       : '" \\" "+(1)'   # double quoute escaped
     for k,v of kv
       do (k,v)->
         it "#{k} -> #{v}", ()->
@@ -181,9 +182,8 @@ describe 'translator section', ()->
     
     describe "fuckups", ()->
       fuckups =
-        '""" " #{1}"""'       : '" \\" "+1'   # LATER
-        '"#{5 #comment}"'     : '""+5'
-        '"#{5 #{comment}"'    : '""+5'
+        '"#{5 #comment}"'     : '""+(5)'
+        '"#{5 #{comment}"'    : '""+(5)'
       for k, v of fuckups
         do (k, v)->
           it "#{k} -> #{v}"
@@ -205,8 +205,8 @@ describe 'translator section', ()->
       '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
       '///ab+c///i'           : '/ab+c/i'
       '//////'                : '/(?:)/'        # this is invalid IcedCoffeeScript
-      '/// / ///'             : '/\\//'         # escape /
-      '/// / // ///'          : '/\\/\\/\\//'   # more /-s to be escaped
+      '/// / ///'             : '/\\//'         # escape forward slash
+      '/// / // ///'          : '/\\/\\/\\//'   # more forward slashes to be escaped
       '/// a b + c ///'       : '/ab+c/'        # spaces to be ignored
       '///\ta\tb\t+\tc\t///'  : '/ab+c/'        # tabs to be ignored as well
       '///ab+c #comment///'   : '/ab+c/'        # comment
@@ -241,7 +241,7 @@ describe 'translator section', ()->
       '///a#{1}b///i'                   : 'RegExp("a"+(1)+"b","i")'
       '///a#{1}b///iiii'                : 'RegExp("a"+(1)+"b","iiii")'
       '///"#{}///'                      : 'RegExp("\\"")' # double quotes escaped
-      '////#{}///'                      : 'RegExp("/")'   # '/' doesn't need to be escaped
+      '////#{}///'                      : 'RegExp("/")'   # forward slashes don't need to be escaped
       
       # The following samples are borrowed from the string interpolation section:
       '///a#{b+c}d///'                : 'RegExp("a"+(b+c)+"d")'

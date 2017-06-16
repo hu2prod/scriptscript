@@ -160,18 +160,30 @@ trans.translator_hash['string_singleq'] = translate:(ctx, node)->
 trans.translator_hash['block_string'] = translate:(ctx, node)->
   '"' + (node.value_view[3...-3].replace /"/g, '\\"') + '"' #"
 
-trans.translator_hash['string_interpolation'] = translate:(ctx, node)->
+trans.translator_hash['string_interpolation_prepare'] = translate:(ctx, node)->
+  ret = switch node.mx_hash.hash_key
+    when 'st1_start'
+      node.value_view[1...-2]   # '"text#{'   -> 'text'
+    when 'st3_start'
+      node.value_view[3...-2]   # '"""text#{' -> 'text'
+    when 'st_mid'
+      node.value_view[1...-2]   # '}text#{'   -> 'text'
+    when 'st1_end'
+      node.value_view[1...-1]   # '}text"'    -> 'text'
+    when 'st3_end'
+      node.value_view[1...-3]   # '}text"""'  -> 'text'
+  ret = ret.replace /"/, '\\"'
+
+trans.translator_hash['string_interpolation_put_together'] = translate:(ctx, node)->
   children = node.value_array
   ret = switch children.length
-    when 0, 1
-      node.value_view
     when 2
-      ctx.translate(children[0])[...-2] + children[1].value[1...]
+      ctx.translate(children[0]) + ctx.translate(children[1])
     when 3
-      ctx.translate(children[0])[...-2] + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + children[2].value[1...]
+      ctx.translate(children[0]) + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + ctx.translate(children[2])
   if children.last().mx_hash.hash_key[-3...] == "end"
-    ret = ret.replace /"""/g, '"' #'
-    ret = ret.replace /\+""/g, ''
+    ret = '"' + ret + '"'
+    ret = ret.replace /\+""/g, ''   # '"a"+"b"' -> '"ab"'
   ret
 
 # ###################################################################################################
@@ -185,7 +197,7 @@ trans.translator_hash['block_regexp'] = translate:(ctx, node)->
   if body == ""
     body = "(?:)"
   else
-    body = body.replace /\//g, '\\/'  # escaping '/'
+    body = body.replace /\//g, '\\/'  # escaping forward slashes
   '/' + body + '/' + flags
 
 trans.translator_hash['regexp_interpolation_prepare'] = translate:(ctx, node)->
@@ -205,8 +217,6 @@ trans.translator_hash['regexp_interpolation_prepare'] = translate:(ctx, node)->
 trans.translator_hash['regexp_interpolation_put_together'] = translate:(ctx, node)->
   children = node.value_array
   ret = switch children.length
-    # when 0, 1 # NEVER, because ult=block_regexp_start
-    #   node.value_view
     when 2
       ctx.translate(children[0]) + ctx.translate(children[1])
     when 3
