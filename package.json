@@ -11,7 +11,8 @@
     "test-grep": "mocha --recursive --compilers coffee:iced-coffee-script/register --grep"
   },
   "bin": {
-    "runss": "./bin/run.coffee"
+    "runss": "./bin/run.coffee",
+    "s10t": "bin/scriptscript.coffee"
   },
   "repository": {
     "type": "git",
