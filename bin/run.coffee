@@ -10,7 +10,7 @@ require 'fy'
 {translate, _translate} = require '../translator'
 
 argv = require('minimist')(process.argv.slice(2))
-input = argv._[0].toString().trim()
+input = argv._[0]?.toString().trim()
 if !input
   console.error """
     -i     print input
