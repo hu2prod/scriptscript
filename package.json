@@ -10,6 +10,9 @@
     "test-watch": "mocha --compilers coffee:iced-coffee-script/register --watch --full-trace --watch-extensions=js,coffee",
     "test-grep": "mocha --recursive --compilers coffee:iced-coffee-script/register --grep"
   },
+  "bin": {
+    "runss": "./bin/run.coffee"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hu2prod/scriptscript.git"
