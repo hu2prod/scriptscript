@@ -1,7 +1,5 @@
 #!/usr/bin/env iced
 ### !pragma coverage-skip-block ###
-## TODO add shebang & make executable  +
-## TODO figure out better name & place & API for such script
 require 'fy'
 {yellow, green, cyan, magenta} = require "colors"
 {tokenize, _tokenize} = require '../tokenizer'
