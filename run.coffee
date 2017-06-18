@@ -2,10 +2,10 @@
 ### !pragma coverage-skip-block ###
 require 'fy'
 {yellow, green, cyan, magenta} = require "colors"
-{tokenize, _tokenize} = require '../tokenizer'
-{parse   , _parse   } = require '../grammar'
-{type_inference, _type_inference} = require '../type_inference'
-{translate, _translate} = require '../translator'
+{tokenize, _tokenize} = require './tokenizer'
+{parse   , _parse   } = require './grammar'
+{type_inference, _type_inference} = require './type_inference'
+{translate, _translate} = require './translator'
 
 argv = require('minimist')(process.argv.slice(2))
 input = argv._[0]?.toString().trim()
