@@ -26,13 +26,14 @@
   },
   "homepage": "https://github.com/hu2prod/scriptscript#readme",
   "devDependencies": {
+    "blns": "^2.0.4",
     "coveralls": "^2.13.0",
     "iced-coffee-coverage": "^1.0.21",
     "iced-coffee-script": "^108.0.11",
     "istanbul": "^0.4.5",
+    "minimist": "^1.2.0",
     "mocha": "^3.2.0",
-    "blns": "^2.0.4",
-    "minimist": "^1.2.0"
+    "shelljs": "^0.7.8"
   },
   "dependencies": {
     "fy": "github:hu2prod/fy",

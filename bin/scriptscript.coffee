@@ -1,10 +1,19 @@
 #!/usr/bin/env iced
-# NO TESTS FOR NOW
-# tests will be added later
-### !pragma coverage-skip-block ###
+
+# TODO
+# no args - REPL
+# no options - exec
+# -c - compile      +
+# -o - output dir
+# -O - output file  +
+# -p - stdout
+# -s - stdin
+# -e - exec
+
 require "fy"
 fs = require 'fs'
 argv = require('minimist')(process.argv.slice(2))
+
 if argv.c
   try
     input = fs.readFileSync argv.c, "utf8"
@@ -15,21 +24,20 @@ else
   perr """
     For now, -c option is required.
     Usage:
-      s10t -c input.ss -o output.js
+      s10t -c input.ss -O output.js
       s10t -c input.ss                # print result to stdout
   """
   process.exit 1
 
 me = require ".."
 await me.go input, {}, defer err, res
-### !pragma coverage-skip-block ###
 throw err if err
 
-if argv.o
+if argv.O
   try
-    fs.writeFileSync argv.o, res, "utf8"
+    fs.writeFileSync argv.O, res, "utf8"
   catch err
     perr err.message
     process.exit 1
 else
-  p "output:", res
+  process.stdout.write res
