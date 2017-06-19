@@ -104,7 +104,6 @@ do ()->
       a_tr = ctx.translate a
       b_tr = ctx.translate b
       if b.mx_hash.type?
-        pp b.mx_hash.type
         switch b.mx_hash.type.main
           when "function"
             return "#{ensure_bracket a_tr}.map(#{b_tr})"
@@ -337,6 +336,26 @@ trans.translator_hash["func_decl"] = translate:(ctx,node)->
   body = "{}" if /^\{\s+\}$/.test body
   
   "(function(#{arg_str_list.join ', '})#{body})"
+trans.translator_hash["func_call"] = translate:(ctx,node)->
+  rvalue = node.value_array[0]
+  comma_rvalue_node = null
+  for v in node.value_array
+    if v.mx_hash.hash_key == 'comma_rvalue'
+      comma_rvalue_node = v
+  
+  arg_list = []
+  func_code = ensure_bracket ctx.translate rvalue
+  if comma_rvalue_node
+    walk = (node)->
+      for v in node.value_array
+        if v.mx_hash.hash_key == 'rvalue'
+          arg_list.push ctx.translate v
+        if v.mx_hash.hash_key == 'comma_rvalue'
+          walk v
+      rvalue
+    walk comma_rvalue_node
+  
+  "#{func_code}(#{arg_list.join ', '})"
 # ###################################################################################################
 #    macro-block
 # ###################################################################################################

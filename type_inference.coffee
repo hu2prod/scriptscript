@@ -738,6 +738,29 @@ trans.translator_hash['func_stub'] = translate:(ctx, node)->
   
   assert_pass_down node, craft_type, "function"
   ret
+
+trans.translator_hash['func_call'] = translate:(ctx, node)->
+  ret = 0
+  rvalue = node.value_array[0]
+  comma_rvalue_node = null
+  for v in node.value_array
+    if v.mx_hash.hash_key == 'comma_rvalue'
+      comma_rvalue_node = v
+  
+  arg_list = []
+  ret += ctx.translate rvalue
+  if comma_rvalue_node
+    walk = (node)->
+      for v in node.value_array
+        if v.mx_hash.hash_key == 'rvalue'
+          arg_list.push v
+        if v.mx_hash.hash_key == 'comma_rvalue'
+          walk v
+      rvalue
+    walk comma_rvalue_node
+    for v in arg_list
+      ret += ctx.translate v
+  ret
 # ###################################################################################################
 #    macro
 # ###################################################################################################

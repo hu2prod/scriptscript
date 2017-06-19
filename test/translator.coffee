@@ -339,7 +339,7 @@ describe 'translator section', ()->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
   
-  describe "function", ()->
+  describe "function decl", ()->
     kv =
       "->"        : "(function(){})"
       "->a"       : """
@@ -404,6 +404,18 @@ describe 'translator section', ()->
         it JSON.stringify(k), ()->
           util.throws ()->
             full(k)
+  
+  describe "function call", ()->
+    kv =
+      "a(b)": "(a)(b)"
+      "a(b\n)": "(a)(b)"
+      # "a(\nb)": "(a)(b)" # BUG
+      "a(b,c)": "(a)(b, c)"
+      "a()": "(a)()"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          assert.equal full(k), v
   
   describe "macro-block", ()->
     kv =
