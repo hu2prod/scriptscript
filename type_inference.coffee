@@ -13,10 +13,24 @@ current_scope =
 
 scope_list = [current_scope]
 scope_stack = []
+fake_id = (type)->
+  {
+    mx_hash : {
+      type
+    }
+  }
 
 scope_state_reset = ()->
   current_scope =
-    id_map : {} # id -> ast pos list
+    id_map : {
+      Math : [
+        fake_id mk_type 'object', [], {
+          # TODO multisignature
+          abs   : mk_type 'function', [mk_type('float'), mk_type('float')]
+          round : mk_type 'function', [mk_type('int'), mk_type('float')]
+        }
+      ]
+    } # id -> ast pos list
 
   scope_list = [current_scope]
   scope_stack = []
@@ -50,8 +64,10 @@ scope_pop = ()->
 class @Type
   main : ''
   nest : []
+  field_hash : {} # name -> type
   
   constructor:()->
+    @field_hash = {}
     
   eq : (t)->
     return false if @main != t.main
@@ -61,13 +77,19 @@ class @Type
     true
   
   toString : ()->
+    nest_part = ""
     if @nest.length
       list = []
       for v in @nest
         list.push v.toString()
-      "#{@main}<#{list.join ','}>"
-    else
-      "#{@main}"
+      nest_part = "<#{list.join ','}>"
+    object_part = ""
+    if h_count @field_hash
+      list = []
+      for k,v of @field_hash
+        list.push "#{k}:#{v}" # implicit to string
+      object_part = "{#{list.join ','}}"
+    "#{@main}#{nest_part}#{object_part}"
   
   can_match : (t)->
     return true if @main == '*'
@@ -99,10 +121,11 @@ class @Type
       ret += v.exchange_missing_info v2
     ret
 
-mk_type = (str, nest=[])->
+mk_type = (str, nest=[], field_hash={})->
   ret = new module.Type
   ret.main = str
   ret.nest = nest
+  ret.field_hash = field_hash
   ret
 
 # ###################################################################################################
@@ -562,6 +585,7 @@ trans.translator_hash["hash"] = translate:(ctx, node)->
   walk node
   
   element_list = []
+  must_be_hash = false
   
   for el in pair_list
     rvalue_list = []
@@ -574,24 +598,37 @@ trans.translator_hash["hash"] = translate:(ctx, node)->
         ret += ctx.translate sn
     
     if rvalue_list.length == 0
+      key = id_list[0]
       value = id_list[0]
       scope_id_push value
     else if rvalue_list.length == 1
+      # NOTE LATER can be missing
+      # e.g. {a.b.c} => {c:a.b.c}
+      key = id_list[0]
       value = rvalue_list[0]
     else # if rvalue_list.length == 2
       [key, value] = rvalue_list
+      must_be_hash = true
       # TODO check key castable to string # same as string iterpolated
-    element_list.push value
+    element_list.push {key, value}
   
-  ret += assert_pass_down_eq_list element_list, undefined, "hash decl"
+  # REMOVE LATER
+  if must_be_hash
+    ret += assert_pass_down_eq_list element_list.map((t)->t.value), undefined, "hash decl"
   
-  if element_list[0]?.mx_hash.type?
-    subtype = element_list[0].mx_hash.type
-    if !node.mx_hash.type?
-      node.mx_hash.type = mk_type "hash", [subtype]
-      ret++
+  if element_list.length
+    if must_be_hash
+      subtype = element_list[0].value.mx_hash.type
+      if !node.mx_hash.type?
+        node.mx_hash.type = mk_type "hash", [subtype]
+        ret++
     else
-      # UNIMPLEMENTED
+      if !node.mx_hash.type?
+        node.mx_hash.type = mk_type "object", []
+        ret++
+        for kv in element_list
+          {key, value} = kv
+          node.mx_hash.type.field_hash[key.value] = value.mx_hash.type or mk_type '*'
   else
     if !node.mx_hash.type?
       node.mx_hash.type = mk_type "hash", [mk_type '*']
@@ -640,17 +677,22 @@ trans.translator_hash['id_access'] = translate:(ctx, node)->
     subtype = root.mx_hash.type.nest[0]
     switch root.mx_hash.type.main
       when 'array'
+        # TODO later impl with field_hash
         if id.value == 'length'
           subtype = mk_type 'int'
         else
           throw new Error "Trying access field '#{id.value}' in array"
       when 'hash' # Прим. здесь я считаю hash == dictionary. А есть еще тип named tuple, там нужно смотреть на тип каждого field'а
-        # OK
+        'OK'
+      when 'object' # named tuple
+        if !subtype = root.mx_hash.type.field_hash[id.value]
+          throw new Error "Trying access field '#{id.value}' in object with fields='#{Object.keys root.field_hash}'"
       else
         throw new Error "Trying to access field '#{id.value}' of not allowed type '#{root.mx_hash.type.main}'"
     
-    if subtype and subtype.main != '*'
+    if subtype.main != '*' or node.mx_hash.type
       ret += assert_pass_down node, subtype, "id_access"
+      
   
   ret
 
