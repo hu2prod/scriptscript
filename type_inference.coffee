@@ -25,9 +25,19 @@ scope_state_reset = ()->
     id_map : {
       Math : [
         fake_id mk_type 'object', [], {
-          # TODO multisignature
-          abs   : mk_type 'function', [mk_type('float'), mk_type('float')]
+          abs   : mk_type 'either', [
+            mk_type 'function', [mk_type('int'), mk_type('int')]
+            mk_type 'function', [mk_type('float'), mk_type('float')]
+          ]
           round : mk_type 'function', [mk_type('int'), mk_type('float')]
+        }
+      ]
+      Fail : [ # crafted object for more coverage
+        fake_id mk_type 'object', [], {
+          invalid_either   : mk_type 'either', [
+            mk_type 'function', [mk_type('int'), mk_type('int')]
+            mk_type 'int'
+          ]
         }
       ]
     } # id -> ast pos list
@@ -685,8 +695,9 @@ trans.translator_hash['id_access'] = translate:(ctx, node)->
       when 'hash' # Прим. здесь я считаю hash == dictionary. А есть еще тип named tuple, там нужно смотреть на тип каждого field'а
         'OK'
       when 'object' # named tuple
-        if !subtype = root.mx_hash.type.field_hash[id.value]
-          throw new Error "Trying access field '#{id.value}' in object with fields='#{Object.keys root.field_hash}'"
+        field_hash = root.mx_hash.type.field_hash
+        if !subtype = field_hash[id.value]
+          throw new Error "Trying access field '#{id.value}' in object with fields=#{Object.keys field_hash}"
       else
         throw new Error "Trying to access field '#{id.value}' of not allowed type '#{root.mx_hash.type.main}'"
     
@@ -802,6 +813,45 @@ trans.translator_hash['func_call'] = translate:(ctx, node)->
     walk comma_rvalue_node
     for v in arg_list
       ret += ctx.translate v
+  
+  if rvalue.mx_hash.type
+    check_list = []
+    if rvalue.mx_hash.type.main == 'either'
+      # ensure proper either
+      for v in rvalue.mx_hash.type.nest
+        if v.main != 'function'
+          throw new Error "trying to call type='#{rvalue.mx_hash.type}' part='#{v}'"
+      check_list = rvalue.mx_hash.type.nest
+    else if rvalue.mx_hash.type.main != 'function'
+      throw new Error "trying to call type='#{rvalue.mx_hash.type}'"
+    else
+      check_list = [rvalue.mx_hash.type]
+    
+    allowed_signature_list = []
+    for type in check_list
+      # default arg later
+      continue if type.nest.length-1 != arg_list.length
+      found = false
+      for i in [1 ... type.nest.length] by 1
+        expected_arg_type = type.nest[i]
+        real_arg_type = arg_list[i-1].mx_hash.type
+        if real_arg_type and !expected_arg_type.can_match real_arg_type
+          found = true
+          break
+      if !found
+        allowed_signature_list.push type
+    if allowed_signature_list.length == 0
+      throw new Error "can't find allowed_signature in '#{check_list.map((t)->t.toString())}'"
+    
+    candidate_type = allowed_signature_list[0].nest[0]
+    found = false
+    for v in allowed_signature_list
+      if !v.nest[0].eq candidate_type
+        found = true
+        break
+    if !found
+      ret += assert_pass_down node, candidate_type, "func_call"
+  
   ret
 # ###################################################################################################
 #    macro

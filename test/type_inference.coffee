@@ -443,15 +443,20 @@ describe 'type_inference section', ()->
   
   describe 'built-in functions', ()->
     kv =
-      # "Math.abs(1.0)"   : "float"
-      "Math.abs(1.0)"   : undefined # func call is not working yet
+      "Math.abs(1.0)"   : "float"
+      "Math.abs(1)"     : "int"
+      "Math.abs(a)"     : undefined
+      "Math.round(1.0)" : "int"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
           assert.equal ast.mx_hash.type?.toString(), v
     list = """
-      Math.abs 1
+      Math.abs('1')
+      Math.abs(1,2)
+      Fail.invalid_either(1)
+      1(1)
     """.split "\n"
     for v in list
       do (v)->
