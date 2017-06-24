@@ -2,8 +2,9 @@
   "name": "scriptscript",
   "version": "1.0.0",
   "description": "replace all script language",
-  "main": "index.coffee",
+  "main": "lib/index.js",
   "scripts": {
+    "install": "./build.sh",
     "test": "mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "test-perf": "mocha --recursive --compilers coffee:iced-coffee-script/register",
     "test-simple": "mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report",
@@ -11,9 +12,9 @@
     "test-grep": "mocha --recursive --compilers coffee:iced-coffee-script/register --grep"
   },
   "bin": {
-    "s10t": "bin/scriptscript.coffee",
-    "s-s": "bin/scriptscript.coffee",
-    "sscript": "bin/scriptscript.coffee"
+    "s10t": "bin/scriptscript",
+    "s-s": "bin/scriptscript",
+    "sscript": "bin/scriptscript"
   },
   "repository": {
     "type": "git",
@@ -37,6 +38,7 @@
   },
   "dependencies": {
     "fy": "github:hu2prod/fy",
-    "gram2": "github:hu2prod/gram2"
+    "gram2": "github:hu2prod/gram2",
+    "iced-runtime": "1.0.3"
   }
 }
