@@ -284,22 +284,22 @@ describe 'type_inference section', ()->
   describe 'hash', ()->
     kv =
       "{}"      : "hash<*>"
-      "{a:1}"   : "hash<int>"
-      "{a,b:1}" : "hash<int>"
+      "{a:1}"   : "object{a:int}"
+      "{a,b:1}" : "object{a:*,b:int}"
       "{(a):1}" : "hash<int>"
+      "{a:1,b:'1'}" : "object{a:int,b:string}"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
           assert.equal ast.mx_hash.type?.toString(), v
-    list = """
-      {a:1,b:'1'}
-    """.split "\n"
-    for v in list
-      do (v)->
-        it JSON.stringify(v), ()->
-          util.throws ()->
-            full v
+    # list = """
+    # """.split "\n"
+    # for v in list
+      # do (v)->
+        # it JSON.stringify(v), ()->
+          # util.throws ()->
+            # full v
   
   describe 'array access', ()->
     kv =
@@ -319,11 +319,16 @@ describe 'type_inference section', ()->
       "a=['1']\na[b]"       : "string"
       "a=['1']\na[b]\nb"    : "int"
       
-      "a={a:1}\na[b]"       : "int"
-      "a={a:1}\na[b]\nb"    : "string"
+      # "a={a:1}\na[b]"       : "int"
+      # "a={}+{a:1}\na[b]"       : "int"
+      "a={}\na.a=1\na.a"       : "int"
+      "a={}\na.a=1\na[b]"       : "int"
+      "a={}\na.a=1\na[b]\nb"    : "string"
       
-      "a={a:'1'}\na[b]"     : "string"
-      "a={a:'1'}\na[b]\nb"  : "string"
+      # "a={a:'1'}\na[b]"     : "string"
+      "a={}\na.a='1'\na.a"     : "string"
+      "a={}\na.a='1'\na[b]"     : "string"
+      "a={}\na.a='1'\na[b]\nb"  : "string"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -343,7 +348,11 @@ describe 'type_inference section', ()->
     kv =
       "a.b"             : undefined
       "a = []\na.length": "int"
+      # hash
       "a = {}\na.b"     : undefined
+      "a = {}\na.b=1\na.b"     : "int"
+      # object
+      "a = {b:1}\na.b"     : "int"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -354,6 +363,9 @@ describe 'type_inference section', ()->
       a.b
       ---
       a = 1
+      a.b
+      ---
+      a = {a:1}
       a.b
     """.split /\n?---\n?/g
     for v in list
@@ -422,6 +434,29 @@ describe 'type_inference section', ()->
     list = """
       -> == (a)->
       (a)->a=1 == (a)->a='1'
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
+  describe 'built-in functions', ()->
+    kv =
+      "Math.abs(1.0)"   : "float"
+      "Math.abs(1)"     : "int"
+      "Math.abs(a)"     : undefined
+      "Math.round(1.0)" : "int"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type?.toString(), v
+    list = """
+      Math.abs('1')
+      Math.abs(1,2)
+      Fail.invalid_either(1)
+      1(1)
     """.split "\n"
     for v in list
       do (v)->
