@@ -213,12 +213,12 @@ q('rvalue', '#rvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_pri
 # ###################################################################################################
 #    function decl
 # ###################################################################################################
-q('rvalue', '-> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
-q('rvalue', '=> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
-q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
-q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_stub")
-q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_stub")
-q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_stub")
+q('rvalue', '-> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
+q('rvalue', '=> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
+q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
+q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
+q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_decl")
+q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_decl")
 
 q('arg_list', '#arg')                                   .mx("priority=#{base_priority}")
 q('arg_list', '#arg_list , #arg')                       .mx("priority=#{base_priority}")
