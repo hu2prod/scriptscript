@@ -3,8 +3,8 @@ util = require 'fy/test_util'
 fs = require 'fs'
 path = require 'path'
 
-g = require '../tokenizer.coffee'
-pub = require '../index.coffee'
+g = require '../lib/tokenizer.js'
+pub = require '../lib/index.js'
 
 describe 'tokenizer section', ()->
   it "public endpoint should works", (done)->

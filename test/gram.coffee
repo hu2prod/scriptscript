@@ -1,8 +1,8 @@
 assert = require 'assert'
 util = require 'fy/test_util'
 
-{_tokenize} = require '../tokenizer.coffee'
-{_parse   } = require '../grammar.coffee'
+{_tokenize} = require '../lib/tokenizer.js'
+{_parse   } = require '../lib/grammar.js'
 full = (t)->
   tok = _tokenize(t)
   _parse(tok, mode_full:true)

@@ -3,7 +3,7 @@ fs = require 'fs'
 chipro = require 'child_process'
 assert = require "assert"
 
-ss = "../bin/scriptscript.coffee"
+ss = "../bin/scriptscript"
 
 describe "cli", ->
   this.timeout 10000
@@ -24,7 +24,7 @@ describe "cli", ->
     await chipro.exec "rm -rf tmp", defer err, stdout, stderr
     throw err if err
     # p stdout
-
+  
   it "without arguments prints usage information", (done)->
     await chipro.exec "#{ss}", defer err, stdout, stderr
     # p stderr
