@@ -1,9 +1,9 @@
 assert = require 'assert'
 util = require 'fy/test_util'
 
-{_tokenize} = require '../lib/tokenizer.js'
-{_parse   } = require '../lib/grammar.js'
-{_type_inference, type_inference} = require '../lib/type_inference.js'
+{_tokenize} = require '../src/tokenizer'
+{_parse   } = require '../src/grammar'
+{_type_inference, type_inference} = require '../src/type_inference'
 full = (t)->
   tok = _tokenize(t)
   ast = _parse(tok, mode_full:true)

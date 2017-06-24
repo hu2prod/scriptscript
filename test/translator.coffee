@@ -1,10 +1,10 @@
 assert = require 'assert'
 util = require 'fy/test_util'
 
-{_tokenize} = require '../lib/tokenizer.js'
-{_parse   } = require '../lib/grammar.js'
-{_translate, translate} = require '../lib/translator.js'
-{_type_inference} = require '../lib/type_inference.js'
+{_tokenize} = require '../src/tokenizer'
+{_parse   } = require '../src/grammar'
+{_translate, translate} = require '../src/translator'
+{_type_inference} = require '../src/type_inference'
 
 full = (t)->
   tok = _tokenize(t)
@@ -12,7 +12,7 @@ full = (t)->
   _type_inference ast[0], {}
   _translate ast[0], {}
 
-{go} = require '../lib/index.js'
+{go} = require '../src/index'
 
 describe 'translator section', ()->
   sample_list = """

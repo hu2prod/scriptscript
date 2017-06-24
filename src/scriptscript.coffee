@@ -1,4 +1,5 @@
 #!/usr/bin/env iced
+### !pragma coverage-skip-block ###
 
 # TODO
 # no args - REPL
@@ -31,6 +32,7 @@ else
 
 me = require ".."
 await me.go input, {}, defer err, res
+### !pragma coverage-skip-block ###
 throw err if err
 
 if argv.O
