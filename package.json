@@ -4,7 +4,7 @@
   "description": "replace all script language",
   "main": "lib/index.js",
   "scripts": {
-    "install": "./build.sh",
+    "install": "iced -o lib -c src",
     "test": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "test-perf": "make && mocha --recursive --compilers coffee:iced-coffee-script/register",
     "test-simple": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report",

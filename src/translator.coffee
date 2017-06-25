@@ -1,5 +1,5 @@
 require 'fy'
-require 'fy/codegen'
+require 'fy/lib/codegen'
 {
   Translator
   un_op_translator_holder

@@ -1,5 +1,5 @@
 assert = require 'assert'
-util = require 'fy/test_util'
+util = (require 'fy').test_util
 
 {_tokenize} = require '../src/tokenizer'
 {_parse   } = require '../src/grammar'
