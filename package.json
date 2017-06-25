@@ -5,11 +5,11 @@
   "main": "lib/index.js",
   "scripts": {
     "install": "./build.sh",
-    "test": "mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "test-perf": "mocha --recursive --compilers coffee:iced-coffee-script/register",
-    "test-simple": "mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report",
+    "test": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test-perf": "make && mocha --recursive --compilers coffee:iced-coffee-script/register",
+    "test-simple": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report",
     "test-watch": "mocha --recursive --compilers coffee:iced-coffee-script/register --watch --full-trace --watch-extensions=js,coffee",
-    "test-grep": "mocha --recursive --compilers coffee:iced-coffee-script/register --grep"
+    "test-grep": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --grep"
   },
   "bin": {
     "s10t": "bin/scriptscript",
