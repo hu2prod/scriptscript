@@ -1,5 +1,5 @@
 assert = require 'assert'
-util = (require 'fy').test_util
+util = require 'fy/test_util'
 fs = require 'fs'
 path = require 'path'
 
