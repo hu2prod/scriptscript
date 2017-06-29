@@ -1,45 +1,120 @@
 #!/usr/bin/env iced
-### !pragma coverage-skip-block ###
-
-# TODO
-# no args - REPL
-# no options - exec
-# -c - compile      +
-# -o - output dir
-# -O - output file  +
-# -p - stdout
-# -s - stdin
-# -e - exec
 
 require "fy"
-fs = require 'fs'
-argv = require('minimist')(process.argv.slice(2))
-
-if argv.c
-  try
-    input = fs.readFileSync argv.c, "utf8"
-  catch err
-    perr err.message
-    process.exit 1
-else
-  perr """
-    For now, -c option is required.
-    Usage:
-      s10t -c input.ss -O output.js
-      s10t -c input.ss                # print result to stdout
-  """
-  process.exit 1
-
-me = require ".."
-await me.go input, {}, defer err, res
 ### !pragma coverage-skip-block ###
-throw err if err
+fs = require 'fs'
+ss = require ".."
+a = require('minimist') process.argv.slice(2), 
+  boolean: ['s', 'p', 'c', 'd']
+  string: ['o', 'i']
+  # -e can be boolean or string
+  alias: 
+    's': "stdin"
+    'p': "print"
+    'c': "compile"
+    'o': "output"
+    'i': "input" 
+    'e': "exec"
+    'd': "debug"
 
-if argv.O
-  try
-    fs.writeFileSync argv.O, res, "utf8"
-  catch err
-    perr err.message
-    process.exit 1
-else
-  process.stdout.write res
+if a.d
+  pp a
+
+##################################### REPL ####################################
+
+if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
+  _debug = a.d
+  (require "repl").start eval: (input, skip1, skip2, cb)->
+    await ss.go input, {}, defer err, res
+    ### !pragma coverage-skip-block ###
+    if _debug
+      cb err, eval res
+    else
+      perr err.message if err
+      try
+        ret = eval res
+      catch eval_err
+        perr eval_err.message
+      cb(null, ret)
+    return
+
+################################### compiler ##################################
+
+compile = (file, cb)->
+  await fs.readFile file, "utf8", defer err, contents
+  ### !pragma coverage-skip-block ###
+  if err
+    perr file + ": " + if a.d then err.stack else err.message
+    return cb(err, null)
+  await ss.go contents, {}, defer err, res
+  ### !pragma coverage-skip-block ###
+  if err
+    perr file + ": " + if a.d then err.stack else err.message
+  cb(err, res)
+
+# a._ contents are treated as filenames to compile
+if a._.length
+  if a.o and a.c
+    await (require "child_process").exec "mkdir -p #{a.o}", defer err, stdout, stderr
+    ### !pragma coverage-skip-block ###
+    throw err if err
+  for file in a._
+    do (file)->
+      await compile file, defer err, res
+      ### !pragma coverage-skip-block ###
+      return if err
+      if a.c
+        await fs.writeFile "#{a.o or '.'}/#{file.replace /\.\w+$/, '.js'}", res, "utf8"
+        ### !pragma coverage-skip-block ###
+        if err
+          perr file + ": " + if a.d then err.stack else err.message
+          return
+      if a.p
+        p res
+      if a.e and typeof a.e == "boolean" or !a.s and !a.p and !a.c and !a.o and !a.i
+        try
+          eval res
+        catch err
+          perr file + ": " + if a.d then err.stack else err.message
+      return
+
+#################################### stdin ####################################
+
+read_stdin = (cb)->
+  input = ""
+  process.stdin.setEncoding 'utf8'
+  process.stdin.on 'readable', ()->
+    chunk = process.stdin.read();
+    input += chunk if chunk
+  process.stdin.on 'end', ()->
+    cb null, input
+
+if a.s
+  await read_stdin defer err, input
+  ### !pragma coverage-skip-block ###
+  await ss.go input, {}, defer err, res
+  ### !pragma coverage-skip-block ###
+  throw err if err
+  if a.e
+    eval res
+  if a.p or !a.e
+    process.stdout.write res
+
+################################## CLI input ##################################
+
+if a.i
+  await ss.go a.i, {}, defer err, res
+  ### !pragma coverage-skip-block ###
+  throw err if err
+  if a.e
+    eval res
+  if a.p or !a.e
+    process.stdout.write res
+
+##################################### exec ####################################
+
+if a.e and typeof a.e != "boolean"
+  await ss.go a.e, {}, defer err, res
+  ### !pragma coverage-skip-block ###
+  throw err if err
+  eval res
