@@ -1,7 +1,7 @@
 #!/usr/bin/env iced
+### !pragma coverage-skip-block ###
 
 require "fy"
-### !pragma coverage-skip-block ###
 fs = require 'fs'
 ss = require ".."
 a = require('minimist') process.argv.slice(2), 
@@ -98,7 +98,7 @@ if a.s
   if a.e
     eval res
   if a.p or !a.e
-    process.stdout.write res
+    p res
 
 ################################## CLI input ##################################
 

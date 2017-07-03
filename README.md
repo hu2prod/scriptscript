@@ -4,6 +4,24 @@ install
 
     npm i hu2prod/scriptscript
 
+usage
+
+    s-s                     start REPL
+    s-s -i                  start REPL (bug/feature)
+    s-s *.ss                exec files sequentially
+    s-s *.ss -e             exec files sequentially
+    s-s *.ss -c             compile files to the same folder
+    s-s *.ss -co output     compile files and put to the "output" folder
+    s-s *.ss -p             compile and print out results to stdout
+
+    s-s -s                  read stdin and write compiled JavaScript to stdout
+    s-s -sp                 read stdin and write compiled JavaScript to stdout
+    s-s -se                 read stdin and exec
+
+    s-s -i "some_code()"    compile argument and print compiled JavaScript
+    s-s -i "some_code()" -p compile argument and print compiled JavaScript
+    s-s -e "some_code()"    eval argument
+
 test
 
     npm i                       # ensure you have all dev dependencies
