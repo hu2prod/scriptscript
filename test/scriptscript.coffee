@@ -65,12 +65,12 @@ describe "public cli", ->
   it "*.ss -c", (done)->
     await chipro.exec "#{sscript} *.ss -c", defer err, stdout, stderr
     # p stdout
-    done err if err
+    return done err if err
     await
       fs.readFile "1.js", "utf8", defer err1, contents1
       fs.readFile "2.js", "utf8", defer err2, contents2
-    done err1 if err1
-    done err2 if err2
+    return done err1 if err1
+    return done err2 if err2
     assert.equal contents1, compiled1
     assert.equal contents2, compiled2
     done()
@@ -78,12 +78,12 @@ describe "public cli", ->
   it "*.ss -co output", (done)->
     await chipro.exec "#{sscript} *.ss -co output", defer err, stdout, stderr
     # p stdout
-    done err if err
+    return done err if err
     await
       fs.readFile "output/1.js", "utf8", defer err1, contents1
       fs.readFile "output/2.js", "utf8", defer err2, contents2
-    done err1 if err1
-    done err2 if err2
+    return done err1 if err1
+    return done err2 if err2
     assert.equal contents1, compiled1
     assert.equal contents2, compiled2
     done()
@@ -120,11 +120,11 @@ describe "public cli", ->
     assert.equal stdout, compiled2
     done err
   
-  it "s-s -i '#{sample2}' -p", (done)->
-    await chipro.exec "#{sscript} -i '#{sample2}' -p", defer err, stdout, stderr
-    # p stdout
-    assert.equal stdout, compiled2
-    done err
+  # it "s-s -i '#{sample2}' -p", (done)->
+  #   await chipro.exec "#{sscript} -i '#{sample2}' -p", defer err, stdout, stderr
+  #   # p stdout
+  #   assert.equal stdout, compiled2
+  #   done err
   
   it "s-s -e '#{sample2}'", (done)->
     await chipro.exec "#{sscript} -e '#{sample2}'", defer err, stdout, stderr

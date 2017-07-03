@@ -58,6 +58,7 @@ if a._.length
     await (require "child_process").exec "mkdir -p #{a.o}", defer err, stdout, stderr
     ### !pragma coverage-skip-block ###
     throw err if err
+  ### !pragma coverage-skip-block ###
   for file in a._
     do (file)->
       await compile file, defer err, res
@@ -69,6 +70,7 @@ if a._.length
         if err
           perr file + ": " + if a.d then err.stack else err.message
           return
+      ### !pragma coverage-skip-block ###
       if a.p
         p res
       if a.e and typeof a.e == "boolean" or !a.s and !a.p and !a.c and !a.o and !a.i
@@ -77,7 +79,7 @@ if a._.length
         catch err
           perr file + ": " + if a.d then err.stack else err.message
       return
-
+### !pragma coverage-skip-block ###
 #################################### stdin ####################################
 
 read_stdin = (cb)->
@@ -99,6 +101,7 @@ if a.s
     eval res
   if a.p or !a.e
     p res
+### !pragma coverage-skip-block ###
 
 ################################## CLI input ##################################
 
@@ -110,7 +113,7 @@ if a.i
     eval res
   if a.p or !a.e
     process.stdout.write res
-
+### !pragma coverage-skip-block ###
 ##################################### exec ####################################
 
 if a.e and typeof a.e != "boolean"
