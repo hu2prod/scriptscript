@@ -2,7 +2,13 @@
 # scriptscript
 install
 
-    npm i hu2prod/scriptscript
+    npm i [-g] hu2prod/scriptscript
+
+global install adds these commands (which are mutual aliases) to your shell:
+
+    s-s
+    sscript
+    s10t
 
 usage
 

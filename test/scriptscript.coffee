@@ -56,13 +56,13 @@ describe "public cli", ->
     assert.equal stdout, output1 + output2
     done err
   
-  it "*.ss -e", (done)->
+  it "s-s *.ss -e", (done)->
     await chipro.exec "#{sscript} *.ss -e", defer err, stdout, stderr
     # p stdout
     assert.equal stdout, output1 + output2
     done err
   
-  it "*.ss -c", (done)->
+  it "s-s *.ss -c", (done)->
     await chipro.exec "#{sscript} *.ss -c", defer err, stdout, stderr
     # p stdout
     return done err if err
@@ -75,7 +75,7 @@ describe "public cli", ->
     assert.equal contents2, compiled2
     done()
   
-  it "*.ss -co output", (done)->
+  it "s-s *.ss -co output", (done)->
     await chipro.exec "#{sscript} *.ss -co output", defer err, stdout, stderr
     # p stdout
     return done err if err
@@ -88,7 +88,7 @@ describe "public cli", ->
     assert.equal contents2, compiled2
     done()
   
-  it "*.ss -p", (done)->
+  it "s-s *.ss -p", (done)->
     await chipro.exec "#{sscript} *.ss -p", defer err, stdout, stderr
     # p stdout
     assert.equal stdout, compiled1 + '\n' + compiled2 + '\n'
@@ -110,7 +110,7 @@ describe "public cli", ->
   
   it "cat 2.ss | s-s -se", (done)->
     await chipro.exec "cat 2.ss | #{sscript} -se", defer err, stdout, stderr
-    p stdout
+    # p stdout
     assert.equal stdout, output2
     done err
   
@@ -120,42 +120,14 @@ describe "public cli", ->
     assert.equal stdout, compiled2
     done err
   
-  # it "s-s -i '#{sample2}' -p", (done)->
-  #   await chipro.exec "#{sscript} -i '#{sample2}' -p", defer err, stdout, stderr
-  #   # p stdout
-  #   assert.equal stdout, compiled2
-  #   done err
+  it "s-s -i '#{sample2}' -p", (done)->
+    await chipro.exec "#{sscript} -i '#{sample2}' -p", defer err, stdout, stderr
+    # p stdout
+    assert.equal stdout, compiled2
+    done err
   
   it "s-s -e '#{sample2}'", (done)->
     await chipro.exec "#{sscript} -e '#{sample2}'", defer err, stdout, stderr
     # p stdout
     assert.equal stdout, output2
     done err
-  
-  # it "compiles to a file", (done)->
-  #   await chipro.exec "#{sscript} -c in.ss", defer err, stdout, stderr
-  #   # p stdout
-  #   out = fs.readFileSync "in.js", "utf8"
-  #   assert.equal out, compiled
-  #   done err
-  
-  # it "-e - exec", (done)->
-  #   await chipro.exec "#{sscript} -e '#{sample}'", defer err, stdout, stderr
-  #   # p stdout
-  #   assert.equal stdout, output
-  #   done err
-  
-  # it "compiles to a file", (done)->
-  #   await chipro.exec "#{ss} -c in.ss -O out.js", defer err, stdout, stderr
-  #   # p stdout
-  #   out = fs.readFileSync "out.js", "utf8"
-  #   assert.equal out, "/ab+c/"
-  #   done err
-  
-  # it "compiles to a file", (done)->
-  #   await chipro.exec "#{ss} -c in.ss -O out.js", defer err, stdout, stderr
-  #   # p stdout
-  #   out = fs.readFileSync "out.js", "utf8"
-  #   assert.equal out, "/ab+c/"
-  #   done err
-  

@@ -60,25 +60,23 @@ if a._.length
     throw err if err
   ### !pragma coverage-skip-block ###
   for file in a._
-    do (file)->
-      await compile file, defer err, res
+    await compile file, defer err, res
+    ### !pragma coverage-skip-block ###
+    throw err if err
+    if a.c
+      await fs.writeFile "#{a.o or '.'}/#{file.replace /\.\w+$/, '.js'}", res, "utf8"
       ### !pragma coverage-skip-block ###
-      return if err
-      if a.c
-        await fs.writeFile "#{a.o or '.'}/#{file.replace /\.\w+$/, '.js'}", res, "utf8"
-        ### !pragma coverage-skip-block ###
-        if err
-          perr file + ": " + if a.d then err.stack else err.message
-          return
-      ### !pragma coverage-skip-block ###
-      if a.p
-        p res
-      if a.e and typeof a.e == "boolean" or !a.s and !a.p and !a.c and !a.o and !a.i
-        try
-          eval res
-        catch err
-          perr file + ": " + if a.d then err.stack else err.message
-      return
+      if err
+        perr file + ": " + if a.d then err.stack else err.message
+        continue
+    ### !pragma coverage-skip-block ###
+    if a.p
+      p res
+    if a.e and typeof a.e == "boolean" or !a.s and !a.p and !a.c and !a.o and !a.i
+      try
+        eval res
+      catch err
+        perr file + ": " + if a.d then err.stack else err.message
 ### !pragma coverage-skip-block ###
 #################################### stdin ####################################
 
