@@ -91,13 +91,13 @@ describe "public cli", ->
           """
         done()
 
-    it "_compile", (done)->
+    it ":c 2+2 compiles code instead of evaluating", (done)->
       child = chipro.spawn sscript
       output = ""
       child.stdout.on "data", (data)->
         output += data.toString()
-      child.stdin.write "_compile #{sample1}\n"
-      child.stdin.end   "_compile #{sample2}\n"
+      child.stdin.write ":c #{sample1}\n"
+      child.stdin.end   ":c #{sample2}\n"
       child.on "close", (code)->
         # p output
         assert.equal output, """

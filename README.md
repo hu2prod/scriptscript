@@ -33,7 +33,7 @@ The global install adds these commands (which are mutual aliases) to your shell:
 
     > 2+2
     4
-    > _compile 2+2
+    > :c 2+2
     '(2+2)'
     > p("Hello world!")         # all globals from 'fy' are available
     Hello world!

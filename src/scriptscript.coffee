@@ -26,8 +26,8 @@ if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
   # _debug = a.d
   geval = eval
   (require "repl").start eval: (input, skip1, skip2, cb)->
-    if input.startsWith "_compile "
-      await ss.go input[9...], {}, defer err, res
+    if input.startsWith ":c "
+      await ss.go input[3...], {}, defer err, res
       ### !pragma coverage-skip-block ###
       return cb err, res
     await ss.go input, {}, defer err, res
