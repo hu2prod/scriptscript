@@ -8,8 +8,8 @@ sample1   = "2 + 2"
 compiled1 = "(2+2)"
 output1   = ""
 res1      = "4"
-sample2   = "console.log(///ab+c///)"
-compiled2 = "(console.log)(/ab+c/)"
+sample2   = "p(///ab+c///)"
+compiled2 = "(p)(/ab+c/)"
 output2   = "/ab+c/\n"
 res2      = "undefined"
 
@@ -87,10 +87,27 @@ describe "public cli", ->
         assert.equal stderr, """
           a is not defined
           input is not defined
-          
+
           """
         done()
 
+    it "_compile", (done)->
+      child = chipro.spawn sscript
+      output = ""
+      child.stdout.on "data", (data)->
+        output += data.toString()
+      child.stdin.write "_compile #{sample1}\n"
+      child.stdin.end   "_compile #{sample2}\n"
+      child.on "close", (code)->
+        # p output
+        assert.equal output, """
+          > '#{compiled1}'
+          > '#{compiled2}'
+          > 
+          """
+        done()
+  
+  
   it "s-s *.ss", (done)->
     await chipro.exec "#{sscript} *.ss", defer err, stdout, stderr
     # p stdout
