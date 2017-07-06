@@ -50,6 +50,22 @@ describe "public cli", ->
         """
       done()
   
+  it "s-s -i also starts a REPL", (done)->
+    child = chipro.spawn sscript, ["-i"]
+    output = ""
+    child.stdout.on "data", (data)->
+      output += data.toString()
+    child.stdin.write sample1 + '\n'
+    child.stdin.end   sample2 + '\n'
+    child.on "close", (code)->
+      # p output
+      assert.equal output, """
+        > #{output1}#{res1}
+        > #{output2}#{res2}
+        > 
+        """
+      done()
+  
   it "without options executes files sequentially", (done)->
     await chipro.exec "#{sscript} *.ss", defer err, stdout, stderr
     # p stdout
@@ -106,7 +122,7 @@ describe "public cli", ->
     assert.equal stdout, compiled1 + '\n' + compiled2 + '\n'
     done err
   
-  it "FIXME cat *.ss | s-s -s" # need semicolon after (2+2)
+  it "FIXME cat *.ss | s-s -se" # need semicolon after (2+2)
   
   it "cat 2.ss | s-s -se", (done)->
     await chipro.exec "cat 2.ss | #{sscript} -se", defer err, stdout, stderr
