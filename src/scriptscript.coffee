@@ -24,15 +24,16 @@ if a.d
 
 if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
   _debug = a.d
+  geval = eval
   (require "repl").start eval: (input, skip1, skip2, cb)->
     await ss.go input, {}, defer err, res
     ### !pragma coverage-skip-block ###
     if _debug
-      cb err, eval res
+      cb err, geval res
     else
       perr err.message if err
       try
-        ret = eval res
+        ret = geval res
       catch eval_err
         perr eval_err.message
       cb(null, ret)

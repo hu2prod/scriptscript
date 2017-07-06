@@ -34,39 +34,64 @@ describe "public cli", ->
     # p stdout
     done()
   
-  it "without arguments starts a REPL", (done)->
-    child = chipro.spawn sscript
-    output = ""
-    child.stdout.on "data", (data)->
-      output += data.toString()
-    child.stdin.write sample1 + '\n'
-    child.stdin.end   sample2 + '\n'
-    child.on "close", (code)->
-      # p output
-      assert.equal output, """
-        > #{output1}#{res1}
-        > #{output2}#{res2}
-        > 
-        """
-      done()
+  describe "repl", ->
+    it "without arguments starts a REPL", (done)->
+      child = chipro.spawn sscript
+      output = ""
+      child.stdout.on "data", (data)->
+        output += data.toString()
+      child.stdin.write sample1 + '\n'
+      child.stdin.end   sample2 + '\n'
+      child.on "close", (code)->
+        # p output
+        assert.equal output, """
+          > #{output1}#{res1}
+          > #{output2}#{res2}
+          > 
+          """
+        done()
+    
+    it "s-s -i also starts a REPL", (done)->
+      child = chipro.spawn sscript, ["-i"]
+      output = ""
+      child.stdout.on "data", (data)->
+        output += data.toString()
+      child.stdin.write sample1 + '\n'
+      child.stdin.end   sample2 + '\n'
+      child.on "close", (code)->
+        # p output
+        assert.equal output, """
+          > #{output1}#{res1}
+          > #{output2}#{res2}
+          > 
+          """
+        done()
   
-  it "s-s -i also starts a REPL", (done)->
-    child = chipro.spawn sscript, ["-i"]
-    output = ""
-    child.stdout.on "data", (data)->
-      output += data.toString()
-    child.stdin.write sample1 + '\n'
-    child.stdin.end   sample2 + '\n'
-    child.on "close", (code)->
-      # p output
-      assert.equal output, """
-        > #{output1}#{res1}
-        > #{output2}#{res2}
-        > 
-        """
-      done()
-  
-  it "without options executes files sequentially", (done)->
+    it "local scope is not exposed to the repl", (done)->
+      child = chipro.spawn sscript
+      stdout = stderr = ""
+      child.stdout.on "data", (data)->
+        stdout += data.toString()
+      child.stderr.on "data", (data)->
+        stderr += data.toString()
+      child.stdin.write "a\n"
+      child.stdin.end "input\n"
+      child.on "close", (code)->
+        # p stdout
+        # p stderr
+        assert.equal stdout, """
+          > undefined
+          > undefined
+          > 
+          """
+        assert.equal stderr, """
+          a is not defined
+          input is not defined
+          
+          """
+        done()
+
+  it "s-s *.ss", (done)->
     await chipro.exec "#{sscript} *.ss", defer err, stdout, stderr
     # p stdout
     assert.equal stdout, output1 + output2
