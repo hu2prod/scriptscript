@@ -66,7 +66,7 @@ describe "public cli", ->
           > 
           """
         done()
-  
+    
     it "local scope is not exposed to the repl", (done)->
       child = chipro.spawn sscript
       stdout = stderr = ""
@@ -79,18 +79,13 @@ describe "public cli", ->
       child.on "close", (code)->
         # p stdout
         # p stderr
-        assert.equal stdout, """
-          > undefined
-          > undefined
-          > 
-          """
         assert.equal stderr, """
           a is not defined
           input is not defined
 
           """
         done()
-
+    
     it ":c 2+2 compiles code instead of evaluating", (done)->
       child = chipro.spawn sscript
       output = ""
@@ -105,6 +100,52 @@ describe "public cli", ->
           > '#{compiled2}'
           > 
           """
+        done()
+    
+    it ":d 2++ prints full stack trace", (done)->
+      child = chipro.spawn sscript
+      stdout = stderr = ""
+      child.stdout.on "data", (data)->
+        stdout += data.toString()
+      child.stderr.on "data", (data)->
+        stderr += data.toString()
+      child.stdin.end   ":d 2++\n"
+      child.on "close", (code)->
+        # p stdout
+        # p stderr
+        assert stderr.startsWith "ReferenceError: Invalid left-hand side expression in postfix operation\n"
+        assert.equal stderr.search(/\ +at .+:\d+:\d+/), 71  # first stack trace entry
+        assert stderr.length > 500
+        done()
+    
+    it "2++ prints just the error message", (done)->
+      child = chipro.spawn sscript
+      stdout = stderr = ""
+      child.stdout.on "data", (data)->
+        stdout += data.toString()
+      child.stderr.on "data", (data)->
+        stderr += data.toString()
+      child.stdin.end   "2++\n"
+      child.on "close", (code)->
+        # p stdout
+        # p stderr
+        assert.equal stderr, "Invalid left-hand side expression in postfix operation\n"
+        done()
+  
+    it "2++ prints full stack trace if -d option is used", (done)->
+      child = chipro.spawn sscript, ["-d"]
+      stdout = stderr = ""
+      child.stdout.on "data", (data)->
+        stdout += data.toString()
+      child.stderr.on "data", (data)->
+        stderr += data.toString()
+      child.stdin.end   "2++\n"
+      child.on "close", (code)->
+        # p stdout
+        # p stderr
+        assert stderr.startsWith "ReferenceError: Invalid left-hand side expression in postfix operation\n"
+        assert.equal stderr.search(/\ +at .+:\d+:\d+/), 71  # first stack trace entry
+        assert stderr.length > 500
         done()
   
   

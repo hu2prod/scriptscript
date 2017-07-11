@@ -35,14 +35,14 @@ The global install adds these commands (which are mutual aliases) to your shell:
     4
     > :c 2+2
     '(2+2)'
-    > p("Hello world!")         # all globals from 'fy' are available
-    Hello world!
-    undefined
-    > 2++                       # to see full stack trace, start s-s with -d option
+    > 2++
     Invalid left-hand side expression in postfix operation
     undefined
-    > ++2
-    Parsing error. No proper combination found
+    > :d 2++                    # or start s-s with -d option
+    ReferenceError: Invalid left-hand side expression in postfix operation
+      <FULL STACK TRACE GOES HERE>
+    > p("Hello world!")         # all globals from 'fy' are available
+    Hello world!
     undefined
 
 ### Options

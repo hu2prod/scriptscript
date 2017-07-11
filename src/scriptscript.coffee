@@ -23,25 +23,26 @@ if a.d
 ##################################### REPL ####################################
 
 if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
-  # _debug = a.d
   geval = eval
   (require "repl").start eval: (input, skip1, skip2, cb)->
     if input.startsWith ":c "
       await ss.go input[3...], {}, defer err, res
       ### !pragma coverage-skip-block ###
       return cb err, res
-    await ss.go input, {}, defer err, res
+    debug = input.startsWith ":d "
+    input = input[3...] if debug
+    await ss.go input, {}, defer ss_err, res
     ### !pragma coverage-skip-block ###
-    # if _debug
-    if a.d
-      cb err, geval res
+    if ss_err
+      perr if a.d or debug then ss_err.stack else ss_err.message
+      cb()
     else
-      perr err.message if err
       try
         ret = geval res
+        cb null, ret
       catch eval_err
-        perr eval_err.message
-      cb(null, ret)
+        perr if a.d or debug then eval_err.stack else eval_err.message
+        cb()
     return
 
 ################################### compiler ##################################
