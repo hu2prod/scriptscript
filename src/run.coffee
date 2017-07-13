@@ -7,17 +7,16 @@ require 'fy'
 {type_inference, _type_inference} = require './type_inference'
 {translate, _translate} = require './translator'
 
-argv = require('minimist')(process.argv.slice(2))
+argv = require('minimist') process.argv.slice(2), boolean: ['i', 't', 'a']
 input = argv._[0]?.toString().trim()
 if !input
   console.error """
+    Usage:    bin/run [options] input
+    Options:
     -i     print input
     -t     print tokens
     -a     print ast
     --perf launch test specified times and hang
-    
-    Usage:    iced run.coffee input [-ita]
-       or        ./run.coffee input [-ita]
     """
   process.exit 1
 
