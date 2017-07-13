@@ -289,7 +289,8 @@ do ()->
 
   for at in "int float".split /\s+/
     for bt in "int float".split /\s+/
-      def_bin "/", at, bt, "float"
+      for op in "/ **".split /\s+/
+        def_bin op, at, bt, "float"
 
   for op in "and or".split /\s+/
     def_bin op, "bool", "bool", "bool"

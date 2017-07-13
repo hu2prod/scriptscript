@@ -47,6 +47,7 @@ describe 'type_inference section', ()->
       "1*1"           : "int"
       "1/1"           : "float"
       "1//1"          : "int"
+      "1**1"          : "float"
       "1<<1"          : "int"
       "1>>1"          : "int"
       "1>>>1"         : "int"
