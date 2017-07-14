@@ -161,8 +161,6 @@ trans.translator_hash['string_singleq'] = translate:(ctx, node)->
   s = s.replace /\s*\n\s*/g, ' '
   '"' + s + '"' #"
 
-util = require "util"
-insp = (v) -> p util.inspect v, colors: true
 trans.translator_hash['string_doubleq'] = translate:(ctx, node)->
   s = node.value_view
   s = s.replace /^"\s+/g, '"'
@@ -176,12 +174,16 @@ trans.translator_hash['string_interpolation_prepare'] = translate:(ctx, node)->
   ret = switch node.mx_hash.hash_key
     when 'st1_start'
       node.value_view[1...-2]   # '"text#{'   -> 'text'
+      .replace(/^\s+/g, '')
+      .replace /\s*\n\s*/g, ' '
     when 'st3_start'
       node.value_view[3...-2]   # '"""text#{' -> 'text'
     when 'st_mid'
       node.value_view[1...-2]   # '}text#{'   -> 'text'
     when 'st1_end'
       node.value_view[1...-1]   # '}text"'    -> 'text'
+      .replace(/\s+$/g, '')
+      .replace /\s*\n\s*/g, ' '
     when 'st3_end'
       node.value_view[1...-3]   # '}text"""'  -> 'text'
   ret = ret.replace /"/, '\\"'
@@ -195,7 +197,16 @@ trans.translator_hash['string_interpolation_put_together'] = translate:(ctx, nod
       ctx.translate(children[0]) + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + ctx.translate(children[2])
   if children.last().mx_hash.hash_key[-3...] == "end"
     ret = '("' + ret + '")'
-    ret = ret.replace /\+""/g, ''   # '"a"+"b"' -> '"ab"'
+    ret = ret.replace /\+""/g, ''   # some cleanup
+  ret
+
+trans.translator_hash['string_interpolation_put_together_m1'] = translate:(ctx, node)->
+  children = node.value_array
+  ret = switch children.length
+    when 2
+      ctx.translate(children[0]) + ctx.translate(children[1]).replace /\s*\n\s*/g, ' '
+    when 3
+      ctx.translate(children[0]) + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + ctx.translate(children[2]).replace /\s*\n\s*/g, ' '
   ret
 
 # ###################################################################################################

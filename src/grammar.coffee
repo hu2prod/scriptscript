@@ -47,12 +47,12 @@ q('st_mid', '#string_template_mid')                     .mx("ult=string_interpol
 q('st1_end', '#inline_string_template_end')             .mx("ult=string_interpolation_prepare ti=string_inter_pass")
 q('st3_end', '#block_string_template_end')              .mx("ult=string_interpolation_prepare ti=string_inter_pass")
 
-q('st1_start', '#st1_start #st_mid')                    .mx("ult=string_interpolation_put_together ti=string_inter_pass")
+q('st1_start', '#st1_start #st_mid')                    .mx("ult=string_interpolation_put_together_m1 ti=string_inter_pass")
 q('st3_start', '#st3_start #st_mid')                    .mx("ult=string_interpolation_put_together ti=string_inter_pass")
 q('rvalue', '#st1_start #st1_end')                      .mx("priority=#{base_priority} ult=string_interpolation_put_together ti=string_inter_pass")
 q('rvalue', '#st3_start #st3_end')                      .mx("priority=#{base_priority} ult=string_interpolation_put_together ti=string_inter_pass")
 
-q('st1_start', '#st1_start #rvalue #st_mid')            .mx("ult=string_interpolation_put_together ti=string_inter_pass")
+q('st1_start', '#st1_start #rvalue #st_mid')            .mx("ult=string_interpolation_put_together_m1 ti=string_inter_pass")
 q('st3_start', '#st3_start #rvalue #st_mid')            .mx("ult=string_interpolation_put_together ti=string_inter_pass")
 q('rvalue', '#st1_start #rvalue #st1_end')              .mx("priority=#{base_priority} ult=string_interpolation_put_together ti=string_inter_pass")
 q('rvalue', '#st3_start #rvalue #st3_end')              .mx("priority=#{base_priority} ult=string_interpolation_put_together ti=string_inter_pass")
