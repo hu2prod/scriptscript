@@ -140,6 +140,29 @@ describe 'translator section', ()->
           util.throws ()->
             full(sample)
   
+    describe "multiline", ->
+      kv =
+        '''
+          "Call me Ishmael. Some years ago --
+            never mind how long precisely -- having little
+              or no money in my purse, and nothing particular
+            to interest me on shore, I thought I would sail
+          about a little and see the watery part of the
+            world..."
+        ''' : '"Call me Ishmael. Some years ago -- never mind how long precisely -- having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world..."'
+        '''
+          'Call me Ishmael. Some years ago --
+            never mind how long precisely -- having little
+              or no money in my purse, and nothing particular
+            to interest me on shore, I thought I would sail
+          about a little and see the watery part of the
+            world...'
+        ''' : '"Call me Ishmael. Some years ago -- never mind how long precisely -- having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world..."'
+      for k,v of kv
+        do (k,v)->
+          it "#{k} -> #{v}", ()->
+            assert.equal full(k), v
+
   describe "strings interpolated", ()->
     kv =
       '"a#{b+c}d"'        : '"a"+(b+c)+"d"'

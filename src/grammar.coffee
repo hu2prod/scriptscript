@@ -30,7 +30,7 @@ q('num_const', '#float_literal')                        .mx("ult=value ti=const 
 q('const', '#num_const')                                .mx("ult=deep ti=pass")
 q('str_const', '#string_literal_singleq')               .mx("ult=string_singleq ti=const type=string")
 q('str_const', '#block_string_literal_singleq')         .mx("ult=block_string ti=const type=string")
-q('str_const', '#string_literal_doubleq')               .mx("ult=value ti=const type=string")
+q('str_const', '#string_literal_doubleq')               .mx("ult=string_doubleq ti=const type=string")
 q('str_const', '#block_string_literal_doubleq')         .mx("ult=block_string ti=const type=string")
 q('const', '#str_const')                                .mx("ult=deep  ti=pass")
 q('rvalue','#const')                                    .mx("priority=#{base_priority} ult=deep  ti=pass")
