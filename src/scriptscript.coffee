@@ -117,7 +117,7 @@ if a.i
   if a.e
     eval res
   if a.p or !a.e
-    process.stdout.write res
+    p res
 ### !pragma coverage-skip-block ###
 ##################################### exec ####################################
 

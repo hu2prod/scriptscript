@@ -216,13 +216,13 @@ describe "public cli", ->
   it "s-s -i '#{sample2}'", (done)->
     await chipro.exec "#{sscript} -i '#{sample2}'", defer err, stdout, stderr
     # p stdout
-    assert.equal stdout, compiled2
+    assert.equal stdout, compiled2 + '\n'
     done err
   
   it "s-s -i '#{sample2}' -p", (done)->
     await chipro.exec "#{sscript} -i '#{sample2}' -p", defer err, stdout, stderr
     # p stdout
-    assert.equal stdout, compiled2
+    assert.equal stdout, compiled2 + '\n'
     done err
   
   it "s-s -e '#{sample2}'", (done)->
