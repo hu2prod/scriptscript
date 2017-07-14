@@ -156,11 +156,18 @@ do ()->
 trans.translator_hash['string_singleq'] = translate:(ctx, node)->
   s = node.value_view[1...-1]
   s = s.replace /"/g, '\\"'
+  s = s.replace /^\s+/g, ''
+  s = s.replace /\s+$/g, ''
   s = s.replace /\s*\n\s*/g, ' '
   '"' + s + '"' #"
 
+util = require "util"
+insp = (v) -> p util.inspect v, colors: true
 trans.translator_hash['string_doubleq'] = translate:(ctx, node)->
-  node.value_view.replace /\s*\n\s*/g, ' '
+  s = node.value_view
+  s = s.replace /^"\s+/g, '"'
+  s = s.replace /\s+"$/g, '"'
+  s = s.replace /\s*\n\s*/g, ' '
 
 trans.translator_hash['block_string'] = translate:(ctx, node)->
   '"' + (node.value_view[3...-3].replace /"/g, '\\"') + '"' #"
