@@ -187,7 +187,7 @@ trans.translator_hash['string_interpolation_put_together'] = translate:(ctx, nod
     when 3
       ctx.translate(children[0]) + '"+' + ensure_bracket(ctx.translate(children[1])) + '+"' + ctx.translate(children[2])
   if children.last().mx_hash.hash_key[-3...] == "end"
-    ret = '"' + ret + '"'
+    ret = '("' + ret + '")'
     ret = ret.replace /\+""/g, ''   # '"a"+"b"' -> '"ab"'
   ret
 
