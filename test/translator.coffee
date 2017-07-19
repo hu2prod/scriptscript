@@ -105,265 +105,312 @@ describe 'translator section', ()->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
   
-  describe "strings non-interpolated", ()->
-    kv =
-      '""'            : '""'
-      '"abcd"'        : '"abcd"'
-      '"\\""'         : '"\\""'
-      '"\\a"'         : '"\\a"'
-      "''"            : '""'
-      "'abcd'"        : '"abcd"'
-      "'\"'"          : '"\\""'
-      "'\"\"'"        : '"\\"\\""'
-      '""""""'        : '""'
-      "''''''"        : '""'
-      '"""abcd"""'    : '"abcd"'
-      "'''abcd'''"    : '"abcd"'
-      '""" " """'     : '" \\" "'
-      '""" "" """'    : '" \\"\\" "'
-      "'''\"'''"      : '"\\""'
-      "'''\"\"'''"    : '"\\"\\""'
-      "'a\#{b}c'"     : '"a\#{b}c"'
-      "'''a\#{b}c'''" : '"a\#{b}c"'
-    for k,v of kv
-      do (k,v)->
-        it "#{k} -> #{v}", ()->
-          assert.equal full(k), v
-
-    sample_list = """
-      '''a\#{b}'
-      'a\#{b}'''
-    """.split '\n'
-    for sample in sample_list
-      do (sample)->
-        it "#{sample} throws", ()->
-          util.throws ()->
-            full(sample)
+  # ###################################################################################################
+  #    STRINGS
+  # ###################################################################################################
   
-    describe "multiline", ->
+  describe "strings", ()->
+    describe "non-interpolated", ()->
       kv =
-        '''
-          "Call me Ishmael. Some years ago --
-            never mind how long precisely -- having little
-              or no money in my purse, and nothing particular
-            to interest me on shore, I thought I would sail
-          about a little and see the watery part of the
-            world..."
-        ''' : '"Call me Ishmael. Some years ago -- never mind how long precisely -- having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world..."'
-        '''
-          'Call me Ishmael. Some years ago --
-            never mind how long precisely -- having little
-              or no money in my purse, and nothing particular
-            to interest me on shore, I thought I would sail
-          about a little and see the watery part of the
-            world...'
-        ''' : '"Call me Ishmael. Some years ago -- never mind how long precisely -- having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world..."'
-        '''
-          "
-          
-          
-          "
-        ''' : '""'
-        '''
-          '
-          
-          
-          '
-        ''' : '""'
-        '''
-          "
-          abcd
-          efgh
-          "
-        ''' : '"abcd efgh"'
-        '''
-          '
-          abcd
-          efgh
-          '
-        ''' : '"abcd efgh"'
+        '""'            : '""'
+        '"abcd"'        : '"abcd"'
+        '"\\""'         : '"\\""'
+        '"\\a"'         : '"\\a"'
+        "''"            : '""'
+        "'abcd'"        : '"abcd"'
+        "'\"'"          : '"\\""'
+        "'\"\"'"        : '"\\"\\""'
+        '""""""'        : '""'
+        "''''''"        : '""'
+        '"""abcd"""'    : '"abcd"'
+        "'''abcd'''"    : '"abcd"'
+        '""" " """'     : '" \\" "'
+        '""" "" """'    : '" \\"\\" "'
+        "'''\"'''"      : '"\\""'
+        "'''\"\"'''"    : '"\\"\\""'
+        "'a\#{b}c'"     : '"a\#{b}c"'
+        "'''a\#{b}c'''" : '"a\#{b}c"'
       for k,v of kv
         do (k,v)->
           it "#{k} -> #{v}", ()->
             assert.equal full(k), v
 
-  describe "strings interpolated", ()->
-    kv =
-      '"a#{b+c}d"'                : '("a"+(b+c)+"d")'
-      '"a#{b+c}d#{e+f}g"'         : '("a"+(b+c)+"d"+(e+f)+"g")'
-      '"a#{b+c}d#{e+f}g#{h+i}j"'  : '("a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j")'
-      '"a{} #{b+c} {} #d"'        : '("a{} "+(b+c)+" {} #d")'
-      '"a{ #{b+c} } # #{d} } #d"' : '("a{ "+(b+c)+" } # "+(d)+" } #d")'
-      '"""a#{b}c"""'              : '("a"+(b)+"c")'
-      "'''a\#{b}c'''"             : '"a#{b}c"'
-      '"a\\#{#{b}c"'              : '("a\\#{"+(b)+"c")'
-      '"a\\#{a}#{b}c"'            : '("a\\#{a}"+(b)+"c")'
-      '"#{}"'                     : '("")'
-      '"a#{}"'                    : '("a")'
-      '"#{}b"'                    : '("b")'
-      '"a#{}b"'                   : '("ab")'
-      '"#{}#{}"'                  : '("")'
-      '"#{}#{}#{}"'               : '("")'
-      '"#{}#{}#{}#{}"'            : '("")'
-      '"a#{}#{}"'                 : '("a")'
-      '"#{1}#{}"'                 : '(""+(1))'
-      '"#{}b#{}"'                 : '("b")'
-      '"#{}#{2}"'                 : '(""+(2))'
-      '"#{}#{}c"'                 : '("c")'
-      '"a#{1}#{}"'                : '("a"+(1))'
-      '"a#{}b#{}"'                : '("ab")'
-      '"a#{}#{2}"'                : '("a"+(2))'
-      '"a#{}#{}c"'                : '("ac")'
-      '"#{1}b#{}"'                : '(""+(1)+"b")'
-      '"#{1}#{2}"'                : '(""+(1)+(2))'
-      '"#{1}#{}c"'                : '(""+(1)+"c")'
-      '"#{1}#{2}c"'               : '(""+(1)+(2)+"c")'
-      '"#{1}b#{}c"'               : '(""+(1)+"bc")'
-      '"a#{1}b#{}c"'              : '("a"+(1)+"bc")'
-      '"a#{}b#{}c"'               : '("abc")'
-      '"#{2+2}#{3-8}"'            : '(""+(2+2)+(3-8))'
-      '"a#{-8}"'                  : '("a"+(-8))'
-      '"#{[]}"'                   : '(""+([]))'
-      '"""a#{2+2}b"""'            : '("a"+(2+2)+"b")'
-      '""" " #{1}"""'             : '(" \\" "+(1))'   # double quoute escaped
-    for k,v of kv
-      do (k,v)->
-        it "#{k} -> #{v}", ()->
-          assert.equal full(k), v
+      sample_list = """
+        '''a\#{b}'
+        'a\#{b}'''
+      """.split '\n'
+      for sample in sample_list
+        do (sample)->
+          it "#{sample} throws", ()->
+            util.throws ()->
+              full(sample)
     
-    describe "fuckups", ()->
-      fuckups =
-        '"#{5 #comment}"'     : '(""+(5))'
-        '"#{5 #{comment}"'    : '(""+(5))'
-      for k, v of fuckups
-        do (k, v)->
-          it "#{k} -> #{v}"
-    
-    sample_list = '''
-      """a#{b}"
-      "a#{b}"""
-      "a#{{}}"
-    '''.split '\n'
-    # Note that "#{{}}" is valid IcedCoffeeScript (though "#{{{}}}" isn't)
-    for sample in sample_list
-      do (sample)->
-        it "#{sample} throws", ()->
-          util.throws ()->
-            full(sample)
-  
-    describe "+strings", ->
+    describe "interpolated", ()->
       kv =
-        '+"123"'      : '+"123"'
-        "+'123'"      : '+"123"'
-        '+"""123"""'  : '+"123"'
-        "+'''123'''"  : '+"123"'
-        '+"#{123}"'   : '+(""+(123))'
-        '+"#{41*3}"'  : '+(""+(41*3))'
-        '+"12#{3}"'   : '+("12"+(3))'
-        '+"12#{1+2}"' : '+("12"+(1+2))'
-        '+"#{1}23"'   : '+(""+(1)+"23")'
-        '+"#{1}2#{3}"': '+(""+(1)+"2"+(3))'
+        '"a#{b+c}d"'                : '("a"+(b+c)+"d")'
+        '"a#{b+c}d#{e+f}g"'         : '("a"+(b+c)+"d"+(e+f)+"g")'
+        '"a#{b+c}d#{e+f}g#{h+i}j"'  : '("a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j")'
+        '"a{} #{b+c} {} #d"'        : '("a{} "+(b+c)+" {} #d")'
+        '"a{ #{b+c} } # #{d} } #d"' : '("a{ "+(b+c)+" } # "+(d)+" } #d")'
+        '"""a#{b}c"""'              : '("a"+(b)+"c")'
+        "'''a\#{b}c'''"             : '"a#{b}c"'
+        '"a\\#{#{b}c"'              : '("a\\#{"+(b)+"c")'
+        '"a\\#{a}#{b}c"'            : '("a\\#{a}"+(b)+"c")'
+        '"#{}"'                     : '("")'
+        '"a#{}"'                    : '("a")'
+        '"#{}b"'                    : '("b")'
+        '"a#{}b"'                   : '("ab")'
+        '"#{}#{}"'                  : '("")'
+        '"#{}#{}#{}"'               : '("")'
+        '"#{}#{}#{}#{}"'            : '("")'
+        '"a#{}#{}"'                 : '("a")'
+        '"#{1}#{}"'                 : '(""+(1))'
+        '"#{}b#{}"'                 : '("b")'
+        '"#{}#{2}"'                 : '(""+(2))'
+        '"#{}#{}c"'                 : '("c")'
+        '"a#{1}#{}"'                : '("a"+(1))'
+        '"a#{}b#{}"'                : '("ab")'
+        '"a#{}#{2}"'                : '("a"+(2))'
+        '"a#{}#{}c"'                : '("ac")'
+        '"#{1}b#{}"'                : '(""+(1)+"b")'
+        '"#{1}#{2}"'                : '(""+(1)+(2))'
+        '"#{1}#{}c"'                : '(""+(1)+"c")'
+        '"#{1}#{2}c"'               : '(""+(1)+(2)+"c")'
+        '"#{1}b#{}c"'               : '(""+(1)+"bc")'
+        '"a#{1}b#{}c"'              : '("a"+(1)+"bc")'
+        '"a#{}b#{}c"'               : '("abc")'
+        '"#{2+2}#{3-8}"'            : '(""+(2+2)+(3-8))'
+        '"a#{-8}"'                  : '("a"+(-8))'
+        '"#{[]}"'                   : '(""+([]))'
+        '"""a#{2+2}b"""'            : '("a"+(2+2)+"b")'
+        '""" " #{1}"""'             : '(" \\" "+(1))'   # double quoute escaped
       for k,v of kv
         do (k,v)->
           it "#{k} -> #{v}", ()->
             assert.equal full(k), v
+      
+      describe "fuckups", ()->
+        fuckups =
+          '"#{5 #comment}"'     : '(""+(5))'
+          '"#{5 #{comment}"'    : '(""+(5))'
+        for k, v of fuckups
+          do (k, v)->
+            it "#{k} -> #{v}"
+      
+      sample_list = '''
+        """a#{b}"
+        "a#{b}"""
+        "a#{{}}"
+      '''.split '\n'
+      # Note that "#{{}}" is valid IcedCoffeeScript (though "#{{{}}}" isn't)
+      for sample in sample_list
+        do (sample)->
+          it "#{sample} throws", ()->
+            util.throws ()->
+              full(sample)
+    
+      describe "multiline", ->
+        kv =
+          '''
+            "Call me Ishmael. Some years ago --
+              never mind how long precisely -- having little
+                or no money in my purse, and nothing particular
+              to interest me on shore, I thought I would sail
+            about a little and see the watery part of the
+              world..."
+          ''' : '"Call me Ishmael. Some years ago -- never mind how long precisely -- having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world..."'
+          '''
+            'Call me Ishmael. Some years ago --
+              never mind how long precisely -- having little
+                or no money in my purse, and nothing particular
+              to interest me on shore, I thought I would sail
+            about a little and see the watery part of the
+              world...'
+          ''' : '"Call me Ishmael. Some years ago -- never mind how long precisely -- having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world..."'
+          '''
+            "
+            
+            
+            "
+          ''' : '""'
+          '''
+            '
+            
+            
+            '
+          ''' : '""'
+          '''
+            "
+            abcd
+            efgh
+            "
+          ''' : '"abcd efgh"'
+          '''
+            '
+            abcd
+            efgh
+            '
+          ''' : '"abcd efgh"'
+          '''
+            "
+            abcd
+            #{3+3}
+            efgh
+            #{5+5}
+            ijkl
+            "
+          ''' : '("abcd "+(3+3)+" efgh "+(5+5)+" ijkl")'
+          '''
+            "
+            #{3+3}
+            efgh
+            #{5+5}
+            ijkl
+            "
+          ''' : '(""+(3+3)+" efgh "+(5+5)+" ijkl")'
+          '''
+            "
+            abcd
+            #{3+3}
+            #{5+5}
+            ijkl
+            "
+          ''' : '("abcd "+(3+3)+" "+(5+5)+" ijkl")'
+          '''
+            "
+            abcd
+            #{3+3}
+            #{5+5}
+            "
+          ''' : '("abcd "+(3+3)+" "+(5+5))'
+          '''
+            "
+            #{3+3}
+            "
+          ''' : '(""+(3+3))'
+        for k,v of kv
+          do (k,v)->
+            it "#{k} -> #{v}", ()->
+              assert.equal full(k), v
+
+      describe "+strings", ->
+        kv =
+          '+"123"'      : '+"123"'
+          "+'123'"      : '+"123"'
+          '+"""123"""'  : '+"123"'
+          "+'''123'''"  : '+"123"'
+          '+"#{123}"'   : '+(""+(123))'
+          '+"#{41*3}"'  : '+(""+(41*3))'
+          '+"12#{3}"'   : '+("12"+(3))'
+          '+"12#{1+2}"' : '+("12"+(1+2))'
+          '+"#{1}23"'   : '+(""+(1)+"23")'
+          '+"#{1}2#{3}"': '+(""+(1)+"2"+(3))'
+        for k,v of kv
+          do (k,v)->
+            it "#{k} -> #{v}", ()->
+              assert.equal full(k), v
   
+  # ###################################################################################################
+  #    REGEXP
+  # ###################################################################################################
   
   describe "regexp", ()->
-    kv =
-      '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
-      '///ab+c///i'           : '/ab+c/i'
-      '//////'                : '/(?:)/'        # this is invalid IcedCoffeeScript
-      '/// / ///'             : '/\\//'         # escape forward slash
-      '/// / // ///'          : '/\\/\\/\\//'   # more forward slashes to be escaped
-      '/// a b + c ///'       : '/ab+c/'        # spaces to be ignored
-      '///\ta\tb\t+\tc\t///'  : '/ab+c/'        # tabs to be ignored as well
-      '///ab+c #comment///'   : '/ab+c/'        # comment
-      '///ab+c#omment///'     : '/ab+c#omment/' # comments should be preceded by whitespace
-      '///ab+c \\#omment///'  : '/ab+c\\#omment/'
-      '///[#]///'             : '/[#]/'
-      '''///multiline
-      lalala
-      tratata///'''           : '/multilinelalalatratata/'
-      '''///multiline
-      with # a comment
-      # and
-      some continuation
-      ///'''                  : '/multilinewithsomecontinuation/'
-      '/// ///'               : '/(?:)/'     # O_O
-      '''///
-      ///'''                  : '/(?:)/'     # multiline O_O
-      '''///   # comment
-      ///'''                  : '/(?:)/'     # multiline O_O with comment
-    for k,v of kv
-      do (k,v)->
-        it "#{k} -> #{v}", ()->
-          assert.equal full(k), v
-  
-  describe "regexp interpolation", ()->
-    kv =
-      '///ab+c\\#{///'                  : '/ab+c\\#{/'  # interpolation escaped
-      '///ab+c #comment #{2+2} de+f///' : 'RegExp("ab+c"+(2+2)+"de+f")'
-      '''///ab+c #comment #{2+2} de+f
-      another line # with a comment
-      # one more comment #{4+4}///'''   : 'RegExp("ab+c"+(2+2)+"de+fanotherline"+(4+4))'
-      '///a#{1}b///i'                   : 'RegExp("a"+(1)+"b","i")'
-      '///a#{1}b///iiii'                : 'RegExp("a"+(1)+"b","iiii")'
-      '///"#{}///'                      : 'RegExp("\\"")' # double quotes escaped
-      '////#{}///'                      : 'RegExp("/")'   # forward slashes don't need to be escaped
-      
-      # The following samples are borrowed from the string interpolation section:
-      '///a#{b+c}d///'                : 'RegExp("a"+(b+c)+"d")'
-      '///a#{b+c}d#{e+f}g///'         : 'RegExp("a"+(b+c)+"d"+(e+f)+"g")'
-      '///a#{b+c}d#{e+f}g#{h+i}j///'  : 'RegExp("a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j")'
-      '///a{} #{b+c} {} #d///'        : 'RegExp("a{}"+(b+c)+"{}")'
-      '///a{ #{b+c} } # #{d} } #d///' : 'RegExp("a{"+(b+c)+"}"+(d)+"}")'
-      '///a\\#{#{b}c///'              : 'RegExp("a\\#{"+(b)+"c")'
-      '///a\\#{a}#{b}c///'            : 'RegExp("a\\#{a}"+(b)+"c")'
-      '///#{}///'                     : 'RegExp("")'  # this is invalid IcedCoffeeScript
-      '///a#{}///'                    : 'RegExp("a")'
-      '///#{}b///'                    : 'RegExp("b")'
-      '///a#{}b///'                   : 'RegExp("ab")'
-      '///#{}#{}///'                  : 'RegExp("")'  # this is invalid IcedCoffeeScript
-      '///#{}#{}#{}///'               : 'RegExp("")'  # this is invalid IcedCoffeeScript
-      '///#{}#{}#{}#{}///'            : 'RegExp("")'  # this is invalid IcedCoffeeScript
-      '///a#{}#{}///'                 : 'RegExp("a")'
-      '///#{1}#{}///'                 : 'RegExp(""+(1))'
-      '///#{}b#{}///'                 : 'RegExp("b")'
-      '///#{}#{2}///'                 : 'RegExp(""+(2))'
-      '///#{}#{}c///'                 : 'RegExp("c")'
-      '///a#{1}#{}///'                : 'RegExp("a"+(1))'
-      '///a#{}b#{}///'                : 'RegExp("ab")'
-      '///a#{}#{2}///'                : 'RegExp("a"+(2))'
-      '///a#{}#{}c///'                : 'RegExp("ac")'
-      '///#{1}b#{}///'                : 'RegExp(""+(1)+"b")'
-      '///#{1}#{2}///'                : 'RegExp(""+(1)+(2))'
-      '///#{1}#{}c///'                : 'RegExp(""+(1)+"c")'
-      '///#{1}#{2}c///'               : 'RegExp(""+(1)+(2)+"c")'
-      '///#{1}b#{}c///'               : 'RegExp(""+(1)+"bc")'
-      '///a#{1}b#{}c///'              : 'RegExp("a"+(1)+"bc")'
-      '///a#{}b#{}c///'               : 'RegExp("abc")'
-      '///#{2+2}#{3-8}///'            : 'RegExp(""+(2+2)+(3-8))'
-      '///a#{-8}///'                  : 'RegExp("a"+(-8))'
-      '///#{[]}///'                   : 'RegExp(""+([]))'
-    for k, v of kv
-      do (k, v)->
-        it "#{k} -> #{v}", ()->
-          assert.equal full(k), v
+    describe "non-interpolated", ()->
+      kv =
+        '/ab+c/iiiiiiiiiiiiiii' : '/ab+c/iiiiiiiiiiiiiii'
+        '///ab+c///i'           : '/ab+c/i'
+        '//////'                : '/(?:)/'        # this is invalid IcedCoffeeScript
+        '/// / ///'             : '/\\//'         # escape forward slash
+        '/// / // ///'          : '/\\/\\/\\//'   # more forward slashes to be escaped
+        '/// a b + c ///'       : '/ab+c/'        # spaces to be ignored
+        '///\ta\tb\t+\tc\t///'  : '/ab+c/'        # tabs to be ignored as well
+        '///ab+c #comment///'   : '/ab+c/'        # comment
+        '///ab+c#omment///'     : '/ab+c#omment/' # comments should be preceded by whitespace
+        '///ab+c \\#omment///'  : '/ab+c\\#omment/'
+        '///[#]///'             : '/[#]/'
+        '''///multiline
+        lalala
+        tratata///'''           : '/multilinelalalatratata/'
+        '''///multiline
+        with # a comment
+        # and
+        some continuation
+        ///'''                  : '/multilinewithsomecontinuation/'
+        '/// ///'               : '/(?:)/'     # O_O
+        '''///
+        ///'''                  : '/(?:)/'     # multiline O_O
+        '''///   # comment
+        ///'''                  : '/(?:)/'     # multiline O_O with comment
+      for k,v of kv
+        do (k,v)->
+          it "#{k} -> #{v}", ()->
+            assert.equal full(k), v
     
-  describe "regexp invalid", ()->
-    sample_list = '''
-      /// ////
-      /// /// ///
-      ///a#{{}}///
-    '''.split '\n'
-    # Note that "#{{}}" is valid IcedCoffeeScript (though "#{{{}}}" isn't)
-    for sample in sample_list
-      do (sample)->
-        it "#{sample} throws", ()->
-          util.throws ()->
-            full(sample)
+    describe "interpolated", ()->
+      kv =
+        '///ab+c\\#{///'                  : '/ab+c\\#{/'  # interpolation escaped
+        '///ab+c #comment #{2+2} de+f///' : 'RegExp("ab+c"+(2+2)+"de+f")'
+        '''///ab+c #comment #{2+2} de+f
+        another line # with a comment
+        # one more comment #{4+4}///'''   : 'RegExp("ab+c"+(2+2)+"de+fanotherline"+(4+4))'
+        '///a#{1}b///i'                   : 'RegExp("a"+(1)+"b","i")'
+        '///a#{1}b///iiii'                : 'RegExp("a"+(1)+"b","iiii")'
+        '///"#{}///'                      : 'RegExp("\\"")' # double quotes escaped
+        '////#{}///'                      : 'RegExp("/")'   # forward slashes don't need to be escaped
+        
+        # The following samples are borrowed from the string interpolation section:
+        '///a#{b+c}d///'                : 'RegExp("a"+(b+c)+"d")'
+        '///a#{b+c}d#{e+f}g///'         : 'RegExp("a"+(b+c)+"d"+(e+f)+"g")'
+        '///a#{b+c}d#{e+f}g#{h+i}j///'  : 'RegExp("a"+(b+c)+"d"+(e+f)+"g"+(h+i)+"j")'
+        '///a{} #{b+c} {} #d///'        : 'RegExp("a{}"+(b+c)+"{}")'
+        '///a{ #{b+c} } # #{d} } #d///' : 'RegExp("a{"+(b+c)+"}"+(d)+"}")'
+        '///a\\#{#{b}c///'              : 'RegExp("a\\#{"+(b)+"c")'
+        '///a\\#{a}#{b}c///'            : 'RegExp("a\\#{a}"+(b)+"c")'
+        '///#{}///'                     : 'RegExp("")'  # this is invalid IcedCoffeeScript
+        '///a#{}///'                    : 'RegExp("a")'
+        '///#{}b///'                    : 'RegExp("b")'
+        '///a#{}b///'                   : 'RegExp("ab")'
+        '///#{}#{}///'                  : 'RegExp("")'  # this is invalid IcedCoffeeScript
+        '///#{}#{}#{}///'               : 'RegExp("")'  # this is invalid IcedCoffeeScript
+        '///#{}#{}#{}#{}///'            : 'RegExp("")'  # this is invalid IcedCoffeeScript
+        '///a#{}#{}///'                 : 'RegExp("a")'
+        '///#{1}#{}///'                 : 'RegExp(""+(1))'
+        '///#{}b#{}///'                 : 'RegExp("b")'
+        '///#{}#{2}///'                 : 'RegExp(""+(2))'
+        '///#{}#{}c///'                 : 'RegExp("c")'
+        '///a#{1}#{}///'                : 'RegExp("a"+(1))'
+        '///a#{}b#{}///'                : 'RegExp("ab")'
+        '///a#{}#{2}///'                : 'RegExp("a"+(2))'
+        '///a#{}#{}c///'                : 'RegExp("ac")'
+        '///#{1}b#{}///'                : 'RegExp(""+(1)+"b")'
+        '///#{1}#{2}///'                : 'RegExp(""+(1)+(2))'
+        '///#{1}#{}c///'                : 'RegExp(""+(1)+"c")'
+        '///#{1}#{2}c///'               : 'RegExp(""+(1)+(2)+"c")'
+        '///#{1}b#{}c///'               : 'RegExp(""+(1)+"bc")'
+        '///a#{1}b#{}c///'              : 'RegExp("a"+(1)+"bc")'
+        '///a#{}b#{}c///'               : 'RegExp("abc")'
+        '///#{2+2}#{3-8}///'            : 'RegExp(""+(2+2)+(3-8))'
+        '///a#{-8}///'                  : 'RegExp("a"+(-8))'
+        '///#{[]}///'                   : 'RegExp(""+([]))'
+      for k, v of kv
+        do (k, v)->
+          it "#{k} -> #{v}", ()->
+            assert.equal full(k), v
+      
+    describe "invalid", ()->
+      sample_list = '''
+        /// ////
+        /// /// ///
+        ///a#{{}}///
+      '''.split '\n'
+      # Note that "#{{}}" is valid IcedCoffeeScript (though "#{{{}}}" isn't)
+      for sample in sample_list
+        do (sample)->
+          it "#{sample} throws", ()->
+            util.throws ()->
+              full(sample)
   
+  # ###################################################################################################
   
   describe "hash", ()->
     kv =
