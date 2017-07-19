@@ -13,18 +13,20 @@ full = (t)->
 describe 'type_inference section', ()->
   describe 'const', ()->
     kv =
-      "1"     : "int"
-      "0777"  : "int"
-      "0x1"   : "int"
-      "0b1"   : "int"
-      "1.0"   : "float"
-      "'1'"   : "string"
-      '"1"'   : "string"
-      "true"  : "bool"
-      "false" : "bool"
-      "a"     : undefined
-      "@"     : undefined
-      "'1'\n1": "int" # test stmt_plus
+      "1"           : "int"
+      "0777"        : "int"
+      "0x1"         : "int"
+      "0b1"         : "int"
+      "1.0"         : "float"
+      "'1'"         : "string"
+      '"1"'         : "string"
+      '/ab+c/i'     : "regexp"
+      '///ab+c///i' : "regexp"
+      "true"        : "bool"
+      "false"       : "bool"
+      "a"           : undefined
+      "@"           : undefined
+      "'1'\n1"      : "int" # test stmt_plus
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
