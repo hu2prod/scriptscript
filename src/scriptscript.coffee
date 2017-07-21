@@ -4,6 +4,7 @@
 require "fy"
 fs = require 'fs'
 ss = require ".."
+{red} = require "colors"
 a = require('minimist') process.argv.slice(2), 
   boolean: ['s', 'p', 'c', 'd']
   string: ['o', 'i']
@@ -20,6 +21,27 @@ a = require('minimist') process.argv.slice(2),
 if a.d
   pp a
 
+#################################### utils ####################################
+
+print_error = (err, debug, prefix="") ->
+  perr red(prefix +
+    if debug
+    then err.stack
+    else err.stack.split('\n')[...2].join('\n') + "\n    <You can see full stack trace in debug mode (-d option or :d in the REPL)>"
+  )
+
+try_eval = (err, res)->
+  if err
+    print_error err, a.d
+    return
+  if a.e
+    try
+      eval res
+    catch eval_err
+      print_error eval_err, a.d
+  if a.p or !a.e
+    p res
+
 ##################################### REPL ####################################
 
 if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
@@ -34,14 +56,14 @@ if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
     await ss.go input, {}, defer ss_err, res
     ### !pragma coverage-skip-block ###
     if ss_err
-      perr if a.d or debug then ss_err.stack else ss_err.message
+      print_error ss_err, a.d or debug
       cb()
     else
       try
         ret = geval res
         cb null, ret
       catch eval_err
-        perr if a.d or debug then eval_err.stack else eval_err.message
+        print_error eval_err, a.d or debug
         cb()
     return
 
@@ -51,12 +73,12 @@ compile = (file, cb)->
   await fs.readFile file, "utf8", defer err, contents
   ### !pragma coverage-skip-block ###
   if err
-    perr file + ": " + if a.d then err.stack else err.message
+    print_error err, a.d, file + ": "
     return cb(err, null)
   await ss.go contents, {}, defer err, res
   ### !pragma coverage-skip-block ###
   if err
-    perr file + ": " + if a.d then err.stack else err.message
+    print_error err, a.d, file + ": "
   cb(err, res)
 
 # a._ contents are treated as filenames to compile
@@ -74,7 +96,7 @@ if a._.length
       await fs.writeFile "#{a.o or '.'}/#{file.replace /\.\w+$/, '.js'}", res, "utf8"
       ### !pragma coverage-skip-block ###
       if err
-        perr file + ": " + if a.d then err.stack else err.message
+        print_error err, a.d, file + ": "
         continue
     ### !pragma coverage-skip-block ###
     if a.p
@@ -83,8 +105,9 @@ if a._.length
       try
         eval res
       catch err
-        perr file + ": " + if a.d then err.stack else err.message
+        print_error err, a.d, file + ": "
 ### !pragma coverage-skip-block ###
+
 #################################### stdin ####################################
 
 read_stdin = (cb)->
@@ -101,28 +124,18 @@ if a.s
   ### !pragma coverage-skip-block ###
   await ss.go input, {}, defer err, res
   ### !pragma coverage-skip-block ###
-  throw err if err
-  if a.e
-    eval res
-  if a.p or !a.e
-    p res
+  try_eval err, res
 ### !pragma coverage-skip-block ###
 
-################################## CLI input ##################################
+################################ Other options ################################
 
 if a.i
   await ss.go a.i, {}, defer err, res
   ### !pragma coverage-skip-block ###
-  throw err if err
-  if a.e
-    eval res
-  if a.p or !a.e
-    p res
+  try_eval err, res
 ### !pragma coverage-skip-block ###
-##################################### exec ####################################
 
 if a.e and typeof a.e != "boolean"
   await ss.go a.e, {}, defer err, res
   ### !pragma coverage-skip-block ###
-  throw err if err
-  eval res
+  try_eval err, res

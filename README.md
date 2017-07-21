@@ -36,9 +36,10 @@ The global install adds these commands (which are mutual aliases) to your shell:
     > :c 2+2
     '(2+2)'
     > 2++
-    Invalid left-hand side expression in postfix operation
-    undefined
-    > :d 2++                    # or start s-s with -d option
+    ReferenceError: Invalid left-hand side expression in postfix operation
+        at try_eval (/usr/lib/node_modules/scriptscript/lib/scriptscript.js:52:14)
+        <You can see full stack trace in debug mode (-d option or :d in the REPL)>
+    > :d 2++
     ReferenceError: Invalid left-hand side expression in postfix operation
       <FULL STACK TRACE GOES HERE>
     > p("Hello world!")         # all globals from 'fy' are available

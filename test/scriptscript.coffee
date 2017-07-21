@@ -79,11 +79,9 @@ describe "public cli", ->
       child.on "close", (code)->
         # p stdout
         # p stderr
-        assert.equal stderr, """
-          a is not defined
-          input is not defined
-
-          """
+        lines = stderr.split '\n'
+        assert.equal lines[0], "ReferenceError: a is not defined"
+        assert.equal lines[3], "ReferenceError: input is not defined"
         done()
     
     it ":c 2+2 compiles code instead of evaluating", (done)->
@@ -118,7 +116,7 @@ describe "public cli", ->
         assert stderr.length > 500
         done()
     
-    it "2++ prints just the error message", (done)->
+    it "2++ prints just the first entry of stack trace", (done)->
       child = chipro.spawn sscript
       stdout = stderr = ""
       child.stdout.on "data", (data)->
@@ -129,7 +127,10 @@ describe "public cli", ->
       child.on "close", (code)->
         # p stdout
         # p stderr
-        assert.equal stderr, "Invalid left-hand side expression in postfix operation\n"
+        lines = stderr.split '\n'
+        assert.equal lines[0],     "ReferenceError: Invalid left-hand side expression in postfix operation"
+        assert lines[1].startsWith "    at "
+        assert.equal lines[2],     "    <You can see full stack trace in debug mode (-d option or :d in the REPL)>"
         done()
   
     it "2++ prints full stack trace if -d option is used", (done)->
