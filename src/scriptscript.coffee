@@ -21,6 +21,8 @@ a = require('minimist') process.argv.slice(2),
 if a.d
   pp a
 
+geval = eval    # this magic prevents exposing local scope
+
 #################################### utils ####################################
 
 print_error = (err, debug, prefix="") ->
@@ -36,7 +38,7 @@ try_eval = (err, res)->
     return
   if a.e
     try
-      eval res
+      geval res
     catch eval_err
       print_error eval_err, a.d
   if a.p or !a.e
@@ -45,7 +47,6 @@ try_eval = (err, res)->
 ##################################### REPL ####################################
 
 if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
-  geval = eval
   (require "repl").start eval: (input, skip1, skip2, cb)->
     if input.startsWith ":c "
       await ss.go input[3...], {}, defer err, res
