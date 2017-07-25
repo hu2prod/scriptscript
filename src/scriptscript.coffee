@@ -78,8 +78,6 @@ compile = (file, cb)->
     return cb(err, null)
   await ss.go contents, {}, defer err, res
   ### !pragma coverage-skip-block ###
-  if err
-    print_error err, a.d, file + ": "
   cb(err, res)
 
 # a._ contents are treated as filenames to compile
@@ -92,7 +90,9 @@ if a._.length
   for file in a._
     await compile file, defer err, res
     ### !pragma coverage-skip-block ###
-    throw err if err
+    if err
+      print_error err, a.d, file + ": "
+      continue
     if a.c
       await fs.writeFile "#{a.o or '.'}/#{file.replace /\.\w+$/, '.js'}", res, "utf8"
       ### !pragma coverage-skip-block ###
@@ -104,7 +104,7 @@ if a._.length
       p res
     if a.e and typeof a.e == "boolean" or !a.s and !a.p and !a.c and !a.o and !a.i
       try
-        eval res
+        geval res
       catch err
         print_error err, a.d, file + ": "
 ### !pragma coverage-skip-block ###
