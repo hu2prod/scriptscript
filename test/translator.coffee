@@ -71,8 +71,6 @@ describe 'translator section', ()->
       a>b
       a>=b
       2/2
-      2**2
-      2//2
       2%2
     """.split /\n/g
     for sample in sample_list
@@ -80,6 +78,8 @@ describe 'translator section', ()->
         it JSON.stringify(sample), ()->
           assert.equal full(sample), "(#{sample})"
     kv =
+      "2**2"           : "Math.pow(2, 2)"
+      "2//2"           : "Math.floor(2, 2)"
       "true and false" : "(true&&false)"
       "1 and 2"        : "(1&2)"
       "true or false"  : "(true||false)"
