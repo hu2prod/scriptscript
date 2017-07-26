@@ -77,32 +77,48 @@ do ()->
     op = node.value_array[1].value_view
     # PORTING BUG gram2
     node.value_array[1].value = node.value_array[1].value_view
-    if op in ['or', 'and']
-      # needs type inference
+
+    if op in "and or |".split " "
       [a,_skip,b] = node.value_array
       a_tr = ctx.translate a
       b_tr = ctx.translate b
+    if op == "and"
+      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+        return "(#{a_tr}&#{b_tr})"
+      else                                    # type inference ensures operands to be bools
+        return "(#{a_tr}&&#{b_tr})"
+    if op == "or"
+      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+        return "(#{a_tr}|#{b_tr})"
+      else                                    # type inference ensures operands to be bools
+        return "(#{a_tr}||#{b_tr})"
+    
+    # if op in ['or', 'and']
+    #   # needs type inference
+    #   [a,_skip,b] = node.value_array
+    #   a_tr = ctx.translate a
+    #   b_tr = ctx.translate b
       
-      if !a.mx_hash.type? or !b.mx_hash.type?
-        throw new Error "can't translate op=#{op} because type inference can't detect type of arguments"
-      if !a.mx_hash.type.eq b.mx_hash.type
-        # не пропустит type inference
-        ### !pragma coverage-skip-block ###
-        throw new Error "can't translate op=#{op} because type mismatch #{a.mx_hash.type} != #{b.mx_hash.type}"
-      switch a.mx_hash.type.toString()
-        when 'int'
-          return "(#{a_tr}|#{b_tr})"
-        when 'bool'
-          return "(#{a_tr}||#{b_tr})"
-        else
-          # не пропустит type inference
-          ### !pragma coverage-skip-block ###
-          throw new Error "op=#{op} doesn't support type #{a.mx_hash.type}"
+    #   if !a.mx_hash.type? or !b.mx_hash.type?
+    #     throw new Error "can't translate op=#{op} because type inference can't detect type of arguments"
+    #   if !a.mx_hash.type.eq b.mx_hash.type
+    #     # не пропустит type inference
+    #     ### !pragma coverage-skip-block ###
+    #     throw new Error "can't translate op=#{op} because type mismatch #{a.mx_hash.type} != #{b.mx_hash.type}"
+    #   switch a.mx_hash.type.toString()
+    #     when 'int'
+    #       return "(#{a_tr}|#{b_tr})"
+    #     when 'bool'
+    #       return "(#{a_tr}||#{b_tr})"
+    #     else
+    #       # не пропустит type inference
+    #       ### !pragma coverage-skip-block ###
+    #       throw new Error "op=#{op} doesn't support type #{a.mx_hash.type}"
     if op == '|'
       # pipes logic
-      [a,_skip,b] = node.value_array
-      a_tr = ctx.translate a
-      b_tr = ctx.translate b
+      # [a,_skip,b] = node.value_array
+      # a_tr = ctx.translate a
+      # b_tr = ctx.translate b
       if b.mx_hash.type?
         switch b.mx_hash.type.main
           when "function"

@@ -354,7 +354,7 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
       
       key = "#{op},#{at},#{bt}"
       if !_ret = bin_op_type_table[key]
-        throw new Error "can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
+        throw new Error "Type inference: can't find bin_op=#{op} a=#{at} b=#{bt} node=#{node.value}"
       break
     
     if !node.mx_hash.type?

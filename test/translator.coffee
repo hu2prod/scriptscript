@@ -80,15 +80,25 @@ describe 'translator section', ()->
         it JSON.stringify(sample), ()->
           assert.equal full(sample), "(#{sample})"
     kv =
+      "true and false" : "(true&&false)"
+      "1 and 2"        : "(1&2)"
       "true or false"  : "(true||false)"
-      "1 or 2"  : "(1|2)"
+      "1 or 2"         : "(1|2)"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
     
     sample_list = """
+      a and b
       a or b
+      2 and 3.5
+      2.2 or 5.8
+      false and 4
+      2 or true
+      'a' and 'b'
+      false or 8
+      null and /ab+c/i
     """.split /\n/g
     for sample in sample_list
       do (sample)->
