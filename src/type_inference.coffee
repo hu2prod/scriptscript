@@ -283,15 +283,27 @@ do ()->
     key = "#{op},#{at},#{bt}"
     bin_op_type_table[key] = ret
     return
-
-  for op in "+ - * // % << >> >>>".split /\s+/
-    def_bin op, "int", "int", "int"
-
-  for at in "int float".split /\s+/
-    for bt in "int float".split /\s+/
-      for op in "/ **".split /\s+/
+  
+  for op in "+ - * % %%".split " "
+    for at in "int float".split " "
+      for bt in "int float".split " "
         def_bin op, at, bt, "float"
-
+  
+  for op in "+ - * % %% << >> >>>".split /\s+/
+    def_bin op, "int", "int", "int"
+  
+  def_bin "+", "string", "string", "string"
+  def_bin "*", "string", "int", "string"
+  
+  for op in "/ **".split " "
+    for at in "int float".split " "
+      for bt in "int float".split " "
+        def_bin op, at, bt, "float"
+  
+  for at in "int float".split " "
+    for bt in "int float".split " "
+      def_bin "//", at, bt, "int"
+  
   for op in "and or".split /\s+/
     def_bin op, "bool", "bool", "bool"
   for op in "and or".split /\s+/
