@@ -79,7 +79,8 @@ describe 'translator section', ()->
           assert.equal full(sample), "(#{sample})"
     kv =
       "2**2"           : "Math.pow(2, 2)"
-      "2//2"           : "Math.floor(2, 2)"
+      "2//2"           : "Math.floor(2 / 2)"
+      "2%%2"           : "(function(a, b){return (a % b + b) % b})(2, 2)"
       "true and false" : "(true&&false)"
       "1 and 2"        : "(1&2)"
       "true or false"  : "(true||false)"

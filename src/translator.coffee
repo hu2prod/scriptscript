@@ -66,7 +66,7 @@ ensure_bracket = (t)->
 
 do ()->
   holder = new bin_op_translator_holder
-  for v in bin_op_list = "+ - * / ** // %".split ' '
+  for v in bin_op_list = "+ - * / ** // % %%".split ' '
     holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
     v = v+"="
     holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
@@ -78,7 +78,7 @@ do ()->
     # PORTING BUG gram2
     node.value_array[1].value = node.value_array[1].value_view
 
-    if op in "** // and or |".split " "
+    if op in "** // %% and or |".split " "
       [a,_skip,b] = node.value_array
       a_tr = ctx.translate a
       b_tr = ctx.translate b
@@ -95,7 +95,10 @@ do ()->
     if op == "**"
       return "Math.pow(#{a_tr}, #{b_tr})"
     if op == "//"
-      return "Math.floor(#{a_tr}, #{b_tr})"
+      return "Math.floor(#{a_tr} / #{b_tr})"
+    if op == "%%"
+      return "(function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
+      return "(#{a_tr} % #{b_tr} + #{b_tr}) % #{b_tr}"
     # if op in ['or', 'and']
     #   # needs type inference
     #   [a,_skip,b] = node.value_array
