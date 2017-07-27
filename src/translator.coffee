@@ -38,7 +38,7 @@ deep = (ctx, node)->
     if trans.trans_skip[v.mx_hash.hash_key]?
       # LATER
       if node.mx_hash.eol_pass and v.mx_hash.hash_key == 'eol'
-        list.push "\n"
+        list.push ";\n"
     else if fn = trans.trans_token[v.mx_hash.hash_key]
       list.push fn v.value
     else if trans.trans_value[v.mx_hash.hash_key]?
