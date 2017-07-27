@@ -92,17 +92,16 @@ do ()->
         return "(#{a_tr}|#{b_tr})"
       else                                    # type inference ensures operands to be bools
         return "(#{a_tr}||#{b_tr})"
-    # SEMICOLONS NEEDED FOR TESTS
-    # if op == "and="
-    #   if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-    #     return "(#{a_tr}&=#{b_tr})"
-    #   else                                    # type inference ensures operands to be bools
-    #     return "(#{a_tr}&&=#{b_tr})"
-    # if op == "or="
-    #   if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-    #     return "(#{a_tr}|=#{b_tr})"
-    #   else                                    # type inference ensures operands to be bools
-    #     return "(#{a_tr}||=#{b_tr})"
+    if op == "and="
+      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+        return "(#{a_tr}&=#{b_tr})"
+      else                                    # type inference ensures operands to be bools
+        return "(#{a_tr}&&=#{b_tr})"
+    if op == "or="
+      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+        return "(#{a_tr}|=#{b_tr})"
+      else                                    # type inference ensures operands to be bools
+        return "(#{a_tr}||=#{b_tr})"
     if op == "**"
       return "Math.pow(#{a_tr}, #{b_tr})"
     if op == "//"
