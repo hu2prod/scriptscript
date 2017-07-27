@@ -167,6 +167,24 @@ describe "public cli", ->
         assert.equal stderr.search(/\ +at .+:\d+:\d+/), 71  # first stack trace entry
         assert stderr.length > 500
         done()
+    
+    it ":c #{sample4} prints short error message (first entry of stack trace)", (done)->
+      child = chipro.spawn sscript
+      stdout = stderr = ""
+      child.stdout.on "data", (data)->
+        stdout += data.toString()
+      child.stderr.on "data", (data)->
+        stderr += data.toString()
+      child.stdin.end ":c #{sample4}\n"
+      child.on "close", (code)->
+        # p stdout
+        # p stderr
+        lines = stderr.split '\n'
+        assert.equal lines[0],     err4
+        assert lines[1].startsWith "    at "
+        assert.equal lines[2],     err_bottom
+        assert.equal lines.length, 4
+        done()
   
   # ###################################################################################################
   #    Normal work

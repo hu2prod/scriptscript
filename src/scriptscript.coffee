@@ -51,7 +51,12 @@ if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
     if input.startsWith ":c "
       await ss.go input[3...], {}, defer err, res
       ### !pragma coverage-skip-block ###
-      return cb err, res
+      if err
+        print_error err, a.d
+        cb()
+      else
+        cb null, res
+      return
     debug = input.startsWith ":d "
     input = input[3...] if debug
     await ss.go input, {}, defer ss_err, res
