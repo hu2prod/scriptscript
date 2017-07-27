@@ -522,7 +522,7 @@ describe 'translator section', ()->
         b=a
       """       : """
         (function(){
-          (a=1)
+          (a=1);
           (b=a)
         })
         """
@@ -626,21 +626,21 @@ describe 'translator section', ()->
       fn = ()->
       [1] | fn
       """       : """
-        (fn=(function(){}))
+        (fn=(function(){}));
         ([1]).map(fn)
         """
       """
       fn = ()->
       ([1]) | fn
       """       : """
-        (fn=(function(){}))
+        (fn=(function(){}));
         ([1]).map(fn)
         """
       """
       fn = ()->
       [1] | fn | b
       """       : """
-        (fn=(function(){}))
+        (fn=(function(){}));
         b = ([1]).map(fn)
         """
       """
@@ -648,8 +648,8 @@ describe 'translator section', ()->
       fn = ()->
       [1] | fn | b
       """       : """
-        (b=[])
-        (fn=(function(){}))
+        (b=[]);
+        (fn=(function(){}));
         b = ([1]).map(fn)
         """
       

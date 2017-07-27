@@ -238,21 +238,19 @@ describe "public cli", ->
     it "cat [12].ss | s-s -s", (done)->
       await chipro.exec "cat [12].ss | #{sscript} -s", defer err, stdout, stderr
       # p stdout
-      assert.equal stdout, compiled1 + '\n' + compiled2 + '\n'
+      assert.equal stdout, compiled1 + ';\n' + compiled2 + '\n'
       done err
     
     it "cat [12].ss | s-s -sp", (done)->
       await chipro.exec "cat [12].ss | #{sscript} -sp", defer err, stdout, stderr
       # p stdout
-      assert.equal stdout, compiled1 + '\n' + compiled2 + '\n'
+      assert.equal stdout, compiled1 + ';\n' + compiled2 + '\n'
       done err
     
-    it "FIXME cat [12].ss | s-s -se" # need semicolon after (2+2)
-    
-    it "cat 2.ss | s-s -se", (done)->
-      await chipro.exec "cat 2.ss | #{sscript} -se", defer err, stdout, stderr
+    it "cat [12].ss | s-s -se", (done)->
+      await chipro.exec "cat [12].ss | #{sscript} -se", defer err, stdout, stderr
       # p stdout
-      assert.equal stdout, output2
+      assert.equal stdout, output1 + output2
       done err
     
     it "s-s -i '#{sample2}'", (done)->
