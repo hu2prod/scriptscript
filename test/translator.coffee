@@ -85,10 +85,21 @@ describe 'translator section', ()->
       "1 and 2"        : "(1&2)"
       "true or false"  : "(true||false)"
       "1 or 2"         : "(1|2)"
+      "a**=2"           : "a = Math.pow(a, 2)"
+      "a//=2"           : "a = Math.floor(a / 2)"
+      "a%%=2"           : "a = (function(a, b){return (a % b + b) % b})(a, 2)"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
+    kv =
+      "a and= false"    : "(true&&=false)"
+      "a and= 2"        : "(1&=2)"
+      "a or= false"     : "(true||=false)"
+      "a or= 2"         : "(1|=2)"
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k)
     
     sample_list = """
       a and b

@@ -114,7 +114,7 @@ q('bin_op',  '!=|==')                                   .mx('priority=9  right_a
 
 q('bin_op',  '&&|and|or|[PIPE][PIPE]')                  .mx('priority=10 right_assoc=1') .strict('$1.hash_key==binary_operator')
 
-q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|[QUESTION]=').mx('priority=3') .strict('$1.hash_key==binary_operator')
+q('assign_bin_op',  '=|+=|-=|*=|/=|%=|<<=|>>=|>>>=|**=|//=|%%=|and=|or=|[QUESTION]=').mx('priority=3') .strict('$1.hash_key==binary_operator')
 
 
 # ###################################################################################################

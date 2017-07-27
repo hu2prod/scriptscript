@@ -78,7 +78,7 @@ do ()->
     # PORTING BUG gram2
     node.value_array[1].value = node.value_array[1].value_view
 
-    if op in "** // %% and or |".split " "
+    if op in "** // %% and or | **= //= %%= and= or=".split " "
       [a,_skip,b] = node.value_array
       a_tr = ctx.translate a
       b_tr = ctx.translate b
@@ -92,13 +92,29 @@ do ()->
         return "(#{a_tr}|#{b_tr})"
       else                                    # type inference ensures operands to be bools
         return "(#{a_tr}||#{b_tr})"
+    # SEMICOLONS NEEDED FOR TESTS
+    # if op == "and="
+    #   if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+    #     return "(#{a_tr}&=#{b_tr})"
+    #   else                                    # type inference ensures operands to be bools
+    #     return "(#{a_tr}&&=#{b_tr})"
+    # if op == "or="
+    #   if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+    #     return "(#{a_tr}|=#{b_tr})"
+    #   else                                    # type inference ensures operands to be bools
+    #     return "(#{a_tr}||=#{b_tr})"
     if op == "**"
       return "Math.pow(#{a_tr}, #{b_tr})"
     if op == "//"
       return "Math.floor(#{a_tr} / #{b_tr})"
     if op == "%%"
       return "(function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
-      return "(#{a_tr} % #{b_tr} + #{b_tr}) % #{b_tr}"
+    if op == "**="
+      return "#{a_tr} = Math.pow(#{a_tr}, #{b_tr})"
+    if op == "//="
+      return "#{a_tr} = Math.floor(#{a_tr} / #{b_tr})"
+    if op == "%%="
+      return "#{a_tr} = (function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
     # if op in ['or', 'and']
     #   # needs type inference
     #   [a,_skip,b] = node.value_array
