@@ -26,7 +26,7 @@ geval = eval    # this magic prevents exposing local scope
 #################################### utils ####################################
 
 print_error = (err, debug, prefix="") ->
-  perr red(prefix +
+  perr red.bold(prefix +
     if debug
     then err.stack
     else err.stack.split('\n')[...2].join('\n') + "\n    <You can see full stack trace in debug mode (-d option or :d in the REPL)>"
@@ -42,7 +42,7 @@ try_eval = (err, res)->
     catch eval_err
       print_error eval_err, a.d
   if a.p or !a.e
-    p res
+    puts res
 
 ##################################### REPL ####################################
 
@@ -106,7 +106,7 @@ if a._.length
         continue
     ### !pragma coverage-skip-block ###
     if a.p
-      p res
+      puts res
     if a.e and typeof a.e == "boolean" or !a.s and !a.p and !a.c and !a.o and !a.i
       try
         geval res
