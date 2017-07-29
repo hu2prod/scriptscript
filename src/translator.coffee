@@ -65,20 +65,21 @@ ensure_bracket = (t)->
 # ###################################################################################################
 
 do ()->
+  literally_translated_bin_op_list = "+ - * / % += -= *= /= %= = == != < <= > >=".split ' '
   holder = new bin_op_translator_holder
-  for v in bin_op_list = "+ - * / ** // % %%".split ' '
+  for v in literally_translated_bin_op_list
     holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
-    v = v+"="
-    holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
+  #   v = v+"="
+  #   holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
 
-  for v in bin_op_list = "= == != < <= > >=".split ' '
-    holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
+  # for v in bin_op_list = "= == != < <= > >=".split ' '
+  #   holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
   trans.translator_hash['bin_op'] = translate:(ctx, node)->
     op = node.value_array[1].value_view
     # PORTING BUG gram2
     node.value_array[1].value = node.value_array[1].value_view
 
-    if op in "** // %% and or | **= //= %%= and= or=".split " "
+    if op not in literally_translated_bin_op_list
       [a,_skip,b] = node.value_array
       a_tr = ctx.translate a
       b_tr = ctx.translate b
