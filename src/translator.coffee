@@ -65,10 +65,15 @@ ensure_bracket = (t)->
 # ###################################################################################################
 
 do ()->
-  literally_translated_bin_op_list = "+ - * / % += -= *= /= %= = == != < <= > >=".split ' '
   holder = new bin_op_translator_holder
-  for v in literally_translated_bin_op_list
-    holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
+  for v in "+ - * / % += -= *= /= %= = == != < <= > >=".split ' '
+    holder.op_list[v]     = new bin_op_translator_framework "($1$op$2)"
+  holder.op_list["**"]  = new bin_op_translator_framework "Math.pow($1, $2)"
+  holder.op_list["//"]  = new bin_op_translator_framework "Math.floor($1 / $2)"
+  holder.op_list["%%"]  = new bin_op_translator_framework "(function(a, b){return (a % b + b) % b})($1, $2)"
+  holder.op_list["**="] = new bin_op_translator_framework "$1 = Math.pow($1, $2)"
+  holder.op_list["//="] = new bin_op_translator_framework "$1 = Math.floor($1 / $2)"
+  holder.op_list["%%="] = new bin_op_translator_framework "$1 = (function(a, b){return (a % b + b) % b})($1, $2)"
   
   trans.translator_hash['bin_op'] = translate:(ctx, node)->
     op = node.value_array[1].value_view
@@ -76,25 +81,13 @@ do ()->
     node.value_array[1].value = node.value_array[1].value_view
     
     # return is implied, I actually mean it. This if block is intended to be the last statement in the function.
-    if op in literally_translated_bin_op_list
+    if op of holder.op_list
       holder.translate ctx, node
     else
       [a,_skip,b] = node.value_array
       a_tr = ctx.translate a
       b_tr = ctx.translate b
       switch op
-        when "**"
-          "Math.pow(#{a_tr}, #{b_tr})"
-        when "//"
-          "Math.floor(#{a_tr} / #{b_tr})"
-        when "%%"
-          "(function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
-        when "**="
-          "#{a_tr} = Math.pow(#{a_tr}, #{b_tr})"
-        when "//="
-          "#{a_tr} = Math.floor(#{a_tr} / #{b_tr})"
-        when "%%="
-          "#{a_tr} = (function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
         when "and"
           if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
             "(#{a_tr}&#{b_tr})"
@@ -132,7 +125,7 @@ do ()->
     
     
     # Here is some old code (maybe del later):
-
+    
     # if op in ['or', 'and']
     #   # needs type inference
     #   [a,_skip,b] = node.value_array
