@@ -69,52 +69,70 @@ do ()->
   holder = new bin_op_translator_holder
   for v in literally_translated_bin_op_list
     holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
-  #   v = v+"="
-  #   holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
-
-  # for v in bin_op_list = "= == != < <= > >=".split ' '
-  #   holder.op_list[v]  = new bin_op_translator_framework "($1$op$2)"
+  
   trans.translator_hash['bin_op'] = translate:(ctx, node)->
     op = node.value_array[1].value_view
     # PORTING BUG gram2
     node.value_array[1].value = node.value_array[1].value_view
-
-    if op not in literally_translated_bin_op_list
+    
+    # return is implied, I actually mean it. This if block is intended to be the last statement in the function.
+    if op in literally_translated_bin_op_list
+      holder.translate ctx, node
+    else
       [a,_skip,b] = node.value_array
       a_tr = ctx.translate a
       b_tr = ctx.translate b
-    if op == "and"
-      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-        return "(#{a_tr}&#{b_tr})"
-      else                                    # type inference ensures operands to be bools
-        return "(#{a_tr}&&#{b_tr})"
-    if op == "or"
-      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-        return "(#{a_tr}|#{b_tr})"
-      else                                    # type inference ensures operands to be bools
-        return "(#{a_tr}||#{b_tr})"
-    if op == "and="
-      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-        return "(#{a_tr}&=#{b_tr})"
-      else                                    # type inference ensures operands to be bools
-        return "(#{a_tr}&&=#{b_tr})"
-    if op == "or="
-      if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-        return "(#{a_tr}|=#{b_tr})"
-      else                                    # type inference ensures operands to be bools
-        return "(#{a_tr}||=#{b_tr})"
-    if op == "**"
-      return "Math.pow(#{a_tr}, #{b_tr})"
-    if op == "//"
-      return "Math.floor(#{a_tr} / #{b_tr})"
-    if op == "%%"
-      return "(function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
-    if op == "**="
-      return "#{a_tr} = Math.pow(#{a_tr}, #{b_tr})"
-    if op == "//="
-      return "#{a_tr} = Math.floor(#{a_tr} / #{b_tr})"
-    if op == "%%="
-      return "#{a_tr} = (function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
+      switch op
+        when "**"
+          "Math.pow(#{a_tr}, #{b_tr})"
+        when "//"
+          "Math.floor(#{a_tr} / #{b_tr})"
+        when "%%"
+          "(function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
+        when "**="
+          "#{a_tr} = Math.pow(#{a_tr}, #{b_tr})"
+        when "//="
+          "#{a_tr} = Math.floor(#{a_tr} / #{b_tr})"
+        when "%%="
+          "#{a_tr} = (function(a, b){return (a % b + b) % b})(#{a_tr}, #{b_tr})"
+        when "and"
+          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+            "(#{a_tr}&#{b_tr})"
+          else                                    # type inference ensures operands to be bools
+            "(#{a_tr}&&#{b_tr})"
+        when "or"
+          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+            "(#{a_tr}|#{b_tr})"
+          else                                    # type inference ensures operands to be bools
+            "(#{a_tr}||#{b_tr})"
+        when "and="
+          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+            "(#{a_tr}&=#{b_tr})"
+          else                                    # type inference ensures operands to be bools
+            "(#{a_tr}&&=#{b_tr})"
+        when "or="
+          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+            "(#{a_tr}|=#{b_tr})"
+          else                                    # type inference ensures operands to be bools
+            "(#{a_tr}||=#{b_tr})"
+        when '|'
+          # pipes logic
+          if b.mx_hash.type?
+            switch b.mx_hash.type.main
+              when "function"
+                "#{ensure_bracket a_tr}.map(#{b_tr})"
+              when "array"
+                "#{b_tr} = #{a_tr}"
+              # else для switch не нужен т.к. не пропустит type inference
+          else
+            "#{b_tr} = #{a_tr}"
+    
+    # Don't put code down here below if block without a good reason (unless you're ready for refactoring).
+    # The preceding block should remain the last statement in the function as long as possible.
+    
+    
+    # Here is some old code (maybe del later):
+
     # if op in ['or', 'and']
     #   # needs type inference
     #   [a,_skip,b] = node.value_array
@@ -136,24 +154,7 @@ do ()->
     #       # не пропустит type inference
     #       ### !pragma coverage-skip-block ###
     #       throw new Error "op=#{op} doesn't support type #{a.mx_hash.type}"
-    if op == '|'
-      # pipes logic
-      # [a,_skip,b] = node.value_array
-      # a_tr = ctx.translate a
-      # b_tr = ctx.translate b
-      if b.mx_hash.type?
-        switch b.mx_hash.type.main
-          when "function"
-            return "#{ensure_bracket a_tr}.map(#{b_tr})"
-          when "array"
-            return "#{b_tr} = #{a_tr}"
-          # else не нужен т.к. не пропустит type inference
-      
-      
-      return "#{b_tr} = #{a_tr}"
-      
     
-    holder.translate ctx, node
 # ###################################################################################################
 #    pre_op
 # ###################################################################################################
