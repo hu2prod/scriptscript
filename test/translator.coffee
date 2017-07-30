@@ -78,16 +78,18 @@ describe 'translator section', ()->
         it JSON.stringify(sample), ()->
           assert.equal full(sample), "(#{sample})"
     kv =
-      "2**2"           : "Math.pow(2, 2)"
-      "2//2"           : "Math.floor(2 / 2)"
-      "2%%2"           : "(function(a, b){return (a % b + b) % b})(2, 2)"
-      "true and false" : "(true&&false)"
-      "1 and 2"        : "(1&2)"
-      "true or false"  : "(true||false)"
-      "1 or 2"         : "(1|2)"
-      "a**=2"           : "a = Math.pow(a, 2)"
-      "a//=2"           : "a = Math.floor(a / 2)"
-      "a%%=2"           : "a = (function(a, b){return (a % b + b) % b})(a, 2)"
+      "2**2"             : "Math.pow(2, 2)"
+      "2//2"             : "Math.floor(2 / 2)"
+      "2%%2"             : "(function(a, b){return (a % b + b) % b})(2, 2)"
+      "true and false"   : "(true&&false)"
+      "1 and 2"          : "(1&2)"
+      "true or false"    : "(true||false)"
+      "1 or 2"           : "(1|2)"
+      "true xor false"   : "(true^^false)"
+      "1 xor 2"          : "(1^2)"
+      "a**=2"            : "a = Math.pow(a, 2)"
+      "a//=2"            : "a = Math.floor(a / 2)"
+      "a%%=2"            : "a = (function(a, b){return (a % b + b) % b})(a, 2)"
       """a = true
          a and= false""" : """(a=true);
                               (a&&=false)"""
@@ -100,6 +102,12 @@ describe 'translator section', ()->
       """a = 2
          a or= 3"""      : """(a=2);
                               (a|=3)"""
+      """a = true
+         a xor= false""" : """(a=true);
+                              (a^^=false)"""
+      """a = 2
+         a xor= 3"""     : """(a=2);
+                              (a^=3)"""
       # "a and= 2"        : "(1&=2)"
       # "a or= false"     : "(true||=false)"
       # "a or= 2"         : "(1|=2)"
@@ -122,6 +130,9 @@ describe 'translator section', ()->
       'a' and 'b'
       false or 8
       null and /ab+c/i
+      7 xor 7.8
+      5 xor true
+      undefined xor null
     """.split /\n/g
     sample_list.append [
       """a=5.8

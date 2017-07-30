@@ -98,6 +98,11 @@ do ()->
             "(#{a_tr}|#{b_tr})"
           else                                    # type inference ensures operands to be bools
             "(#{a_tr}||#{b_tr})"
+        when "xor"
+          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+            "(#{a_tr}^#{b_tr})"
+          else                                    # type inference ensures operands to be bools
+            "(#{a_tr}^^#{b_tr})"
         when "and="
           if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
             "(#{a_tr}&=#{b_tr})"
@@ -108,6 +113,11 @@ do ()->
             "(#{a_tr}|=#{b_tr})"
           else                                    # type inference ensures operands to be bools
             "(#{a_tr}||=#{b_tr})"
+        when "xor="
+          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
+            "(#{a_tr}^=#{b_tr})"
+          else                                    # type inference ensures operands to be bools
+            "(#{a_tr}^^=#{b_tr})"
         when '|'
           # pipes logic
           if b.mx_hash.type?
@@ -123,9 +133,9 @@ do ()->
     # Don't put code down here below if block without a good reason (unless you're ready for refactoring).
     # The preceding block should remain the last statement in the function as long as possible.
     
-    
+
     # Here is some old code (maybe del later):
-    
+
     # if op in ['or', 'and']
     #   # needs type inference
     #   [a,_skip,b] = node.value_array

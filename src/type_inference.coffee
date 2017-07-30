@@ -304,9 +304,8 @@ do ()->
     for bt in "int float".split " "
       def_bin "//", at, bt, "int"
   
-  for op in "and or".split /\s+/
+  for op in "and or xor".split /\s+/
     def_bin op, "bool", "bool", "bool"
-  for op in "and or".split /\s+/
     def_bin op, "int", "int", "int"
   for type in "int float".split /\s+/
     for op in "< <= > >=".split /\s+/

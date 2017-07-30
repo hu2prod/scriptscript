@@ -84,8 +84,10 @@ describe 'type_inference section', ()->
       "1>>>1"         : "int"
       "1 and 1"       : "int"
       "1 or 1"        : "int"
+      "1 xor 1"       : "int"
       "true and true" : "bool"
       "true or  true" : "bool"
+      "true xor  true": "bool"
       "1 == 1"        : "bool"
       "1 != 1"        : "bool"
       "1 >  1"        : "bool"
@@ -108,6 +110,12 @@ describe 'type_inference section', ()->
     
     list = """
       1+'1'
+      '1'-/1/
+      1*'1'
+      '1'/1
+      true and 1
+      1 or false
+      1 xor 1.0
       'a' or 'b'
       'a' or 1
     """.split "\n"

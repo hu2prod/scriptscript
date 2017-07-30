@@ -44,6 +44,7 @@ describe 'gram section', ()->
     a && b
     a or b
     a || b
+    a xor b
     a < b
     a <= b
     a == b
@@ -72,6 +73,9 @@ describe 'gram section', ()->
     a <<= b
     a >>= b
     a >>>= b
+    a and= b
+    a or= b
+    a xor= b
     a ?= b
     a[b]
     a.b
