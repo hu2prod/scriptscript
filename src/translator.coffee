@@ -66,7 +66,7 @@ ensure_bracket = (t)->
 
 do ()->
   holder = new bin_op_translator_holder
-  for v in "+ - * / % += -= *= /= %= = == != < <= > >=".split ' '
+  for v in "+ - * / % += -= *= /= %= = == != < <= > >= << >> >>>".split ' '
     holder.op_list[v]     = new bin_op_translator_framework "($1$op$2)"
   holder.op_list["**"]  = new bin_op_translator_framework "Math.pow($1, $2)"
   holder.op_list["//"]  = new bin_op_translator_framework "Math.floor($1 / $2)"
