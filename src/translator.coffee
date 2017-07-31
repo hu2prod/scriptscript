@@ -87,37 +87,19 @@ do ()->
       [a,_skip,b] = node.value_array
       a_tr = ctx.translate a
       b_tr = ctx.translate b
+      logical_or_bitwise = (char) ->
+        postfix = if op[-1..] == '=' then '=' else ''
+        if a.mx_hash.type.toString() == "int"         # type inference ensures the second operand to be int
+          "(#{a_tr}#{char}#{postfix}#{b_tr})"
+        else                                          # type inference ensures operands to be bools
+          "(#{a_tr}#{char}#{char}#{postfix}#{b_tr})"
       switch op
-        when "and"
-          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-            "(#{a_tr}&#{b_tr})"
-          else                                    # type inference ensures operands to be bools
-            "(#{a_tr}&&#{b_tr})"
-        when "or"
-          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-            "(#{a_tr}|#{b_tr})"
-          else                                    # type inference ensures operands to be bools
-            "(#{a_tr}||#{b_tr})"
-        when "xor"
-          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-            "(#{a_tr}^#{b_tr})"
-          else                                    # type inference ensures operands to be bools
-            "(#{a_tr}^^#{b_tr})"
-        when "and="
-          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-            "(#{a_tr}&=#{b_tr})"
-          else                                    # type inference ensures operands to be bools
-            "(#{a_tr}&&=#{b_tr})"
-        when "or="
-          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-            "(#{a_tr}|=#{b_tr})"
-          else                                    # type inference ensures operands to be bools
-            "(#{a_tr}||=#{b_tr})"
-        when "xor="
-          if a.mx_hash.type.toString() == "int"   # type inference ensures the second operand to be int
-            "(#{a_tr}^=#{b_tr})"
-          else                                    # type inference ensures operands to be bools
-            "(#{a_tr}^^=#{b_tr})"
+        when "and", "and="
+          logical_or_bitwise '&'
+        when "or", "or="
+          logical_or_bitwise '|'
+        when "xor", "xor="
+          logical_or_bitwise '^'
         when '|'
           # pipes logic
           if b.mx_hash.type?
@@ -129,6 +111,9 @@ do ()->
               # else для switch не нужен т.к. не пропустит type inference
           else
             "#{b_tr} = #{a_tr}"
+        else
+          ### !pragma coverage-skip-block ###
+          throw new Error "Translator: can't figure out how to translate '#{op}'"
     
     # Don't put code down here below if block without a good reason (unless you're ready for refactoring).
     # The preceding block should remain the last statement in the function as long as possible.
