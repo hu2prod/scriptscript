@@ -192,7 +192,7 @@ describe 'type_inference section', ()->
     ###
     for v in list
       do (v)->
-        it JSON.stringify(v), ()->
+        it JSON.stringify(v) + " throws", ()->
           util.throws ()->
             full v
   
@@ -204,6 +204,7 @@ describe 'type_inference section', ()->
       "+'1'"     : "float"
       "!true"    : "bool"
       "not true" : "bool"
+      "not 1"    : "int"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -211,10 +212,13 @@ describe 'type_inference section', ()->
           assert.equal ast.mx_hash.type?.toString(), v
     list = """
       +1
+      !1
+      ~true
+      ~1.5
     """.split "\n"
     for v in list
       do (v)->
-        it JSON.stringify(v), ()->
+        it JSON.stringify(v) + " throws", ()->
           util.throws ()->
             full v
   

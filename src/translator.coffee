@@ -152,7 +152,6 @@ do ()->
   for v in un_op_list = "~ + - !".split ' '
     holder.op_list[v]  = new un_op_translator_framework "$op$1"
 
-  holder.op_list["not"]  = new un_op_translator_framework "!$1"
   holder.op_list["void"] = new un_op_translator_framework "null"
 
   for v in un_op_list = "typeof new delete".split ' '
@@ -160,8 +159,17 @@ do ()->
   # trans.translator_hash['pre_op'] = holder
   # PORTING BUG UGLY FIX gram2
   trans.translator_hash['pre_op'] = translate:(ctx, node)->
+    op = node.value_array[0].value_view
     node.value_array[0].value = node.value_array[0].value_view
-    holder.translate ctx, node
+    if op == "not"
+      a = node.value_array[1]
+      a_tr = ctx.translate a
+      if a.mx_hash.type.toString() == "int"
+        "~#{a_tr}"
+      else
+        "!#{a_tr}"   # type inference ensures bool
+    else
+      holder.translate ctx, node
 
 # ###################################################################################################
 #    post_op

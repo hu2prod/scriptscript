@@ -25,6 +25,8 @@ describe 'translator section', ()->
     (a)
     +a
     -a
+    ~a
+    !a
     []
     [1]
     [1,2]
@@ -148,18 +150,29 @@ describe 'translator section', ()->
     ]
     for sample in sample_list
       do (sample)->
-        it JSON.stringify(sample), ()->
+        it JSON.stringify(sample) + " throws", ()->
           util.throws ()->
             full(sample)
   
   describe "pre op", ()->
     kv =
-      "not a"   : "!a"
       "void a"  : "null"
+      "not true": "!true"
+      "not 1"   : "~1"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           assert.equal full(k), v
+    sample_list = """
+      not a
+      not 'a'
+      not 1.5
+    """.split /\n/g
+    for sample in sample_list
+      do (sample)->
+        it JSON.stringify(sample) + " throws", ()->
+          util.throws ()->
+            full(sample)
   
   # ###################################################################################################
   #    STRINGS

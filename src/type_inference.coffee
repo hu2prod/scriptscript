@@ -462,6 +462,7 @@ def_pre "-", "int",    "int"
 def_pre "~", "int",    "int"
 def_pre "+", "string", "float"
 def_pre "!",   "bool", "bool"
+def_pre "not", "int" , "int"
 def_pre "not", "bool", "bool"
 
 
