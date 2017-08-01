@@ -287,22 +287,22 @@ show_diff = (a,b)->
     show_diff a.value_array[i], b.value_array[i]
   return
 
-@_parse = (str, opt={})->
-  res = g.go str,
+@_parse = (tok_res, opt={})->
+  gram_res = g.go tok_res,
     expected_token : 'stmt_plus'
     mode_full      : opt.mode_full or false
-  if res.length == 0
+  if gram_res.length == 0
     throw new Error "Parsing error. No proper combination found"
-  if res.length != 1
-    [a,b] = res
+  if gram_res.length != 1
+    [a,b] = gram_res
     show_diff a,b
     ### !pragma coverage-skip-block ###
-    throw new Error "Parsing error. More than one proper combination found #{res.length}"
-  res
+    throw new Error "Parsing error. More than one proper combination found #{gram_res.length}"
+  gram_res
 
-@parse = (str, opt, on_end)->
+@parse = (tok_res, opt, on_end)->
   try
-    res = module._parse str, opt
+    gram_res = module._parse tok_res, opt
   catch e
     return on_end e
-  on_end null, res
+  on_end null, gram_res
