@@ -66,8 +66,6 @@ describe 'translator section', ()->
     sample_list = """
       a+b
       a=b
-      a==b
-      a!=b
       a<b
       a<=b
       a>b
@@ -96,6 +94,8 @@ describe 'translator section', ()->
       "a**=2"            : "a = Math.pow(a, 2)"
       "a//=2"            : "a = Math.floor(a / 2)"
       "a%%=2"            : "a = (function(a, b){return (a % b + b) % b})(a, 2)"
+      "a==b"             : "(a===b)"
+      "a!=b"             : "(a!==b)"
       """a = true
          a and= false""" : """(a=true);
                               (a&&=false)"""
