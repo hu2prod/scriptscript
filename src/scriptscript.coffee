@@ -6,7 +6,7 @@ fs = require 'fs'
 ss = require ".."
 {red} = require "colors"
 a = require('minimist') process.argv.slice(2), 
-  boolean: ['s', 'p', 'c', 'd']
+  boolean: ['s', 'p', 'c', 'd', 't', 'n', 'y']
   string: ['o', 'i']
   # -e can be boolean or string
   alias: 
@@ -17,6 +17,9 @@ a = require('minimist') process.argv.slice(2),
     'i': "input" 
     'e': "exec"
     'd': "debug"
+    't': "tokens"
+    'n': "nodes"
+    'y': "type_inference"
 
 if a.d
   pp a
@@ -31,6 +34,15 @@ print_error = (err, debug, prefix="") ->
     then err.stack
     else err.stack.split('\n')[...2].join('\n') + "\n    <You can see full stack trace in debug mode (-d option or :d in the REPL)>"
   )
+
+compile = (input, cb) ->
+  handle_err = (err) ->
+    print_error err, a.d
+    cb()
+  await ss.tokenize input, {}, defer err, tok;    return handle_err(err) if err;  pp tok if a.t
+  await ss.parse tok, {}, defer err, ast;         return handle_err(err) if err;  pp ast if a.n
+  await ss.type_inference ast[0], {}, defer err;  return handle_err(err) if err;  pp ast if a.y
+  await ss.translate ast[0], {}, defer err, res;  return handle_err(err) if err;  cb null, res
 
 try_eval = (err, res)->
   if err
@@ -75,7 +87,7 @@ if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
 
 ################################### compiler ##################################
 
-compile = (file, cb)->
+compile_file = (file, cb)->
   await fs.readFile file, "utf8", defer err, contents
   ### !pragma coverage-skip-block ###
   if err
@@ -92,17 +104,17 @@ if a._.length
     ### !pragma coverage-skip-block ###
     throw err if err
   ### !pragma coverage-skip-block ###
-  for file in a._
-    await compile file, defer err, res
+  for filename in a._
+    await compile_file filename, defer err, res
     ### !pragma coverage-skip-block ###
     if err
-      print_error err, a.d, file + ": "
+      print_error err, a.d, filename + ": "
       continue
     if a.c
-      await fs.writeFile "#{a.o or '.'}/#{file.replace /\.\w+$/, '.js'}", res, "utf8"
+      await fs.writeFile "#{a.o or '.'}/#{filename.replace /\.\w+$/, '.js'}", res, "utf8"
       ### !pragma coverage-skip-block ###
       if err
-        print_error err, a.d, file + ": "
+        print_error err, a.d, filename + ": "
         continue
     ### !pragma coverage-skip-block ###
     if a.p
@@ -111,7 +123,7 @@ if a._.length
       try
         geval res
       catch err
-        print_error err, a.d, file + ": "
+        print_error err, a.d, filename + ": "
 ### !pragma coverage-skip-block ###
 
 #################################### stdin ####################################
@@ -136,7 +148,7 @@ if a.s
 ################################ Other options ################################
 
 if a.i
-  await ss.go a.i, {}, defer err, res
+  await compile a.i, defer err, res
   ### !pragma coverage-skip-block ###
   try_eval err, res
 ### !pragma coverage-skip-block ###

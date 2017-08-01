@@ -57,6 +57,9 @@ Short | Long | Description
 -i | --input | compile argument and print compiled JavaScript; -p assumed unless -e provided; start a REPL if no argument provided
 -e | --exec | eval compiled code
 -d | --debug | debug mode (print out full stack traces and some additional information)
+-t | --tokens | print out tokenizer output (works only with -i for now)
+-n | --nodes | print out AST before type inference (works only with -i for now)
+-y | --type_inference | print out AST after type inference (works only with -i for now)
 
 ### Test
 
