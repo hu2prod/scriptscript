@@ -253,6 +253,8 @@ q('stmt',  '#rvalue')                                   .mx("ult=deep ti=pass")
 q('stmt',  '#stmt #comment')                            .mx("ult=deep ti=pass")
 q('stmt',  '#comment')                                  .mx("ult=deep ti=skip")
 
+q('stmt',  '#empty')                                    .mx("ult=value ti=skip")
+
 q('stmt',  '__test_untranslated')                       .mx("ti=skip")                       # FOR test purposes only
 
 show_diff = (a,b)->

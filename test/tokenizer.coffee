@@ -263,9 +263,10 @@ describe 'tokenizer section', ()->
       assert.equal tl[0][0].value, "####################### COMMENT"
   
   describe "Whitespace", ()->
-    it "should tokenize \\n as 0 tokens", ()->
+    it "should tokenize \\n as empty", ()->
       tl = g._tokenize "\n"
-      assert.equal tl.length, 0
+      assert.equal tl.length, 1
+      assert.equal tl[0][0].mx_hash.hash_key, "empty"
     
     it "should tokenize \\n1 as 2 tokens", ()->
       tl = g._tokenize "\n1"

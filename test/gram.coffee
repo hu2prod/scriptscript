@@ -14,6 +14,7 @@ describe 'gram section', ()->
   ###
   sample_list = '''
     HEAT_UP
+    
     a
     +a
     a+b

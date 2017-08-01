@@ -16,6 +16,7 @@ full = (t)->
 
 describe 'translator section', ()->
   sample_list = """
+    
     a
     1
     1.0

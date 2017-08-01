@@ -154,6 +154,11 @@ tokenizer.parser_list.push (new Token_parser 'regexp_template_end',   ///      ^
   res = tokenizer.go str
   while res.length && res.last()[0].mx_hash.hash_key == 'eol'
     res.pop()
+  # Fix for an empty input:
+  if res.length == 0
+    node = new Node
+    node.mx_hash.hash_key = 'empty'
+    res.push [node]
   res
 
 @tokenize = (str, opt, on_end)->
