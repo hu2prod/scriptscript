@@ -179,12 +179,12 @@ describe 'tokenizer section', ()->
     # TEMP disabled
     # .1
     # .1e10
+    # 1.      # Reason: incorrect tokenization of [1..5]
+    # 1.e10
+    # 1.e+10
+    # 1.e-10
     list = """
-      1.
       1.1
-      1.e10
-      1.e+10
-      1.e-10
       1.1e10
       1e10
       1e+10

@@ -87,7 +87,6 @@ describe 'gram section', ()->
     a .0123
     1
     1.1
-    1.
     1e1
     1e+1
     1e-1
@@ -267,6 +266,7 @@ describe 'gram section', ()->
         ,b
       ]
       ---
+      [0 .. 2]
     """.split /\n?---\n?/g
     for sample in sample_list
       continue if !sample

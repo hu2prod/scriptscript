@@ -53,7 +53,7 @@ tokenizer.parser_list.push (new Token_parser 'binary_literal', /^0b[01]+/i)
 tokenizer.parser_list.push (new Token_parser 'float_literal', ///
   ^ (?:
       (?:
-        \d+\.\d*
+        \d+\.\d+
       )  (?:e[+-]?\d+)? |
       \d+(?:e[+-]?\d+)
     )

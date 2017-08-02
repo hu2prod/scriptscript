@@ -312,6 +312,33 @@ trans.translator_hash["hash_pair_auto"] = translate:(ctx,node)->
 trans.translator_hash['hash_wrap']   = translate:(ctx, node)->
   list = deep ctx, node
   "{"+list.join('')+"}"
+
+# ###################################################################################################
+#    array
+# ###################################################################################################
+trans.translator_hash["num_array"] = translate:(ctx, node)->
+  # [_skip1, a, _skip2, b, _skip3] = node.value_array
+  a = +node.value_array[1].value_view
+  b = +node.value_array[3].value_view
+  if b - a > 20
+    """
+    (function() {
+      var results = [];
+      for (var i = #{a}; i <= #{b}; i++){ results.push(i); }
+      return results;
+    })()
+    """
+  else if a - b > 20
+    """
+    (function() {
+      var results = [];
+      for (var i = #{a}; i >= #{b}; i--){ results.push(i); }
+      return results;
+    })()
+    """
+  else
+    "[#{[a..b].join ", "}]"
+
 # ###################################################################################################
 #    access
 # ###################################################################################################

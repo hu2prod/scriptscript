@@ -162,6 +162,8 @@ q('array',  '[ #indent #comma_rvalue? #dedent ]')       .mx("priority=#{base_pri
 q('rvalue',  '#array')                                  .mx("priority=#{base_priority} ult=deep ti=array")
 # NOTE lvalue array come later
 
+q('array', '[ #num_const .. #num_const ]')              .mx("priority=#{base_priority} ult=num_array")
+
 # ###################################################################################################
 #    hash
 # ###################################################################################################
