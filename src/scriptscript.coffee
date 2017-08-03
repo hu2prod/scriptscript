@@ -40,9 +40,13 @@ compile = (input, cb) ->
     print_error err, a.d
     cb()
   await ss.tokenize input, {}, defer err, tok;    return handle_err(err) if err;  pp tok if a.t
+  ### !pragma coverage-skip-block ###
   await ss.parse tok, {}, defer err, ast;         return handle_err(err) if err;  pp ast if a.n
+  ### !pragma coverage-skip-block ###
   await ss.type_inference ast[0], {}, defer err;  return handle_err(err) if err;  pp ast if a.y
+  ### !pragma coverage-skip-block ###
   await ss.translate ast[0], {}, defer err, res;  return handle_err(err) if err;  cb null, res
+  ### !pragma coverage-skip-block ###
 
 try_eval = (err, res)->
   if err
@@ -69,6 +73,7 @@ if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
       else
         cb null, res
       return
+    ### !pragma coverage-skip-block ###
     debug = input.startsWith ":d "
     input = input[3...] if debug
     await ss.go input, {}, defer ss_err, res
