@@ -95,7 +95,7 @@ describe 'translator section', ()->
       "a**=2"            : "a = Math.pow(a, 2)"
       "a//=2"            : "a = Math.floor(a / 2)"
       "a%%=2"            : "a = (function(a, b){return (a % b + b) % b})(a, 2)"
-      "a%%=2"            : "a = ((_tmp_b=2,(a % _tmp_b + _tmp_b) % _tmp_b)"
+      "a%%=2"            : "a = (_tmp_b=2,(a % _tmp_b + _tmp_b) % _tmp_b)"
       "a==b"             : "(a===b)"
       "a!=b"             : "(a!==b)"
       """a = true

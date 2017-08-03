@@ -73,7 +73,7 @@ do ()->
   holder.op_list["%%"]  = new bin_op_translator_framework "(_tmp_b=$2,($1 % _tmp_b + _tmp_b) % _tmp_b)"
   holder.op_list["**="] = new bin_op_translator_framework "$1 = Math.pow($1, $2)"
   holder.op_list["//="] = new bin_op_translator_framework "$1 = Math.floor($1 / $2)"
-  holder.op_list["%%="] = new bin_op_translator_framework "$1 = ((_tmp_b=$2,($1 % _tmp_b + _tmp_b) % _tmp_b)"
+  holder.op_list["%%="] = new bin_op_translator_framework "$1 = (_tmp_b=$2,($1 % _tmp_b + _tmp_b) % _tmp_b)"
   holder.op_list["=="]  = new bin_op_translator_framework "($1===$2)"
   holder.op_list["!="]  = new bin_op_translator_framework "($1!==$2)"
   
