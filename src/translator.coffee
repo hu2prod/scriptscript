@@ -174,6 +174,8 @@ do ()->
     if op == "not"
       a = node.value_array[1]
       a_tr = ctx.translate a
+      if !a.mx_hash.type
+        throw new Error "can't translate not operation because no type inferenced"
       if a.mx_hash.type.toString() == "int"
         "~#{a_tr}"
       else
