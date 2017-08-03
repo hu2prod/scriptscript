@@ -110,17 +110,22 @@ if a._.length
     throw err if err
   ### !pragma coverage-skip-block ###
   for filename in a._
+    # iced-coverage BUG
     await compile_file filename, defer err, res
     ### !pragma coverage-skip-block ###
     if err
       print_error err, a.d, filename + ": "
       continue
+      ### !pragma coverage-skip-block ###
+    ### !pragma coverage-skip-block ###
     if a.c
-      await fs.writeFile "#{a.o or '.'}/#{filename.replace /\.\w+$/, '.js'}", res, "utf8"
+      await fs.writeFile "#{a.o or '.'}/#{filename.replace /\.\w+$/, '.js'}", res, "utf8", defer(err)
       ### !pragma coverage-skip-block ###
       if err
+        # iced-coverage BUG
         print_error err, a.d, filename + ": "
         continue
+        ### !pragma coverage-skip-block ###
     ### !pragma coverage-skip-block ###
     if a.p
       puts res
