@@ -90,7 +90,7 @@ describe 'translator section', ()->
       "1 and 2"          : "(1&2)"
       "true or false"    : "(true||false)"
       "1 or 2"           : "(1|2)"
-      "true xor false"   : "(true^^false)"
+      "true xor false"   : "(!!(true^false))"
       "1 xor 2"          : "(1^2)"
       "a**=2"            : "a = Math.pow(a, 2)"
       "a//=2"            : "a = Math.floor(a / 2)"
@@ -111,7 +111,7 @@ describe 'translator section', ()->
                               (a|=3)"""
       """a = true
          a xor= false""" : """(a=true);
-                              (a^^=false)"""
+                              (a=!!(a^false))"""
       """a = 2
          a xor= 3"""     : """(a=2);
                               (a^=3)"""

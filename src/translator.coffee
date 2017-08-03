@@ -94,7 +94,13 @@ do ()->
         if a.mx_hash.type.toString() == "int"         # type inference ensures the second operand to be int
           "(#{a_tr}#{char}#{postfix}#{b_tr})"
         else                                          # type inference ensures operands to be bools
-          "(#{a_tr}#{char}#{char}#{postfix}#{b_tr})"
+          if char == '^'
+            if postfix
+              "(#{a_tr}=!!(#{a_tr}^#{b_tr}))"
+            else
+              "(!!(#{a_tr}#{char}#{b_tr}))"
+          else
+            "(#{a_tr}#{char}#{char}#{postfix}#{b_tr})"
       switch op
         when "and", "and="
           logical_or_bitwise '&'
