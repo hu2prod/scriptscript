@@ -100,13 +100,13 @@ describe 'translator section', ()->
       "a!=b"             : "(a!==b)"
       """a = true
          a and= false""" : """(a=true);
-                              (a&&=false)"""
+                              (a=(a&&false))"""
       """a = 2
          a and= 3"""     : """(a=2);
                               (a&=3)"""
       """a = true
          a or= false"""  : """(a=true);
-                              (a||=false)"""
+                              (a=(a||false))"""
       """a = 2
          a or= 3"""      : """(a=2);
                               (a|=3)"""
