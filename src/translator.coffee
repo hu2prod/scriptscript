@@ -70,10 +70,10 @@ do ()->
     holder.op_list[v]     = new bin_op_translator_framework "($1$op$2)"
   holder.op_list["**"]  = new bin_op_translator_framework "Math.pow($1, $2)"
   holder.op_list["//"]  = new bin_op_translator_framework "Math.floor($1 / $2)"
-  holder.op_list["%%"]  = new bin_op_translator_framework "(function(a, b){return (a % b + b) % b})($1, $2)"
+  holder.op_list["%%"]  = new bin_op_translator_framework "(_tmp_b=$2,($1 % _tmp_b + _tmp_b) % _tmp_b)"
   holder.op_list["**="] = new bin_op_translator_framework "$1 = Math.pow($1, $2)"
   holder.op_list["//="] = new bin_op_translator_framework "$1 = Math.floor($1 / $2)"
-  holder.op_list["%%="] = new bin_op_translator_framework "$1 = (function(a, b){return (a % b + b) % b})($1, $2)"
+  holder.op_list["%%="] = new bin_op_translator_framework "$1 = ((_tmp_b=$2,($1 % _tmp_b + _tmp_b) % _tmp_b)"
   holder.op_list["=="]  = new bin_op_translator_framework "($1===$2)"
   holder.op_list["!="]  = new bin_op_translator_framework "($1!==$2)"
   

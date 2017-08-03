@@ -83,9 +83,9 @@ describe 'translator section', ()->
         it JSON.stringify(sample), ()->
           assert.equal full(sample), "(#{sample})"
     kv =
-      "2**2"             : "Math.pow(2, 2)"
-      "2//2"             : "Math.floor(2 / 2)"
-      "2%%2"             : "(function(a, b){return (a % b + b) % b})(2, 2)"
+      "1**2"             : "Math.pow(1, 2)"
+      "1//2"             : "Math.floor(1 / 2)"
+      "1%%2"             : "(_tmp_b=2,(1 % _tmp_b + _tmp_b) % _tmp_b)"
       "true and false"   : "(true&&false)"
       "1 and 2"          : "(1&2)"
       "true or false"    : "(true||false)"
@@ -95,6 +95,7 @@ describe 'translator section', ()->
       "a**=2"            : "a = Math.pow(a, 2)"
       "a//=2"            : "a = Math.floor(a / 2)"
       "a%%=2"            : "a = (function(a, b){return (a % b + b) % b})(a, 2)"
+      "a%%=2"            : "a = ((_tmp_b=2,(a % _tmp_b + _tmp_b) % _tmp_b)"
       "a==b"             : "(a===b)"
       "a!=b"             : "(a!==b)"
       """a = true
