@@ -23,6 +23,12 @@ fake_id = (type)->
 scope_state_reset = ()->
   current_scope =
     id_map : {
+      stdin : [
+        fake_id mk_type 'Source', [mk_type 'string']
+      ]
+      stdout : [
+        fake_id mk_type 'Sink', [mk_type 'string'],
+      ]
       Math : [
         fake_id mk_type 'object', [], {
           abs   : mk_type 'either', [
