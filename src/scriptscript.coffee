@@ -20,6 +20,7 @@ a = require('minimist') process.argv.slice(2),
     't': "tokens"
     'n': "nodes"
     'y': "type_inference"
+    'f': "full" # mode_full
 
 if a.d
   pp a
@@ -41,7 +42,7 @@ compile = (input, cb) ->
     cb()
   await ss.tokenize input, {}, defer err, tok;    return handle_err(err) if err;  pp tok if a.t
   ### !pragma coverage-skip-block ###
-  await ss.parse tok, {}, defer err, ast;         return handle_err(err) if err;  pp ast if a.n
+  await ss.parse tok, {mode_full:!!a.f}, defer err, ast;         return handle_err(err) if err;  pp ast if a.n
   ### !pragma coverage-skip-block ###
   await ss.type_inference ast[0], {}, defer err;  return handle_err(err) if err;  pp ast if a.y
   ### !pragma coverage-skip-block ###
@@ -159,6 +160,7 @@ if a.s
 ################################ Other options ################################
 
 if a.i
+  a.i = a.i.replace /\\n/g, '\n'
   await compile a.i, defer err, res
   ### !pragma coverage-skip-block ###
   try_eval err, res

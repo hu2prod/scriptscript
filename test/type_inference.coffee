@@ -491,7 +491,11 @@ describe 'type_inference section', ()->
       "Math.abs(1.0)"   : "float"
       "Math.abs(1)"     : "int"
       "Math.abs(a)"     : undefined
+      "Fail.invalid_either(1)" : 'int' # норм...
+      # "Fail.invalid_either(1)\nFail.invalid_either" : 'function<int,int>' # норм...
       "Math.round(1.0)" : "int"
+      "Either_test.int_float == Either_test.int_float_bool\nEither_test.int_float_bool" : "either<int,float>"
+      "Either_test.int_float = Either_test.int_float_bool\nEither_test.int_float_bool" : "either<int,float>"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -500,7 +504,6 @@ describe 'type_inference section', ()->
     list = """
       Math.abs('1')
       Math.abs(1,2)
-      Fail.invalid_either(1)
       1(1)
     """.split "\n"
     for v in list

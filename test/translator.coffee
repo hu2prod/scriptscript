@@ -558,6 +558,12 @@ describe 'translator section', ()->
       "()->"      : "(function(){})"
       "(a)->"     : "(function(a){})"
       "(a,b)->"   : "(function(a, b){})"
+      "(a,b,c)->"   : "(function(a, b, c){})"
+      "(a,b)->a+b"   : """
+        (function(a, b){
+          return((a+b))
+        })
+        """
       "(a,b=1)->" : """
         (function(a, b){
           b=b==null?(1):b;
@@ -693,34 +699,72 @@ describe 'translator section', ()->
         a = [1]
         """
       """
-      fn = ()->
+      fn = (t)->t
       [1] | fn
       """       : """
-        (fn=(function(){}));
+        (fn=(function(t){
+          return(t)
+        }));
         ([1]).map(fn)
         """
       """
-      fn = ()->
+      fn = (t)->t
       ([1]) | fn
       """       : """
-        (fn=(function(){}));
+        (fn=(function(t){
+          return(t)
+        }));
         ([1]).map(fn)
         """
       """
-      fn = ()->
+      fn = (t)->t
       [1] | fn | b
       """       : """
-        (fn=(function(){}));
+        (fn=(function(t){
+          return(t)
+        }));
         b = ([1]).map(fn)
         """
       """
       b = []
-      fn = ()->
+      fn = (t)->t
       [1] | fn | b
       """       : """
         (b=[]);
-        (fn=(function(){}));
+        (fn=(function(t){
+          return(t)
+        }));
         b = ([1]).map(fn)
+        """
+      """
+      [1] | ((a,b)->a+b) | c
+      """       : """
+        c = ([1]).reduce((function(a, b){
+          return((a+b))
+        }))
+        """
+      # unsafe backet
+      # """
+      # [1] | (a,b)->a+b | c
+      # """       : """
+      #   c = ([1]).reduce((function(a, b){
+      #     return((a+b))
+      #   }))
+      #   """
+      # async
+      """
+      [1] | ((a,cb)->cb(a)) | c
+      """       : """
+        c = ([1]).async_map((function(a, cb){
+          return((cb)(a))
+        }))
+        """
+      """
+      [1] | ((a,b,cb)->cb(a+b)) | c
+      """       : """
+        c = ([1]).async_reduce((function(a, b, cb){
+          return((cb)((a+b)))
+        }))
         """
       
     for k,v of kv
@@ -733,6 +777,8 @@ describe 'translator section', ()->
       ---
       a = 1
       [1] | a
+      ---
+      [1] | (()->1)
       """.split /\n?---\n?/
     for v in sample_list
       do (v)->
