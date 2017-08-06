@@ -394,10 +394,15 @@ describe 'type_inference section', ()->
       "a.b"             : undefined
       "a = []\na.length": "int"
       # hash
-      "a = {}\na.b"     : undefined
-      "a = {}\na.b=1\na.b"     : "int"
+      "a = {}\na.b"         : undefined
+      "a = {}\na.b=1\na.b"  : "int"
       # object
-      "a = {b:1}\na.b"     : "int"
+      "a = {b:1}"                   : "object{b:int}"
+      "a = {b:1}\na.b"              : "int"
+      "a = {a:1}\nb = {a:1}\na==b"  : "bool"
+      "a = {a:1}\nb = {a:1}\nb==a"  : "bool"
+      "a = {a:1}\nb = {a:c}\na==b\nb"  : "object{a:int}"
+      # "a = {a:1}\nb = {a:c}\na==b\nc"  : "int" # BUG !!!
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -412,6 +417,14 @@ describe 'type_inference section', ()->
       ---
       a = {a:1}
       a.b
+      --
+      a = {a:1}
+      b = {b:1}
+      a == b
+      --
+      a = {a:1}
+      b = {a:'1'}
+      a == b
     """.split /\n?---\n?/g
     for v in list
       do (v)->
@@ -479,6 +492,10 @@ describe 'type_inference section', ()->
     list = """
       -> == (a)->
       (a)->a=1 == (a)->a='1'
+      (1)(1)
+      1(1)
+      ((a,b)->)(1)
+      ((a)->a=1)('1')
     """.split "\n"
     for v in list
       do (v)->
@@ -492,7 +509,7 @@ describe 'type_inference section', ()->
       "Math.abs(1)"     : "int"
       "Math.abs(a)"     : undefined
       "Fail.invalid_either(1)" : 'int' # норм...
-      # "Fail.invalid_either(1)\nFail.invalid_either" : 'function<int,int>' # норм...
+      "Fail.invalid_either(1)\nFail.invalid_either" : 'function<int,int>' # норм...
       "Math.round(1.0)" : "int"
       "Either_test.int_float == Either_test.int_float_bool\nEither_test.int_float_bool" : "either<int,float>"
       "Either_test.int_float = Either_test.int_float_bool\nEither_test.int_float_bool" : "either<int,float>"
@@ -502,6 +519,7 @@ describe 'type_inference section', ()->
           ast = full k
           assert.equal ast.mx_hash.type?.toString(), v
     list = """
+      Math.wtf
       Math.abs('1')
       Math.abs(1,2)
       1(1)

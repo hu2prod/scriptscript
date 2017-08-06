@@ -989,10 +989,6 @@ trans.translator_hash['func_call'] = translate:(ctx, node)->
   if rvalue.mx_hash.type
     check_list = []
     if rvalue.mx_hash.type.main == 'either'
-      # ensure proper either
-      for v in rvalue.mx_hash.type.nest
-        if v.main != 'function'
-          throw new Error "trying to call type='#{rvalue.mx_hash.type}' part='#{v}'"
       check_list = rvalue.mx_hash.type.nest
     else if rvalue.mx_hash.type.main != 'function'
       throw new Error "trying to call type='#{rvalue.mx_hash.type}'"
@@ -1001,6 +997,8 @@ trans.translator_hash['func_call'] = translate:(ctx, node)->
     
     allowed_signature_list = []
     for type in check_list
+      unless type.main in ['function', '*']
+        throw new Error "trying to call type='#{type}'"
       # default arg later
       continue if type.nest.length-1 != arg_list.length
       found = false
