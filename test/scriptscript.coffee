@@ -113,8 +113,24 @@ describe "public cli", ->
       child.on "close", (code)->
         # p output
         assert.equal output, """
-          > '#{compiled1}'
-          > '#{compiled2}'
+          > #{compiled1}
+          > #{compiled2}
+          > 
+          """
+        done()
+    
+    it ":c a | (t)->t | b compiles to multiline", (done)->
+      child = chipro.spawn sscript
+      output = ""
+      child.stdout.on "data", (data)->
+        output += data.toString()
+      child.stdin.end ":c a | (t)->t | b\n"
+      child.on "close", (code)->
+        # p output
+        assert.equal output, """
+          > (a).map((function(t){
+            return(b = t)
+          }))
           > 
           """
         done()
