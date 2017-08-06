@@ -198,47 +198,11 @@ mk_either_list = (t)->
   [t]
 
 # TODO перестать использовать
-assert_pass_down = (ast, type, diagnostics)->
+_assert_pass_down = (ast, type, diagnostics)->
   ret = 0
-  if ast.mx_hash.type?
-    either_list1 = mk_either_list ast.mx_hash.type
-    either_list2 = mk_either_list type
-    
-    # BUG normalize
-    pair_list = []
-    for e1 in either_list1
-      for e2 in either_list2
-        if e1.can_match e2
-          pair_list.push [e1,e2]
-    
-    if pair_list.length == 0
-      perr either_list1
-      perr either_list2
-      throw new Error "assert pass up failed either list can't match"
-    
-    t1_possible_list = []
-    # BUG normalize
-    for pair in pair_list
-      t1_possible_list.upush pair[0]
-    
-    if either_list1.length != t1_possible_list.length
-      if t1_possible_list.length != 1
-        ast.mx_hash.type.set t1_possible_list[0]
-      else
-        cut_type = mk_type 'either', t1_possible_list
-        ast.mx_hash.type.set cut_type
-      ret++
-    
-    # BUG. Can't exchange shared info (e.g. either<function<int,float>,function<int,int>> can't send return type )
-    if either_list1.length == 1 and either_list2.length == 1
-      t1 = either_list1[0]
-      t2 = either_list2[0]
-      if !t1.eq(t2)
-        ret += t1.exchange_missing_info t2
-  else
-    if type.main != '*'
-      ast.mx_hash.type = type
-      ret++
+  if type.main != '*'
+    ast.mx_hash.type = type
+    ret++
   
   # rvalue unwrap
   if ast.mx_hash.hash_key == 'rvalue'
@@ -265,6 +229,8 @@ assert_pass_down = (ast, type, diagnostics)->
         # UNIMPLEMENTED
   return ret
 
+assert_pass_down = (ast, type, diagnostics)->
+  assert_pass_down_eq ast, type_wrap(type), diagnostics
 
 assert_pass_down_eq = (ast1, ast2, diagnostics)->
   ret = 0
@@ -317,9 +283,9 @@ assert_pass_down_eq = (ast1, ast2, diagnostics)->
   else if !ast1.mx_hash.type? and !ast2.mx_hash.type?
     # nothing
   else if !ast1.mx_hash.type?
-    ret += assert_pass_down ast1, ast2.mx_hash.type, "#{diagnostics} ast1 down"
+    ret += _assert_pass_down ast1, ast2.mx_hash.type, "#{diagnostics} ast1 down"
   else #!ast2.mx_hash.type?
-    ret += assert_pass_down ast2, ast1.mx_hash.type, "#{diagnostics} ast2 down"
+    ret += _assert_pass_down ast2, ast1.mx_hash.type, "#{diagnostics} ast2 down"
     
   return ret
 assert_pass_down_eq_list = (ast_list, type, diagnostics)->
@@ -838,8 +804,7 @@ trans.translator_hash['id_access'] = translate:(ctx, node)->
         throw new Error "Trying to access field '#{id.value}' of not allowed type '#{root.mx_hash.type.main}'"
     
     if subtype.main != '*' or node.mx_hash.type
-      # ret += assert_pass_down node, subtype, "id_access"
-      ret += assert_pass_down_eq node, type_wrap(subtype), "id_access"
+      ret += assert_pass_down node, subtype, "id_access"
       
   
   ret
