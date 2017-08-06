@@ -4,7 +4,7 @@
 require "fy"
 fs = require 'fs'
 ss = require ".."
-{red} = require "colors"
+{red,green} = require "colors"
 a = require('minimist') process.argv.slice(2), 
   boolean: ['s', 'p', 'c', 'd', 't', 'n', 'y']
   string: ['o', 'i']
@@ -71,7 +71,8 @@ if !a.s and !a.p and !a.c and !a.o and !a.i and !a.e and !a._.length
         print_error err, a.d
         cb()
       else
-        cb null, res
+        p green res
+        cb null
       return
     ### !pragma coverage-skip-block ###
     debug = input.startsWith ":d "
