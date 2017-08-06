@@ -10,6 +10,7 @@
     "test-simple": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --require iced-coffee-coverage/register-istanbul test && istanbul report",
     "test-skip-cli": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --invert --grep cli --require iced-coffee-coverage/register-istanbul test && istanbul report",
     "test-watch": "mocha --recursive --compilers coffee:iced-coffee-script/register --watch --full-trace --watch-extensions=js,coffee",
+    "test-watch-skip-cli": "mocha --recursive --compilers coffee:iced-coffee-script/register --invert --grep cli --watch --full-trace --watch-extensions=js,coffee",
     "test-grep": "make && mocha --recursive --compilers coffee:iced-coffee-script/register --grep"
   },
   "bin": {

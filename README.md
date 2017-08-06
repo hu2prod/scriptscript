@@ -69,6 +69,7 @@ Short | Long | Description
     npm run test-watch          # no report generating, just watch that all is ok
     npm run test-grep <pattern> # run selected test sections only; a grep pattern is required
     npm run test-skip-cli       # skip cli tests but generate istanbul coverage report anyway
+    npm run test-watch-skip-cli # watch + skip-cli
     time npm run test-perf      # show test execution time without instrumentation
 
 ### Test lifehacks
