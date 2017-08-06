@@ -197,6 +197,7 @@ mk_either_list = (t)->
     return t.nest
   [t]
 
+# TODO перестать использовать
 assert_pass_down = (ast, type, diagnostics)->
   ret = 0
   if ast.mx_hash.type?
@@ -261,11 +262,7 @@ assert_pass_down = (ast, type, diagnostics)->
         a.mx_hash.type = type
         ret++
       else
-        if !a.mx_hash.type.eq(type)
-          p a.mx_hash.type
-          p type
-          p "----"
-        # UNIMPLEMENTED?
+        # UNIMPLEMENTED
   return ret
 
 
@@ -326,16 +323,6 @@ assert_pass_down_eq = (ast1, ast2, diagnostics)->
     
   return ret
 assert_pass_down_eq_list = (ast_list, type, diagnostics)->
-  # ret = 0
-  # # type = undefined
-  # # if !type?# LATER
-  # for v in ast_list
-  #   break if type = v.mx_hash.type
-  # return 0 if !type?
-  # for v, idx in ast_list
-  #   ret += assert_pass_down v, type, "#{diagnostics} pos #{idx}"
-  # 
-  # return ret
   ret = 0
   
   # if !type # coverage LATER
@@ -345,24 +332,6 @@ assert_pass_down_eq_list = (ast_list, type, diagnostics)->
     for v, idx in ast_list
       ret += assert_pass_down v, type, "#{diagnostics} pos #{idx}"
     
-    for v1, idx1 in ast_list
-      continue if !t1 = v1.mx_hash.type
-      for v2, idx2 in ast_list
-        continue if idx1 >= idx2
-        continue if !t2 = v2.mx_hash.type
-        
-        eq = t1.eq t2
-        if eq
-          break if idx2 = idx1+1 # fast forward
-          continue
-        ret += assert_pass_down_eq v1, v2, "#{diagnostics} exchange #{idx1} #{idx2}"
-    
-    type = ast_list.last().mx_hash.type
-    # reverse trick
-    for v, idx in ast_list
-      ret += assert_pass_down v, type, "#{diagnostics} pos #{idx}"
-    
-  
   return ret
 # ###################################################################################################
 
@@ -575,18 +544,14 @@ trans.translator_hash['assign_bin_op'] = translate:(ctx, node)->
         # ПРИМ. Пока сейчас нет операций у которых a.type != b.type
         throw new Error "assign_bin_op conflict '#{_ret_t}' != '#{at}'"
       
-      if !node.mx_hash.type?
-        node.mx_hash.type = _ret_t
-        ret++
-      else
-        # UNIMPLEMENTED
+      assert_pass_down node, _ret_t, 'assign_bin_op'
   else
     # case 2
     if b.mx_hash.type?
       if op == ''
-        ret += assert_pass_down a, b.mx_hash.type, 'assign_bin_op'
+        ret += assert_pass_down_eq a, b, 'assign_bin_op'
         # BYPASSSING missing code coverage
-        ret += assert_pass_down node, b.mx_hash.type, 'assign_bin_op'
+        ret += assert_pass_down_eq node, b, 'assign_bin_op'
         # if !node.mx_hash.type?
         #   node.mx_hash.type = b.mx_hash.type
         #   ret++
@@ -594,7 +559,7 @@ trans.translator_hash['assign_bin_op'] = translate:(ctx, node)->
         #   # UNIMPLEMENTED
     else # a.mx_hash.type?
       if op == ''
-        ret += assert_pass_down b, a.mx_hash.type, 'assign_bin_op'
+        ret += assert_pass_down_eq b, a, 'assign_bin_op'
         if !node.mx_hash.type?
           node.mx_hash.type = a.mx_hash.type
           ret++
@@ -987,13 +952,7 @@ trans.translator_hash['func_call'] = translate:(ctx, node)->
       ret += ctx.translate arg
   
   if rvalue.mx_hash.type
-    check_list = []
-    if rvalue.mx_hash.type.main == 'either'
-      check_list = rvalue.mx_hash.type.nest
-    else if rvalue.mx_hash.type.main != 'function'
-      throw new Error "trying to call type='#{rvalue.mx_hash.type}'"
-    else
-      check_list = [rvalue.mx_hash.type]
+    check_list = mk_either_list rvalue.mx_hash.type
     
     allowed_signature_list = []
     for type in check_list
@@ -1021,7 +980,7 @@ trans.translator_hash['func_call'] = translate:(ctx, node)->
         break
     if !found
       ret += assert_pass_down node, candidate_type, "func_call"
-  else
+  else if ctx.func_call_unroll
     # try to detect function type based on argument call list
     # NOTE BUG. Default args will be FUCKed
     
@@ -1078,9 +1037,9 @@ scope_id_pass = ()->
 
 # ###################################################################################################
 
-@_type_inference = (ast, opt={})->
-  scope_state_reset()
+@__type_inference = (ast, opt={})->
   change_count = 0
+  trans.func_call_unroll = opt.func_call_unroll
   for i in [0 .. 10] # MAGIC
     # phase 1 deep
     # found atoms of known types
@@ -1099,6 +1058,16 @@ scope_id_pass = ()->
   ### !pragma coverage-skip-block ###
   throw new Error "Type inference error. Out of lookup limit change_count(left)=#{change_count}"
   
+@_type_inference = (ast, opt={})->
+  scope_state_reset()
+  
+  module.__type_inference ast, opt
+  opt2 = {
+    func_call_unroll : true
+  }
+  obj_set opt2, opt
+  module.__type_inference ast, opt2
+  return
 
 @type_inference = (ast, opt, on_end)->
   try

@@ -779,6 +779,10 @@ describe 'translator section', ()->
       [1] | a
       ---
       [1] | (()->1)
+      ---
+      [1] | ((a,b,c)->a+b+c)
+      ---
+      [1] | ((a,b,c)->a+b+c+1)
       """.split /\n?---\n?/
     for v in sample_list
       do (v)->
