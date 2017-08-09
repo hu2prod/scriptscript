@@ -1,5 +1,7 @@
 require 'fy'
 
+global.stdout = puts
+
 {@tokenize} = require './tokenizer'
 {@parse   } = require './grammar'
 {@type_inference} = require './type_inference'

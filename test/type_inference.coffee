@@ -509,6 +509,24 @@ describe 'type_inference section', ()->
           util.throws ()->
             full v
   
+  describe "pipes", ()->
+    kv =
+      "['Hello world'] | stdout" : undefined  # at least it compiles without an error
+    for k,v of kv
+      do (k,v)->
+        it JSON.stringify(k), ()->
+          ast = full k
+          assert.equal ast.mx_hash.type?.toString(), v
+    list = """
+      1 | stdout
+      "Hello world" | stdout
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
+  
   describe "can't detect", ()->
     it "a + 1", ()->
       ast = full "a + 1"
