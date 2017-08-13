@@ -1,6 +1,6 @@
 require 'fy'
 
-global.stdout = puts
+global.stdout = (v) -> puts v
 
 {@tokenize} = require './tokenizer'
 {@parse   } = require './grammar'

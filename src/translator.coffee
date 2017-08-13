@@ -114,7 +114,7 @@ do ()->
           # pipes logic
           if b.mx_hash.type?
             switch b.mx_hash.type.main
-              when "function"
+              when "function", "Sink"
                 "#{ensure_bracket a_tr}.map(#{b_tr})"
               when "array"
                 "#{b_tr} = #{a_tr}"

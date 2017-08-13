@@ -722,6 +722,11 @@ describe 'translator section', ()->
         (fn=(function(){}));
         b = ([1]).map(fn)
         """
+      """
+      ["Hello world"] | stdout
+      """       : """
+        (["Hello world"]).map(stdout)
+        """
       
     for k,v of kv
       do (k,v)->
