@@ -723,9 +723,12 @@ describe 'translator section', ()->
         b = ([1]).map(fn)
         """
       """
-      ["Hello world"] | stdout
+      ["Hello", "world"] | stdout
       """       : """
-        (["Hello world"]).map(stdout)
+        var ref = (["Hello","world"]);
+        for (var i = 0, len = ref.length; i < len; i++) {
+          stdout(ref[i]);
+        }
         """
       
     for k,v of kv

@@ -114,10 +114,17 @@ do ()->
           # pipes logic
           if b.mx_hash.type?
             switch b.mx_hash.type.main
-              when "function", "Sink"
+              when "function"
                 "#{ensure_bracket a_tr}.map(#{b_tr})"
               when "array"
                 "#{b_tr} = #{a_tr}"
+              when "Sink"
+                """
+                var ref = #{ensure_bracket a_tr};
+                for (var i = 0, len = ref.length; i < len; i++) {
+                  #{b_tr}(ref[i]);
+                }
+                """
               # else для switch не нужен т.к. не пропустит type inference
           else
             "#{b_tr} = #{a_tr}"
