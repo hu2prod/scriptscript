@@ -1,11 +1,10 @@
 require 'fy'
+require './runtime'
 
-global.stdout = (v) -> puts v
-
-{@tokenize} = require './tokenizer'
-{@parse   } = require './grammar'
+{@tokenize      } = require './tokenizer'
+{@parse         } = require './grammar'
 {@type_inference} = require './type_inference'
-{@translate} = require './translator'
+{@translate     } = require './translator'
 
 @go = (str, opt, on_end)=>
   await @tokenize        str,     opt, defer err, tok_res; return on_end err if err
