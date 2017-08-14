@@ -221,8 +221,13 @@ trans.translator_hash['string_doubleq'] = translate:(ctx, node)->
   s = s.replace /\s+"$/g, '"'
   s = s.replace /\s*\n\s*/g, ' '
 
-trans.translator_hash['block_string'] = translate:(ctx, node)->
-  '"' + (node.value_view[3...-3].replace /"/g, '\\"') + '"' #"
+trans.translator_hash['block_string_singleq'] = translate:(ctx, node)->
+  s = node.value_view[3...-3]
+  s = s.replace /\n/g, '\\n'
+  s = s.replace /"/g, '\\"'
+  '"' + s + '"'
+
+trans.translator_hash['block_string_doubleq'] = trans.translator_hash['block_string_singleq'] # for now...
 
 trans.translator_hash['string_interpolation_prepare'] = translate:(ctx, node)->
   ret = switch node.mx_hash.hash_key
