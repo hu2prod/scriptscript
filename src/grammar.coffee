@@ -126,9 +126,9 @@ q('multipipe',  '[PIPE] #multipipe?')
 # NOTE need ~same rule for lvalue ???
 q('rvalue',  '( #rvalue )')                             .mx("priority=#{base_priority} ult=bracket ti=bracket")
 
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority==#bin_op.priority #bin_op.left_assoc')
-q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op')   .strict('#rvalue[1].priority==#bin_op.priority #rvalue[2].priority<#bin_op.priority #bin_op.right_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op func_decl=#rvalue[1].func_decl')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority<#bin_op.priority !#rvalue[1].func_decl')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op func_decl=#rvalue[1].func_decl')   .strict('#rvalue[1].priority<#bin_op.priority #rvalue[2].priority==#bin_op.priority !#rvalue[1].func_decl #bin_op.left_assoc')
+q('rvalue',  '#rvalue #bin_op #rvalue')                 .mx('priority=#bin_op.priority ult=bin_op ti=bin_op func_decl=#rvalue[1].func_decl')   .strict('#rvalue[1].priority==#bin_op.priority #rvalue[2].priority<#bin_op.priority !#rvalue[1].func_decl #bin_op.right_assoc')
 
 # BUG in gram2
 # # indent set
@@ -140,7 +140,7 @@ q('pre_pipe_rvalue',  '#multipipe #rvalue')                                     
 q('pre_pipe_rvalue',  '#pre_pipe_rvalue #eol #multipipe #rvalue')                                     #.strict("#rvalue.priority<#{pipe_priority}")
 q('rvalue',  '#rvalue #multipipe #indent #pre_pipe_rvalue #dedent').mx("priority=#{pipe_priority}")             .strict("#rvalue[1].priority<=#{pipe_priority}")
 # assign
-q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op ti=assign_bin_op').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority !#lvalue.block_assign')
+q('rvalue',  '#lvalue #assign_bin_op #rvalue')          .mx('priority=#assign_bin_op.priority ult=bin_op ti=assign_bin_op func_decl=#lvalue.func_decl').strict('#lvalue.priority<#assign_bin_op.priority #rvalue.priority<=#assign_bin_op.priority !#lvalue.func_decl !#lvalue.block_assign')
 
 
 q('rvalue',  '#pre_op #rvalue')                         .mx('priority=#pre_op.priority ult=pre_op ti=pre_op')   .strict('#rvalue[1].priority<=#pre_op.priority')
@@ -211,16 +211,16 @@ q('lvalue', '#lvalue . #octal_literal')                 .mx("priority=#{base_pri
 # ###################################################################################################
 #    function call
 # ###################################################################################################
-q('rvalue', '#rvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_priority} ult=func_call ti=func_call")
+q('rvalue', '#rvalue ( #comma_rvalue? #eol? )')         .mx("priority=#{base_priority} ult=func_call ti=func_call").strict('!#rvalue.func_decl')
 # ###################################################################################################
 #    function decl
 # ###################################################################################################
-q('rvalue', '-> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
-q('rvalue', '=> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
-q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
-q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_decl")
-q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_decl")
-q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_decl")
+q('rvalue', '-> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_decl func_decl=1")
+q('rvalue', '=> #function_body?')                       .mx("priority=#{base_priority} ult=func_decl ti=func_decl func_decl=1")
+q('rvalue', '( #arg_list? ) -> #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_decl func_decl=1")
+q('rvalue', '( #arg_list? ) => #function_body?')        .mx("priority=#{base_priority} ult=func_decl ti=func_decl func_decl=1")
+q('rvalue', '( #arg_list? ) : #type -> #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_decl func_decl=1")
+q('rvalue', '( #arg_list? ) : #type => #function_body?').mx("priority=#{base_priority} ult=func_decl ti=func_decl func_decl=1")
 
 q('arg_list', '#arg')                                   .mx("priority=#{base_priority}")
 q('arg_list', '#arg_list , #arg')                       .mx("priority=#{base_priority}")

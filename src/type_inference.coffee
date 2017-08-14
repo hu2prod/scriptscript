@@ -46,6 +46,19 @@ scope_state_reset = ()->
           ]
         }
       ]
+      Either_test : [ # crafted object for more coverage
+        fake_id mk_type 'object', [], {
+          int_float   : mk_type 'either', [
+            mk_type 'int'
+            mk_type 'float'
+          ]
+          int_float_bool   : mk_type 'either', [
+            mk_type 'int'
+            mk_type 'float'
+            mk_type 'bool'
+          ]
+        }
+      ]
     } # id -> ast pos list
 
   scope_list = [current_scope]
@@ -90,6 +103,16 @@ class @Type
     return false if @nest.length != t.nest.length
     for v,k in @nest
       return false if !v.eq t.nest[k]
+    
+    for k,v1 of @field_hash
+      v2 = t.field_hash[k]
+      return false if !v2 or !v1.eq v2
+    
+    # just check keys
+    for k,v2 of t.field_hash
+      v1 = @field_hash[k]
+      return false if !v1
+    
     true
   
   toString : ()->
@@ -117,6 +140,15 @@ class @Type
       v2 = t.nest[k]
       return false if !v.can_match v2
     
+    for k,v1 of @field_hash
+      v2 = t.field_hash[k]
+      return false if !v2 or !v1.can_match v2
+    
+    # just check keys
+    for k,v2 of t.field_hash
+      v1 = @field_hash[k]
+      return false if !v1
+    
     true
   
   exchange_missing_info : (t)->
@@ -135,7 +167,17 @@ class @Type
     for v,k in @nest
       v2 = t.nest[k]
       ret += v.exchange_missing_info v2
+    
+    for k,v1 of @field_hash
+      v1.exchange_missing_info t.field_hash[k]
+    
     ret
+  
+  set : (t)->
+    @main = t.main
+    @nest = t.nest
+    @field_hash = t.field_hash
+    return
 
 mk_type = (str, nest=[], field_hash={})->
   ret = new module.Type
@@ -146,16 +188,19 @@ mk_type = (str, nest=[], field_hash={})->
 
 # ###################################################################################################
 
-assert_pass_down = (ast, type, diagnostics)->
+type_wrap = (type)->
+  mx_hash :
+    type : type
+# TODO flatten either (e.g. either<a,either<b,c> > -> either<a,b,c>)
+mk_either_list = (t)->
+  if t.main == 'either'
+    return t.nest
+  [t]
+
+# TODO перестать использовать
+_assert_pass_down = (ast, type, diagnostics)->
   ret = 0
-  if ast.mx_hash.type?
-    loop
-      break if ast.mx_hash.type.eq type
-      if ast.mx_hash.type.can_match type
-        ret += ast.mx_hash.type.exchange_missing_info type
-        break
-      throw new Error "assert pass up failed node='#{ast.value}'['#{ast.mx_hash.type}'] should be type '#{type}'; extra=#{diagnostics}"
-  else
+  if type.main != '*'
     ast.mx_hash.type = type
     ret++
   
@@ -184,33 +229,75 @@ assert_pass_down = (ast, type, diagnostics)->
         # UNIMPLEMENTED
   return ret
 
+assert_pass_down = (ast, type, diagnostics)->
+  assert_pass_down_eq ast, type_wrap(type), diagnostics
+
 assert_pass_down_eq = (ast1, ast2, diagnostics)->
   ret = 0
   if ast1.mx_hash.type? and ast2.mx_hash.type?
-    loop
-      break if ast1.mx_hash.type.eq ast2.mx_hash.type
-      if ast1.mx_hash.type.can_match ast2.mx_hash.type
-        ret += ast1.mx_hash.type.exchange_missing_info ast2.mx_hash.type
-        break
-      throw new Error "assert pass up eq failed node1='#{ast1.value}'[#{ast1.mx_hash.type}] != node2='#{ast2.value}'[#{ast2.mx_hash.type}]; extra=#{diagnostics}"
+    either_list1 = mk_either_list ast1.mx_hash.type
+    either_list2 = mk_either_list ast2.mx_hash.type
+    
+    # BUG normalize
+    pair_list = []
+    for e1 in either_list1
+      for e2 in either_list2
+        if e1.can_match e2
+          pair_list.push [e1,e2]
+    
+    if pair_list.length == 0
+      perr either_list1
+      perr either_list2
+      throw new Error "assert pass up eq failed either list can't match"
+    
+    t1_possible_list = []
+    t2_possible_list = []
+    # BUG normalize
+    for pair in pair_list
+      t1_possible_list.upush pair[0]
+      t2_possible_list.upush pair[1]
+    
+    
+    if either_list1.length != t1_possible_list.length
+      if t1_possible_list.length == 1
+        ast1.mx_hash.type.set t1_possible_list[0]
+      else
+        cut_type = mk_type 'either', t1_possible_list
+        ast1.mx_hash.type.set cut_type
+      ret++
+    
+    if either_list2.length != t2_possible_list.length
+      if t2_possible_list.length == 1
+        ast2.mx_hash.type.set t2_possible_list[0]
+      else
+        cut_type = mk_type 'either', t2_possible_list
+        ast2.mx_hash.type.set cut_type
+      ret++
+    
+    # BUG. Can't exchange shared info (e.g. either<function<int,float>,function<int,int>> can't send return type )
+    if either_list1.length == 1 and either_list2.length == 1
+      t1 = either_list1[0]
+      t2 = either_list2[0]
+      if !t1.eq(t2)
+        ret += t1.exchange_missing_info t2
   else if !ast1.mx_hash.type? and !ast2.mx_hash.type?
     # nothing
   else if !ast1.mx_hash.type?
-    ret += assert_pass_down ast1, ast2.mx_hash.type, "#{diagnostics} ast1 down"
+    ret += _assert_pass_down ast1, ast2.mx_hash.type, "#{diagnostics} ast1 down"
   else #!ast2.mx_hash.type?
-    ret += assert_pass_down ast2, ast1.mx_hash.type, "#{diagnostics} ast2 down"
+    ret += _assert_pass_down ast2, ast1.mx_hash.type, "#{diagnostics} ast2 down"
     
   return ret
 assert_pass_down_eq_list = (ast_list, type, diagnostics)->
   ret = 0
-  # type = undefined
-  # if !type?# LATER
+  
+  # if !type # coverage LATER
   for v in ast_list
     break if type = v.mx_hash.type
-  return 0 if !type?
-  for v, idx in ast_list
-    ret += assert_pass_down v, type, "#{diagnostics} pos #{idx}"
-  
+  if type
+    for v, idx in ast_list
+      ret += assert_pass_down v, type, "#{diagnostics} pos #{idx}"
+    
   return ret
 # ###################################################################################################
 
@@ -361,13 +448,9 @@ trans.translator_hash['bin_op'] = translate:(ctx, node)->
     
     loop
       if op in ['==', '!=']
-        if at.eq bt
-          _ret = 'bool'
-          break
-        if at.can_match bt
-          ret += at.exchange_missing_info bt
-          _ret = 'bool'
-          break
+        ret += assert_pass_down_eq a, b, "bin_op eq"
+        _ret = 'bool'
+        break
       
       key = "#{op},#{at},#{bt}"
       if !_ret = bin_op_type_table[key]
@@ -427,18 +510,14 @@ trans.translator_hash['assign_bin_op'] = translate:(ctx, node)->
         # ПРИМ. Пока сейчас нет операций у которых a.type != b.type
         throw new Error "assign_bin_op conflict '#{_ret_t}' != '#{at}'"
       
-      if !node.mx_hash.type?
-        node.mx_hash.type = _ret_t
-        ret++
-      else
-        # UNIMPLEMENTED
+      assert_pass_down node, _ret_t, 'assign_bin_op'
   else
     # case 2
     if b.mx_hash.type?
       if op == ''
-        ret += assert_pass_down a, b.mx_hash.type, 'assign_bin_op'
+        ret += assert_pass_down_eq a, b, 'assign_bin_op'
         # BYPASSSING missing code coverage
-        ret += assert_pass_down node, b.mx_hash.type, 'assign_bin_op'
+        ret += assert_pass_down_eq node, b, 'assign_bin_op'
         # if !node.mx_hash.type?
         #   node.mx_hash.type = b.mx_hash.type
         #   ret++
@@ -446,7 +525,7 @@ trans.translator_hash['assign_bin_op'] = translate:(ctx, node)->
         #   # UNIMPLEMENTED
     else # a.mx_hash.type?
       if op == ''
-        ret += assert_pass_down b, a.mx_hash.type, 'assign_bin_op'
+        ret += assert_pass_down_eq b, a, 'assign_bin_op'
         if !node.mx_hash.type?
           node.mx_hash.type = a.mx_hash.type
           ret++
@@ -834,24 +913,16 @@ trans.translator_hash['func_call'] = translate:(ctx, node)->
           walk v
       rvalue
     walk comma_rvalue_node
-    for v in arg_list
-      ret += ctx.translate v
+    for arg in arg_list
+      ret += ctx.translate arg
   
   if rvalue.mx_hash.type
-    check_list = []
-    if rvalue.mx_hash.type.main == 'either'
-      # ensure proper either
-      for v in rvalue.mx_hash.type.nest
-        if v.main != 'function'
-          throw new Error "trying to call type='#{rvalue.mx_hash.type}' part='#{v}'"
-      check_list = rvalue.mx_hash.type.nest
-    else if rvalue.mx_hash.type.main != 'function'
-      throw new Error "trying to call type='#{rvalue.mx_hash.type}'"
-    else
-      check_list = [rvalue.mx_hash.type]
+    check_list = mk_either_list rvalue.mx_hash.type
     
     allowed_signature_list = []
     for type in check_list
+      unless type.main in ['function', '*']
+        throw new Error "trying to call type='#{type}'"
       # default arg later
       continue if type.nest.length-1 != arg_list.length
       found = false
@@ -874,6 +945,17 @@ trans.translator_hash['func_call'] = translate:(ctx, node)->
         break
     if !found
       ret += assert_pass_down node, candidate_type, "func_call"
+  else if ctx.func_call_unroll
+    # try to detect function type based on argument call list
+    # NOTE BUG. Default args will be FUCKed
+    
+    ret_type = node.mx_hash.type or mk_type '*'
+    craft_type = mk_type 'function', [ret_type]
+    
+    for arg in arg_list
+      craft_type.nest.push arg.mx_hash.type or mk_type '*'
+    
+    ret += assert_pass_down rvalue, craft_type, "func_call"
   
   ret
 # ###################################################################################################
@@ -920,9 +1002,9 @@ scope_id_pass = ()->
 
 # ###################################################################################################
 
-@_type_inference = (ast, opt={})->
-  scope_state_reset()
+@__type_inference = (ast, opt={})->
   change_count = 0
+  trans.func_call_unroll = opt.func_call_unroll
   for i in [0 .. 10] # MAGIC
     # phase 1 deep
     # found atoms of known types
@@ -941,6 +1023,16 @@ scope_id_pass = ()->
   ### !pragma coverage-skip-block ###
   throw new Error "Type inference error. Out of lookup limit change_count(left)=#{change_count}"
   
+@_type_inference = (ast, opt={})->
+  scope_state_reset()
+  
+  module.__type_inference ast, opt
+  opt2 = {
+    func_call_unroll : true
+  }
+  obj_set opt2, opt
+  module.__type_inference ast, opt2
+  return
 
 @type_inference = (ast, opt, on_end)->
   try

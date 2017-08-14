@@ -115,7 +115,27 @@ do ()->
           if b.mx_hash.type?
             switch b.mx_hash.type.main
               when "function"
-                "#{ensure_bracket a_tr}.map(#{b_tr})"
+                nest = b.mx_hash.type.nest
+                # NOTE 1st nest == return type
+                if nest.length == 2 # is_map
+                  "#{ensure_bracket a_tr}.map(#{b_tr})"
+                else if nest.length == 3
+                  ###
+                    TODO
+                    Array.prototype.async_map -> ?Promise?
+                    ?Promise?.prototype (need all Array stuff)
+                  ###
+                  if nest[2].main == 'function' # async map
+                    "#{ensure_bracket a_tr}.async_map(#{b_tr})"
+                  else # reduce
+                    "#{ensure_bracket a_tr}.reduce(#{b_tr})"
+                else if nest.length == 4
+                  if nest[3].main == 'function' # async reduce
+                    "#{ensure_bracket a_tr}.async_reduce(#{b_tr})"
+                  else
+                    throw new Error "unknown pipe function signature [1]"
+                else
+                  throw new Error "unknown pipe function signature [2]"
               when "array"
                 "#{b_tr} = #{a_tr}"
               when "Sink"
@@ -389,35 +409,42 @@ trans.translator_hash["func_decl_return"] = translate:(ctx,node)->
   "return(#{str})"
 trans.translator_hash["func_decl"] = translate:(ctx,node)->
   arg_list = []
+  walk = (arg)->
+    default_value_node = null
+    if arg.value_array.length == 1
+      name_node = arg.value_array[0]
+    else if arg.value_array.length == 3
+      if arg.value_array[1].value == "="
+        name_node         = arg.value_array[0]
+        default_value_node= arg.value_array[2]
+      else if arg.value_array[1].value == ":"
+        ### !pragma coverage-skip-block ###
+        throw new Error "types are unsupported arg syntax yet"
+      else if arg.value_array[1].value == ","
+        walk arg.value_array[0]
+        walk arg.value_array[2]
+        return
+      else
+        ### !pragma coverage-skip-block ###
+        throw new Error "unsupported arg syntax"
+    else
+      ### !pragma coverage-skip-block ###
+      throw new Error "unsupported arg syntax"
+    
+    default_value = null
+    if default_value_node
+      default_value = ctx.translate default_value_node
+    arg_list.push {
+      name : name_node.value or name_node.value_view
+      type : null
+      default_value
+    }
+    return
   if node.value_array[0].value == '(' and node.value_array[2].value == ')'
     arg_list_node = node.value_array[1]
     for arg in arg_list_node.value_array
       continue if arg.value == ","
-      default_value_node = null
-      if arg.value_array.length == 1
-        name_node = arg.value_array[0]
-      else if arg.value_array.length == 3
-        if arg.value_array[1].value == "="
-          name_node         = arg.value_array[0]
-          default_value_node= arg.value_array[2]
-        else if arg.value_array[1].value == ":"
-          ### !pragma coverage-skip-block ###
-          throw new Error "types are unsupported arg syntax yet"
-        else
-          ### !pragma coverage-skip-block ###
-          throw new Error "unsupported arg syntax"
-      else
-        ### !pragma coverage-skip-block ###
-        throw new Error "unsupported arg syntax"
-      
-      default_value = null
-      if default_value_node
-        default_value = ctx.translate default_value_node
-      arg_list.push {
-        name : name_node.value or name_node.value_view
-        type : null
-        default_value
-      }
+      walk arg
   
   body_node = node.value_array.last()
   body_node = null if body_node.value in ["->", "=>"] # no body

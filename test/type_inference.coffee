@@ -102,6 +102,20 @@ describe 'type_inference section', ()->
       "1.0 <= 1.0"    : "bool"
       "'1' == '1'"    : "bool"
       "'1' != '1'"    : "bool"
+      
+      "a\na"          : undefined
+      """
+        a
+        a = 1
+        a
+      """          : 'int'
+      """
+        a
+        a
+        a = 1
+        a
+        a
+      """          : 'int'
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -333,18 +347,23 @@ describe 'type_inference section', ()->
       "{a,b:1}" : "object{a:*,b:int}"
       "{(a):1}" : "hash<int>"
       "{a:1,b:'1'}" : "object{a:int,b:string}"
+      "{a:1} == {a:1}" : "bool"
+      "{a:1} == {a:b}" : "bool"
+      
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
           assert.equal ast.mx_hash.type?.toString(), v
-    # list = """
-    # """.split "\n"
-    # for v in list
-      # do (v)->
-        # it JSON.stringify(v), ()->
-          # util.throws ()->
-            # full v
+    list = """
+      {a:1}=={b:1}
+      {a:1}=={a:1,b:1}
+    """.split "\n"
+    for v in list
+      do (v)->
+        it JSON.stringify(v), ()->
+          util.throws ()->
+            full v
   
   describe 'array access', ()->
     kv =
@@ -394,10 +413,15 @@ describe 'type_inference section', ()->
       "a.b"             : undefined
       "a = []\na.length": "int"
       # hash
-      "a = {}\na.b"     : undefined
-      "a = {}\na.b=1\na.b"     : "int"
+      "a = {}\na.b"         : undefined
+      "a = {}\na.b=1\na.b"  : "int"
       # object
-      "a = {b:1}\na.b"     : "int"
+      "a = {b:1}"                   : "object{b:int}"
+      "a = {b:1}\na.b"              : "int"
+      "a = {a:1}\nb = {a:1}\na==b"  : "bool"
+      "a = {a:1}\nb = {a:1}\nb==a"  : "bool"
+      "a = {a:1}\nb = {a:c}\na==b\nb"  : "object{a:int}"
+      # "a = {a:1}\nb = {a:c}\na==b\nc"  : "int" # BUG !!!
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
@@ -412,6 +436,14 @@ describe 'type_inference section', ()->
       ---
       a = {a:1}
       a.b
+      --
+      a = {a:1}
+      b = {b:1}
+      a == b
+      --
+      a = {a:1}
+      b = {a:'1'}
+      a == b
     """.split /\n?---\n?/g
     for v in list
       do (v)->
@@ -479,6 +511,10 @@ describe 'type_inference section', ()->
     list = """
       -> == (a)->
       (a)->a=1 == (a)->a='1'
+      (1)(1)
+      1(1)
+      ((a,b)->)(1)
+      ((a)->a=1)('1')
     """.split "\n"
     for v in list
       do (v)->
@@ -492,16 +528,26 @@ describe 'type_inference section', ()->
       "Math.abs(1)"     : "int"
       "Math.abs(a)"     : undefined
       "Math.round(1.0)" : "int"
+      "Either_test.int_float == Either_test.int_float_bool\nEither_test.int_float_bool" : "either<int,float>"
+      "Either_test.int_float = Either_test.int_float_bool\nEither_test.int_float_bool" : "either<int,float>"
+      
+      # BUG Эти два набора тестов меня напрягают. Если убрать один из них, пропадает coverage, хотя = и == вызывают одну и ту же функцию assert_pass_down_eq
+      "Either_test.int_float_bool == Either_test.int_float\nEither_test.int_float_bool" : "either<int,float>"
+      "Either_test.int_float_bool == 1\nEither_test.int_float_bool" : "int"
+      
+      "Either_test.int_float_bool = Either_test.int_float\nEither_test.int_float_bool" : "either<int,float>"
+      "Either_test.int_float_bool = 1\nEither_test.int_float_bool" : "int"
     for k,v of kv
       do (k,v)->
         it JSON.stringify(k), ()->
           ast = full k
           assert.equal ast.mx_hash.type?.toString(), v
     list = """
+      Math.wtf
       Math.abs('1')
       Math.abs(1,2)
-      Fail.invalid_either(1)
       1(1)
+      Fail.invalid_either(1)
     """.split "\n"
     for v in list
       do (v)->
