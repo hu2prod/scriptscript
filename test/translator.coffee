@@ -279,7 +279,7 @@ describe 'translator section', ()->
           it "#{sample} throws", ()->
             util.throws ()->
               full(sample)
-    
+      
       describe "multiline", ->
         kv =
           '''
@@ -359,6 +359,17 @@ describe 'translator section', ()->
             #{3+3}
             "
           ''' : '(""+(3+3))'
+        for k,v of kv
+          do (k,v)->
+            it "#{k} -> #{v}", ()->
+              assert.equal full(k), v
+
+      describe "heredoc", ->
+        kv =
+          '''"""abc
+          def"""''' : '"abc\\ndef"'
+          """'''abc
+          def'''""" : '"abc\\ndef"'
         for k,v of kv
           do (k,v)->
             it "#{k} -> #{v}", ()->
