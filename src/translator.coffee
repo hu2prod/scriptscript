@@ -243,6 +243,8 @@ trans.translator_hash['string_doubleq'] = translate:(ctx, node)->
 
 trans.translator_hash['block_string_singleq'] = translate:(ctx, node)->
   s = node.value_view[3...-3]
+  s = s.replace /^\n/g, ''
+  s = s.replace /\n$/g, ''
   s = s.replace /\n/g, '\\n'
   s = s.replace /"/g, '\\"'
   '"' + s + '"'
