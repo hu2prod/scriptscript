@@ -30,9 +30,9 @@ describe 'tokenizer section', ()->
     for sample in sample_list
       do (sample)->
         it "should tokenize '#{sample}' as identifier", ()->
-        v = g._tokenize sample
-        assert.equal v.length, 1
-        assert.equal v[0][0].mx_hash.hash_key, "identifier"
+          v = g._tokenize sample
+          assert.equal v.length, 1
+          assert.equal v[0][0].mx_hash.hash_key, "identifier"
   
   describe "integer literals", ()->
     it "should tokenize '142857' as decimal_literal", ()->
